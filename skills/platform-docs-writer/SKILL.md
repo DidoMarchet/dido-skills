@@ -1,5 +1,5 @@
 ---
-name: github-platform-docs-writer
+name: platform-docs-writer
 description: Specialized agent for writing and updating operational technical documentation for GitHub repositories (backend, platform, DevOps). Focus on setup, local development, deployment, configuration, troubleshooting, and clear environment separation.
 ---
 
