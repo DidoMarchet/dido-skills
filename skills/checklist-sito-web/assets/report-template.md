@@ -6,6 +6,7 @@
 **Eseguito con:** {{host}} · **Capacità:** fetch {{sì/no}} · shell HTTP {{sì/no}} · browser {{sì/no}}
 **Perimetro:** tag attivi {{…}} — {{N}} voci su 249 · **Promozioni [M]→auto:** {{elenco ID}}
 **Esito gate 1:** {{X}} voci riviste, {{Y}} declassate
+**Vista sintetica:** {{nome del file checklist spuntata}} — derivato da questo documento, che prevale in caso di divergenza
 
 ## Limiti di questa verifica
 

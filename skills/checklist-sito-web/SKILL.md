@@ -140,7 +140,8 @@ QA sito — avanzamento:
 [ ] 4. GATE 1 — test della prova su ogni esito emesso (vedi "I due gate di onestà")
 [ ] 5. Voci [B]/[M]: non inventare l'esito — scrivi l'istruzione operativa per chi le farà
 [ ] 6. Report: tabella per sezione + piano di intervento prioritizzato
-[ ] 7. GATE 2 — prima di consegnare (vedi "I due gate di onestà")
+[ ] 7. Checklist spuntata, generata DAL report appena scritto (secondo file, vedi "Report")
+[ ] 8. GATE 2 — prima di consegnare (vedi "I due gate di onestà")
 ```
 
 Il **campionamento** del passo 2 conta più della quantità: una pagina per ciascun template
@@ -182,6 +183,16 @@ Se Y = 0 su un audit ampio, il gate non è stato eseguito: rifallo.
 destinatario. Ogni `OK` è osservato. Ogni `N/A` ha il motivo. I numeri della tabella di
 sintesi sono **contati**, non stimati, e quadrano col piano di intervento.
 
+Se hai prodotto la checklist spuntata, il gate include tre riscontri di quadratura — sono
+conteggi, si fanno in un minuto e sono l'unica difesa contro due documenti che divergono:
+
+1. Le caselle `[x]` sono **esattamente** quante gli `OK` della tabella di sintesi.
+2. Le righe del file sono **esattamente** quante le voci in perimetro dichiarate in testa.
+3. Nessuna casella vuota è priva del motivo accanto.
+
+Se un riscontro non torna, l'errore è nella checklist spuntata: rigenerala dal report, non
+correggere il report per farlo quadrare.
+
 ### Razionalizzazioni tipiche e risposta obbligata
 
 | Quello che stai pensando | Cosa fai |
@@ -208,8 +219,23 @@ Usa `assets/report-template.md`. Regole che valgono più del formato:
   Questa sezione va scritta per prima, non aggiunta alla fine.
 - Il piano di intervento è **ordinato per severità, poi per rapporto impatto/sforzo**, e sta
   in una tabella sola: è l'unica pagina che verrà letta davvero.
-- Se l'utente vuole spuntarla nel tempo (foglio condiviso, ticket), esporta anche in .xlsx o
-  .csv con una riga per voce.
+
+### La checklist spuntata — secondo file, sempre
+
+Oltre al report consegna `checklist-esiti-{{sito}}.md`, con `assets/checklist-esiti.md`: le
+voci in perimetro raggruppate per sezione, casella spuntata **solo** dove l'esito è `OK`.
+
+Si compila **per ultimo, dal report già scritto**, riga per riga. È una vista, non una seconda
+verifica: non contiene esiti che nel report non ci siano, e non è un'occasione per rivedere un
+giudizio già passato per il Gate 1.
+
+Ogni casella vuota porta il motivo accanto: `KO` con severità, `PARZIALE`, `N/A`, oppure
+`NON VERIFICATO` con lo strumento mancante. Questo è il file che il cliente aprirà per primo e
+leggerà come "verde = fatto, vuoto = rotto": senza il motivo, i tuoi `NON VERIFICATO` — che
+sono il perimetro di validità del lavoro — gli si presentano come altrettante accuse.
+
+Se serve lavorarla in un foglio (ticket, assegnazioni, avanzamento nel tempo), esporta lo
+stesso contenuto anche in .csv o .xlsx, una riga per voce.
 
 ## Falsi positivi da evitare
 
