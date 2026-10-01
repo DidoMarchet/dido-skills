@@ -11,7 +11,7 @@ export const meta = {
   ],
 }
 
-// Orchestrazione della "Full analysis" di SKILL.md (Parte 2). Checklist, criteri di
+// Orchestrazione della "Analisi completa" di SKILL.md (Parte 2). Checklist, criteri di
 // verifica e gravità stanno solo in SKILL.md: gli agenti li leggono da lì, qui si
 // decide soltanto chi fa cosa e come si combinano i risultati.
 
@@ -171,7 +171,7 @@ ${contextBlock(ctx)}
 I tuoi file — leggili TUTTI per intero, nessuno saltato o letto a metà:
 ${group.files.map((f) => `- ${f}`).join('\n')}
 
-1. Applica a questi file tutta la checklist di "Full analysis", tranne l'esecuzione di test, lint e build: se ne occupa un altro agente.
+1. Applica a questi file tutta la checklist di "Analisi completa", tranne l'esecuzione di test, lint e build: se ne occupa un altro agente.
 2. Per i controlli che attraversano il repo (chi usa un export, helper già esistenti, per una doc il codice che descrive) cerca in tutto il repo.
 3. Segnala solo problemi che si trovano nei TUOI file. Una doc la confronta con il codice chi analizza quella doc: se non è tra i tuoi file, non leggerla.${SCOPE ? ` Delle doc tra i tuoi file confronta solo le parti che descrivono lo scope (${SCOPE}).` : ''}
 4. Verifica ogni problema prima di riportarlo: file e riga esatti e una prova (scenario riproducibile, grep senza utilizzatori, comportamento dimostrato dal codice). Senza prova non si riporta. Se qualcosa sembra voluto, controlla commenti e git log prima di segnalarlo.
@@ -215,7 +215,7 @@ const verifyOne = (f, i, ctx) =>
     `Prova a SMENTIRE questo problema trovato dall'analisi del repository nella directory corrente.
 
 ${RULES}
-Usa i criteri di "Verification" e le definizioni di "Severity" della Parte 2.
+Usa i criteri di "Verifica — un problema è smentito quando" e le definizioni di "Gravità" della Parte 2.
 
 ${contextBlock(ctx)}
 
@@ -235,7 +235,7 @@ const verifyMinor = (findings, ctx, label) =>
     `Prova a SMENTIRE, uno per uno, questi problemi di gravità Bassa trovati dall'analisi del repository nella directory corrente.
 
 ${RULES}
-Usa i criteri di "Verification" e le definizioni di "Severity" della Parte 2.
+Usa i criteri di "Verifica — un problema è smentito quando" e le definizioni di "Gravità" della Parte 2.
 
 ${contextBlock(ctx)}
 
