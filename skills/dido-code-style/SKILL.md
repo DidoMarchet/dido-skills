@@ -172,7 +172,7 @@ Asking for the analysis with this skill is the opt-in to the multi-agent run.
      }
    })
    ```
-   If `scriptPath` is refused, Read the script and pass its content as `script`. If the Workflow tool doesn't exist, run the same phases yourself with the Agent tool.
+   If `scriptPath` is refused, Read the script and pass its content as `script`. If the Workflow tool doesn't exist (another agent or host), run the same phases yourself, in the same order, with subagents if you have them.
 3. When it returns, write the report below from its result.
 
 | Phase | Agents | Job |
@@ -180,7 +180,7 @@ Asking for the analysis with this skill is the opt-in to the multi-agent run.
 | Contesto | 1 | `CLAUDE.md`, docs, memory, known limits, git log → stack, commands, documented choices, files split into groups of ~2500-4000 lines (with a scope, plus the docs that describe it) |
 | Analisi | 1 per group | every file read in full, checked against the checklist; a doc is compared with the code by whoever analyzes the doc |
 | Test | 1 | tests, lint and format in check mode, build, typecheck, dependency audit, following the project's safe procedure; one smoke run where there are no automated tests |
-| Verifica | 3 per Alta/Media finding, 1 per group for the Bassa ones | skeptics try to refute every finding with the criteria below |
+| Verifica | 2 per Alta/Media finding (a third when they disagree), 1 per group for the Bassa ones | skeptics try to refute every finding with the criteria below; they may reproduce it outside the repo |
 | Completezza | as needed | files not read or not assigned get a second round |
 
 ### Checklist

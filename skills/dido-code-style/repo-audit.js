@@ -59,13 +59,13 @@ const CONTEXT = {
         required: ['purpose', 'command', 'cwd', 'setup'],
       },
     },
-    trackedCount: { type: 'integer' },
+    trackedFiles: { type: 'array', items: { type: 'string' } },
     excluded: {
       type: 'array',
       items: {
         type: 'object',
-        properties: { pattern: { type: 'string' }, reason: { type: 'string' }, count: { type: 'integer' } },
-        required: ['pattern', 'reason', 'count'],
+        properties: { reason: { type: 'string' }, files: { type: 'array', items: { type: 'string' } } },
+        required: ['reason', 'files'],
       },
     },
     groups: {
@@ -77,7 +77,7 @@ const CONTEXT = {
       },
     },
   },
-  required: ['summary', 'stack', 'knownChoices', 'commands', 'trackedCount', 'excluded', 'groups'],
+  required: ['summary', 'stack', 'knownChoices', 'commands', 'trackedFiles', 'excluded', 'groups'],
 }
 
 const ANALYSIS = {
@@ -136,12 +136,6 @@ const VERDICTS = {
   required: ['verdicts'],
 }
 
-const MISSING = {
-  type: 'object',
-  properties: { missingFiles: { type: 'array', items: { type: 'string' } } },
-  required: ['missingFiles'],
-}
-
 const contextBlock = (ctx) =>
   [
     `Progetto: ${ctx.summary}`,
@@ -160,9 +154,9 @@ Il tuo compito è l'inventario, non l'analisi: leggi solo ciò che serve ai punt
 2. summary: cos'è il progetto e com'è fatto, in poche righe. stack: linguaggi, framework e strumenti, in una riga.
 3. knownChoices: le scelte documentate come volute, fuori scope o limiti noti, e le segnalazioni già scartate in passato, ognuna con la fonte ("scelta — fonte").
 4. commands: come si lanciano test, lint, format, build, typecheck e audit delle dipendenze${SCOPE ? ' per il codice dello scope' : ''}, ricavati da CLAUDE.md, doc, package.json, Makefile. setup: i prerequisiti documentati (DB isolato, variabili d'ambiente, servizi). Non lanciarli.
-5. File da analizzare: i file tracciati${SCOPE ? " dello scope più le doc che descrivono quel codice (README, docs/, CLAUDE.md), così che chi le analizza le confronti con il codice" : ''} (git ls-files; fuori da git, tutti i file tranne dipendenze, output di build e cartelle di sistema). trackedCount = quanti sono.
-6. excluded: escludi solo ciò che non può contenere un problema (lockfile, binari, immagini, font, file generati o vendorizzati da terzi), come pattern con motivo e numero di file.
-7. groups: dividi tutti gli altri file in gruppi coerenti per modulo, di circa 2500-4000 righe ciascuno (contale con wc -l), così che un agente li legga tutti per intero. Ogni file in un solo gruppo; test e doc con il modulo che riguardano se ci stanno, altrimenti in gruppi propri. File nei gruppi + file esclusi = trackedCount.
+5. trackedFiles: l'elenco completo dei file tracciati${SCOPE ? ' dello scope' : ''}, copiato dall'output di git ls-files${SCOPE ? ` ${SCOPE.replace(/, /g, ' ')}` : ''} (fuori da git: tutti i file tranne dipendenze, output di build e cartelle di sistema).
+6. excluded: i file tracciati che non possono contenere un problema (lockfile, binari, immagini, font, file generati o vendorizzati da terzi), raggruppati per motivo, con l'elenco dei file.
+7. groups: dividi tutti gli altri file tracciati in gruppi coerenti per modulo, di circa 2500-4000 righe ciascuno (contale con wc -l), così che un agente li legga tutti per intero. Ogni file in un solo gruppo; test e doc con il modulo che riguardano se ci stanno, altrimenti in gruppi propri.${SCOPE ? ' Aggiungi ai gruppi anche le doc che descrivono il codice dello scope (README, docs/, CLAUDE.md), così che chi le analizza le confronti con il codice: non vanno in trackedFiles.' : ''}
 
 Percorsi relativi alla root del repo, come li stampa git ls-files. Sola lettura: non creare, modificare o cancellare file.`
 
@@ -181,7 +175,7 @@ ${group.files.map((f) => `- ${f}`).join('\n')}
 2. Per i controlli che attraversano il repo (chi usa un export, helper già esistenti, per una doc il codice che descrive) cerca in tutto il repo.
 3. Segnala solo problemi che si trovano nei TUOI file. Una doc la confronta con il codice chi analizza quella doc: se non è tra i tuoi file, non leggerla.${SCOPE ? ` Delle doc tra i tuoi file confronta solo le parti che descrivono lo scope (${SCOPE}).` : ''}
 4. Verifica ogni problema prima di riportarlo: file e riga esatti e una prova (scenario riproducibile, grep senza utilizzatori, comportamento dimostrato dal codice). Senza prova non si riporta. Se qualcosa sembra voluto, controlla commenti e git log prima di segnalarlo.
-5. Sola lettura: non creare, modificare o cancellare file; non lanciare test, build o server.
+5. Non modificare il repo: prove e script solo in una cartella temporanea fuori dal repo. Non lanciare la suite di test, build o server: li lancia un altro agente.
 
 filesRead: i file che hai letto per intero, con lo stesso percorso della lista. notes: cosa non sei riuscito a controllare e perché (vuoto se niente).`,
     { label: `analisi: ${group.name}`, phase, schema: ANALYSIS },
@@ -208,8 +202,8 @@ ${ctx.commands.length ? ctx.commands.map((c) => `- [${c.purpose}] ${c.command} (
     { label: 'test, lint, build, audit', phase: 'Test', schema: CHECKS, effort: 'medium' },
   )
 
-// Tre scettici indipendenti per ogni problema Alta/Media, ognuno con un punto di
-// partenza diverso così che non arrivino alle stesse conclusioni per la stessa strada.
+// Scettici indipendenti per ogni problema Alta/Media, ognuno con un punto di partenza
+// diverso così che non arrivino alle stesse conclusioni per la stessa strada.
 const LENSES = [
   'Parti dal codice: con input concreti, il comportamento descritto succede davvero?',
   'Parti dal contesto: è una scelta documentata, un limite noto o un rischio già coperto da un altro meccanismo?',
@@ -230,7 +224,7 @@ ${JSON.stringify(f, null, 2)}
 
 Leggi il codice citato e ciò che serve (chiamanti, test, doc, git log). ${LENSES[i]} Tutti i criteri valgono comunque.
 Se un criterio di smentita si applica, o resti in dubbio: refuted = true. Se il problema regge: refuted = false e severity = la gravità giusta secondo le definizioni.
-Sola lettura.`,
+Non modificare il repo: se serve una prova, riproduci in una cartella temporanea fuori dal repo.`,
     { label: `verifica ${i + 1}/3: ${f.file}:${f.line}`, phase: 'Verifica', schema: VERDICT },
   )
 
@@ -249,7 +243,7 @@ Problemi (index = posizione):
 ${findings.map((f, i) => `[${i}] ${JSON.stringify(f)}`).join('\n')}
 
 Per ciascuno leggi il codice citato e ciò che serve. Se un criterio di smentita si applica, o resti in dubbio: refuted = true. Se regge: refuted = false e severity = la gravità giusta. Un verdetto per ogni index.
-Sola lettura.`,
+Non modificare il repo: se serve una prova, riproduci in una cartella temporanea fuori dal repo.`,
     { label: `verifica minori: ${label}`, phase: 'Verifica', schema: VERDICTS },
   )
 
@@ -273,19 +267,27 @@ const judge = (f, votes, planned) => {
   return { ...f, status: 'non verificato', reasons: [`${votes.length} verdetti su ${planned}`] }
 }
 
+// Alta/Media: due scettici, il terzo solo se i primi due non concordano su smentita o
+// gravità. L'esito è identico a tre verdetti sempre — quando concordano il terzo non
+// cambierebbe la maggioranza né la mediana — con un agente in meno.
+const verifyMajor = async (f, ctx) => {
+  const first = (await parallel([0, 1].map((i) => () => verifyOne(f, i, ctx)))).filter(Boolean)
+  const agree =
+    first.length === 2 &&
+    first[0].refuted === first[1].refuted &&
+    (first[0].refuted || first[0].severity === first[1].severity)
+  if (agree) return judge(f, first, 3)
+  const [third] = await parallel([() => verifyOne(f, 2, ctx)])
+  return judge(f, [...first, third].filter(Boolean), 3)
+}
+
 // parallel() non rifiuta mai: un agente che fallisce diventa null, quindi ogni problema
 // esce da qui con uno stato, anche quando i suoi verificatori non rispondono.
 const verifyAll = async (findings, ctx, label) => {
   const major = findings.filter((f) => f.severity !== 'Bassa')
   const minor = findings.filter((f) => f.severity === 'Bassa')
   const [majorDone, minorDone] = await parallel([
-    () =>
-      parallel(
-        major.map((f) => async () => {
-          const votes = await parallel([0, 1, 2].map((i) => () => verifyOne(f, i, ctx)))
-          return judge(f, votes.filter(Boolean), 3)
-        }),
-      ),
+    () => parallel(major.map((f) => () => verifyMajor(f, ctx))),
     async () => {
       if (!minor.length) return []
       const [res] = await parallel([() => verifyMinor(minor, ctx, label)])
@@ -304,8 +306,14 @@ const ctx = await agent(contextPrompt, { label: 'contesto', phase: 'Contesto', s
 if (!ctx) throw new Error('La fase Contesto non ha restituito risultati: analisi interrotta')
 
 const notes = []
+const tracked = [...new Set(ctx.trackedFiles)]
+const trackedSet = new Set(tracked)
 const assigned = [...new Set(ctx.groups.flatMap((g) => g.files))]
-log(`${ctx.stack} — ${ctx.trackedCount} file tracciati, ${assigned.length} da leggere in ${ctx.groups.length} gruppi`)
+const assignedSet = new Set(assigned)
+const excludedSet = new Set(ctx.excluded.flatMap((e) => e.files))
+// Confronto fatto qui sugli elenchi, non affidato a un conteggio dell'agente.
+const unassigned = tracked.filter((f) => !assignedSet.has(f) && !excludedSet.has(f))
+log(`${ctx.stack} — ${tracked.length} file tracciati: ${assigned.length} da leggere in ${ctx.groups.length} gruppi, ${excludedSet.size} esclusi`)
 
 const analyzeAndVerify = (groups, phase) =>
   pipeline(
@@ -334,29 +342,8 @@ if (!checks) notes.push('La fase Test non ha restituito risultati: test, lint e 
 const readPaths = () => results.flatMap((r) => r.filesRead.map((p) => p.replace(/^\.\//, '')))
 const wasRead = (file, paths) => paths.some((p) => p === file || p.endsWith(`/${file}`))
 
-let missing = []
-const excludedCount = ctx.excluded.reduce((n, e) => n + e.count, 0)
-if (assigned.length + excludedCount !== ctx.trackedCount) {
-  log(`Assegnati + esclusi (${assigned.length + excludedCount}) ≠ tracciati (${ctx.trackedCount}): cerco i file mancanti`)
-  const res = await agent(
-    `Controllo di copertura dell'analisi del repository nella directory corrente.
-Elenca i file tracciati${SCOPE ? ` sotto ${SCOPE}` : ''} (git ls-files) che non sono tra i file assegnati e non ricadono nelle esclusioni.
-
-Esclusioni:
-${ctx.excluded.map((e) => `- ${e.pattern} (${e.reason})`).join('\n') || '- nessuna'}
-
-File assegnati:
-${assigned.join('\n')}
-
-Confronta con un comando (es. comm su elenchi ordinati), non a occhio. File temporanei solo fuori dal repo; nient'altro va modificato.`,
-    { label: 'file non assegnati', phase: 'Completezza', schema: MISSING, effort: 'low' },
-  )
-  if (res) missing = res.missingFiles.filter((f) => !assigned.includes(f))
-  else notes.push('Controllo dei file non assegnati non riuscito: la copertura conta solo i file assegnati')
-}
-
 const firstRead = readPaths()
-const secondRound = [...assigned.filter((f) => !wasRead(f, firstRead)), ...missing]
+const secondRound = [...assigned.filter((f) => !wasRead(f, firstRead)), ...unassigned]
 if (secondRound.length) {
   log(`Secondo giro su ${secondRound.length} file non letti o non assegnati`)
   const chunks = []
@@ -367,7 +354,7 @@ if (secondRound.length) {
 }
 
 const finalRead = readPaths()
-const unread = [...assigned, ...missing].filter((f) => !wasRead(f, finalRead))
+const unread = [...assigned, ...unassigned].filter((f) => !wasRead(f, finalRead))
 
 const all = [...results.flatMap((r) => r.verified), ...(checks?.verified ?? [])]
 const bySeverity = (a, b) =>
@@ -382,9 +369,10 @@ return {
   stack: ctx.stack,
   summary: ctx.summary,
   coverage: {
-    tracked: ctx.trackedCount,
-    analyzed: assigned.length + missing.length - unread.length,
-    excluded: ctx.excluded,
+    tracked: tracked.length,
+    analyzed: tracked.filter((f) => wasRead(f, finalRead)).length,
+    excluded: ctx.excluded.map((e) => ({ reason: e.reason, files: e.files.length })),
+    docsAdded: assigned.filter((f) => !trackedSet.has(f)),
     unread,
   },
   commands: checks?.commands ?? [],
