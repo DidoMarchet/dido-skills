@@ -82,7 +82,7 @@ Vocabolario completo, sette valori (**diversi** dai tag di modalità `[A]/[B]/[M
 attivo. Un e-commerce multilingua con area clienti attiva quasi tutte le 249 voci: è
 corretto così, è il caso più rischioso.
 
-**Il filtro si applica VOCE PER VOCE, non solo per sezione.** Quaranta voci `#ecom`,
+**Il filtro si applica VOCE PER VOCE, non solo per sezione.** Trentatré voci `#ecom`,
 `#login`, `#form`, `#blog` e `#multi` vivono dentro sezioni per il resto applicabili:
 PRF-10, PRF-12, ACC-08, ACC-09, ACC-16, SEO-07, SEO-12, SEO-13, SEO-20, ONP-10, NAV-03,
 NAV-05, NAV-11, NAV-12, NAV-13, EML-07, EML-08, EML-09, EML-10, LEG-11, LEG-12, LEG-13,
