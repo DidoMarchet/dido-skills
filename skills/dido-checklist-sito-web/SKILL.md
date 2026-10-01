@@ -1,5 +1,5 @@
 ---
-name: checklist-sito-web
+name: dido-checklist-sito-web
 description: Esegue una checklist di QA completa su un sito web (tecnica, performance, accessibilità, SEO, GEO/AI search, funzionalità, e-commerce, email, privacy e legale, sicurezza, analytics, contenuti, monitoraggio, consegna) e produce un report con esiti, prove e piano di intervento prioritizzato. Usare per collaudo pre-lancio, audit periodico, verifica post-migrazione o due diligence su un sito esistente.
 ---
 

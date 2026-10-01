@@ -1,5 +1,5 @@
 ---
-name: platform-docs-writer
+name: dido-platform-docs-writer
 description: Documentazione operativa di un repository — README, documento per servizio, tabella delle variabili d'ambiente, procedure di avvio e deploy, troubleshooting — ricavata esclusivamente dai file presenti nel repo, con esito NON DEDUCIBILE dichiarato su tutto ciò che i file non dimostrano. Usare quando l'utente chiede di documentare un repository, scrivere o rifare il README, spiegare come si avvia in locale o come va in produzione, allineare documentazione obsoleta al codice attuale, o segnala che nessuno sa più come far partire il progetto. Non per documentazione di prodotto, API reference generabile dal codice o testi commerciali.
 ---
 
