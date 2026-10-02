@@ -11,16 +11,18 @@ export const meta = {
   ],
 }
 
-// Orchestrazione della "Analisi completa" di SKILL.md (Parte 2). Checklist, criteri di
-// verifica e gravità stanno solo in SKILL.md: gli agenti li leggono da lì, qui si
-// decide soltanto chi fa cosa e come si combinano i risultati.
+// Orchestrazione dell'analisi completa descritta in analisi.md. Checklist e criteri di
+// verifica stanno solo lì, principi e gravità solo in SKILL.md: gli agenti li leggono da
+// quei file, qui si decide soltanto chi fa cosa e come si combinano i risultati.
 
 if (!args?.skill) throw new Error('Manca args.skill: percorso assoluto di SKILL.md della skill dido-code-style')
+const ANALISI = args.skill.replace(/SKILL\.md$/, 'analisi.md')
 
 const SCOPE = args.scope ? [].concat(args.scope).join(', ') : null
+const STACK = [].concat(args.stackSkills ?? []).join(', ')
 const SEVERITIES = ['Alta', 'Media', 'Bassa']
 
-const RULES = `Regole: leggi ${args.skill} fino all'intestazione "# 3." (Parte 1 e Parte 2: principi, checklist, criteri di verifica, gravità). Leggi la Parte 3 (backend Node) o la Parte 4 (Nuxt/Vue) solo se riguarda il codice che hai davanti. Testi in italiano e brevi: title in poche parole, problem in una o due frasi su cosa succede e a chi, evidence le righe o il comando che lo mostrano, fix la modifica minima.`
+const RULES = `Regole: leggi ${args.skill} (principi e gravità) e ${ANALISI} (checklist e criteri di verifica).${STACK ? ` Se il codice che hai davanti è di uno di questi stack, leggi anche la sua skill: ${STACK}.` : ''} Testi in italiano e brevi: title in poche parole, problem in una o due frasi su cosa succede e a chi, evidence le righe o il comando che lo mostrano, fix la modifica minima.`
 
 const FINDING = {
   type: 'object',
@@ -215,7 +217,7 @@ const verifyOne = (f, i, ctx) =>
     `Prova a SMENTIRE questo problema trovato dall'analisi del repository nella directory corrente.
 
 ${RULES}
-Usa i criteri di "Verifica: un problema è smentito quando" e le definizioni di "Gravità" della Parte 2.
+Usa i criteri di "Verifica: un problema è smentito quando" e le definizioni di "Gravità".
 
 ${contextBlock(ctx)}
 
@@ -235,7 +237,7 @@ const verifyMinor = (findings, ctx, label) =>
     `Prova a SMENTIRE, uno per uno, questi problemi di gravità Bassa trovati dall'analisi del repository nella directory corrente.
 
 ${RULES}
-Usa i criteri di "Verifica: un problema è smentito quando" e le definizioni di "Gravità" della Parte 2.
+Usa i criteri di "Verifica: un problema è smentito quando" e le definizioni di "Gravità".
 
 ${contextBlock(ctx)}
 

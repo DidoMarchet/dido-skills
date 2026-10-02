@@ -8,6 +8,27 @@ browser interattivo · `[M]` manuale/umana (credenziali, denaro, giudizio, strum
 **Tag di applicabilità:** `#tutti` · `#lancio` (pre-lancio o migrazione) · `#ecom` · `#login`
 · `#multi` (multilingua) · `#blog` · `#form`.
 
+**Sezioni:**
+
+1. GO Go-live, ambiente e migrazione `#lancio`
+2. TEC Tecnica e front-end
+3. PRF Performance
+4. ACC Accessibilità
+5. SEO SEO tecnica
+6. ONP SEO on-page e contenuti indicizzabili
+7. GEO Visibilità nei motori e assistenti AI
+8. NAV Navigazione e interfaccia
+9. FRM Form e conversione
+10. ACT Account utente `#login`
+11. ECM E-commerce `#ecom`
+12. EML Email transazionali e deliverability
+13. LEG Privacy, consenso e adempimenti legali
+14. SEC Sicurezza
+15. ANL Analytics, tracciamento e marketing
+16. CNT Contenuti editoriali
+17. MON Monitoraggio ed esercizio
+18. HND Consegna e chiusura progetto `#lancio`
+
 ---
 
 ## 1. GO Go-live, ambiente e migrazione `#lancio`

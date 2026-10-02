@@ -1,6 +1,6 @@
 # Checklist spuntata di {{nome sito}}
 
-Collaudo del {{data}} su {{URL}}. Perimetro: tag attivi {{…}}, {{N}} voci su 249.
+Collaudo del {{data}} su {{URL}}. Perimetro: tag attivi {{…}}, {{N}} voci su {{M}}.
 Report di riferimento: {{nome del file di report}}.
 
 Questo file è la **vista sintetica** di quel report, generata da esso. Non contiene esiti che
@@ -56,7 +56,8 @@ con il loro motivo: sono un'osservazione, e si vedono.
 | Spuntate `[x]` | |
 | Non spuntate | |
 | Voci fuori perimetro (nel report, non qui) | |
-| **Totale checklist** | 249 |
+| **Totale checklist** | {{M}} |
 
 I numeri si contano, non si stimano, e quadrano col report: le spuntate sono **esattamente** il
-conteggio `OK` della tabella di sintesi, e in perimetro + fuori perimetro fa 249.
+conteggio `OK` della tabella di sintesi, e in perimetro + fuori perimetro fa il totale delle voci
+di `reference/checklist.md`.

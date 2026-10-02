@@ -1,29 +1,12 @@
 # {{nome servizio}}
 
-## 1. Architettura
+## Ruolo
 
-**Ruolo:** {{…}}
-**Dipende da:** {{servizi}} (da `{{file:riga}}`)
-**Da lui dipendono:** {{servizi}} (da `{{file:riga}}`)
+{{Cosa fa nel progetto, cosa usa e chi lo usa, in due o tre righe.}}
 
-## 2. Requisiti
+Immagine, porte, volumi e dipendenze: `{{compose.yaml}}`. Variabili: `{{.env.example}}`.
 
-| Requisito | Valore | Da dove risulta |
-|---|---|---|
-| Runtime e versione | | |
-| Rete | | |
-| Volumi | | |
-
-## 3. Variabili d'ambiente
-
-Solo quelle che **questo** servizio consuma. Attenzione a `env_file`: una variabile può finire
-in più container di quanti sembri.
-
-| Nome | Obbligatoria | Origine (file:riga) | Descrizione | Esempio | Ambiente |
-|---|---|---|---|---|---|
-| | | | | | |
-
-## 4. Comandi operativi
+## Comandi operativi
 
 **Avvio locale**
 ```bash
@@ -40,13 +23,13 @@ in più container di quanti sembri.
 {{…}}
 ```
 
-## 5. Deploy
+## Deploy
 
 {{Come viene aggiornato sul server. Se non deducibile, blocco NON DEDUCIBILE.}}
 
-## 6. Debug rapido
+## Debug rapido
 
-Solo i comandi che hanno senso per questo servizio.
+<!-- Solo i comandi che hanno senso per questo servizio. -->
 
 ```bash
 {{…}}

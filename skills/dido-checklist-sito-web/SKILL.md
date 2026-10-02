@@ -1,6 +1,6 @@
 ---
 name: dido-checklist-sito-web
-description: Esegue una checklist di QA completa su un sito web (tecnica, performance, accessibilità, SEO, GEO/AI search, funzionalità, e-commerce, email, privacy e legale, sicurezza, analytics, contenuti, monitoraggio, consegna) e produce un report con esiti, prove e piano di intervento prioritizzato. Usare per collaudo pre-lancio, audit periodico, verifica post-migrazione o due diligence su un sito esistente.
+description: Usare quando l'utente chiede di collaudare, controllare, fare il QA o l'audit di un sito web, prima di un lancio, dopo una migrazione, come revisione periodica o per una due diligence, anche solo per una parte: tecnica, performance, accessibilità, SEO, GEO e ricerca con AI, e-commerce, email, privacy e legale, sicurezza, analytics, contenuti, monitoraggio, consegna al cliente.
 ---
 
 # Checklist QA sito web
@@ -14,12 +14,10 @@ report ha un esito esplicito, e `NON VERIFICATO` è un esito legittimo e frequen
 con 40 voci verificate e 60 dichiarate non verificabili vale infinitamente più di uno con 100
 voci verdi di cui metà inventate. Questo è l'unico modo in cui questa skill resta utile.
 
-## Quando usarla
+## Richieste parziali
 
-Quando l'utente chiede di collaudare, controllare, fare il QA o l'audit di un sito — prima di
-un lancio, dopo una migrazione, o come revisione periodica. Anche quando chiede solo una parte
-("controlla la SEO tecnica di X"): in quel caso esegui le sole sezioni pertinenti, ma tieni
-formato del report e regole di onestà identici.
+Se l'utente chiede solo una parte ("controlla la SEO tecnica di X"), esegui le sole sezioni
+pertinenti, con lo stesso formato del report e le stesse regole di onestà.
 
 ## Passo 0. Contesto (non saltarlo)
 
@@ -67,7 +65,7 @@ Vocabolario completo, sette valori (**diversi** dai tag di modalità `[A]/[B]/[M
 
 | Asse | Risposta al Passo 0 | Tag attivati |
 |---|---|---|
-| Base | sempre | `#tutti` (161 voci, mai filtrabili) |
+| Base | sempre | `#tutti` (mai filtrabili) |
 | Momento | pre-lancio o post-migrazione | `#lancio` |
 | Tipo | vetrina | nessun tag di tipo |
 | | blog / editoriale | `#blog` |
@@ -79,16 +77,14 @@ Vocabolario completo, sette valori (**diversi** dai tag di modalità `[A]/[B]/[M
 | | c'è una sezione news/blog | `#blog` |
 
 **È un'unione, non un'intersezione.** Una voce si esegue se **almeno uno** dei suoi tag è
-attivo. Un e-commerce multilingua con area clienti attiva quasi tutte le 249 voci: è
+attivo. Un e-commerce multilingua con area clienti attiva quasi tutte le voci: è
 corretto così, è il caso più rischioso.
 
-**Il filtro si applica VOCE PER VOCE, non solo per sezione.** Trentatré voci `#ecom`,
-`#login`, `#form`, `#blog` e `#multi` vivono dentro sezioni per il resto applicabili:
-PRF-10, PRF-12, ACC-08, ACC-09, ACC-16, SEO-07, SEO-12, SEO-13, SEO-20, ONP-10, NAV-03,
-NAV-05, NAV-11, NAV-12, NAV-13, EML-07, EML-08, EML-09, EML-10, LEG-11, LEG-12, LEG-13,
-LEG-14, LEG-15, LEG-16, LEG-17, SEC-05, SEC-08, SEC-12, SEC-13, SEC-18, ANL-04, CNT-09.
-Se il loro tag non è attivo vanno marcate **`N/A` con il motivo, riga per riga**: non
-collassarle in un range né lasciarle cadere in `NON VERIFICATO`. Un `N/A` dichiarato è
+**Il filtro si applica voce per voce, non solo per sezione.** Dentro sezioni per il resto
+applicabili ci sono voci con un tag di tipo (`#ecom`, `#login`, `#form`, `#blog`, `#multi`): il
+tag di ogni voce sta accanto al suo titolo in `reference/checklist.md`. Se il loro tag non è
+attivo vanno marcate **`N/A` con il motivo, riga per riga**: non collassarle in un range né
+lasciarle cadere in `NON VERIFICATO`. Un `N/A` dichiarato è
 informazione; un `NON VERIFICATO` su una voce non pertinente è rumore che nasconde i
 buchi veri.
 
@@ -98,7 +94,8 @@ area riservata, filtri), l'esito è `N/A: funzionalità non presente sul sito`, 
 non `NON VERIFICATO`. Verifica l'assenza prima di dichiararla: un `N/A` è un'osservazione
 e vale come tale.
 
-Nell'appendice del report scrivi: `Tag attivi: #tutti #ecom #form, voci in perimetro: N su 249`.
+Nell'appendice del report scrivi: `Tag attivi: #tutti #ecom #form, voci in perimetro: N su M`,
+dove M sono le voci di `reference/checklist.md`, contate.
 Senza quella riga il perimetro non è riproducibile.
 
 Definito il perimetro, carica `reference/checklist.md` sezione per sezione, quando stai
@@ -140,7 +137,7 @@ QA sito, avanzamento:
 [ ] 4. GATE 1: test della prova su ogni esito emesso (vedi "I due gate di onestà")
 [ ] 5. Voci [B]/[M]: non inventare l'esito, scrivi l'istruzione operativa per chi le farà
 [ ] 6. Report: tabella per sezione + piano di intervento prioritizzato
-[ ] 7. Checklist spuntata, generata DAL report appena scritto (secondo file, vedi "Report")
+[ ] 7. Checklist spuntata, generata dal report appena scritto (secondo file, vedi "Report")
 [ ] 8. GATE 2: prima di consegnare (vedi "I due gate di onestà")
 ```
 
@@ -177,7 +174,8 @@ comando eseguito, nome del file dell'utente e punto in cui l'hai letto. Se la pr
 una parafrasi, un'inferenza o un ricordo, l'esito è `NON VERIFICATO`. **Se la nota della
 riga contraddice l'esito, vince la nota.**
 Output obbligatorio: una riga nell'appendice del report, `Gate 1: X voci riviste, Y declassate`.
-Se Y = 0 su un audit ampio, il gate non è stato eseguito: rifallo.
+Se Y = 0 su un audit ampio, ricontrolla le voci più facili da dare per buone: quelle viste su una
+pagina sola e quelle dedotte dallo stack. Se reggono tutte, Y = 0 è un esito valido.
 
 **Gate 2 (prima di consegnare).** Ogni BLOCCANTE ha prova citabile e un'azione con
 destinatario. Ogni `OK` è osservato. Ogni `N/A` ha il motivo. I numeri della tabella di

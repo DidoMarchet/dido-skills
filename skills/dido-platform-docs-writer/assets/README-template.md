@@ -11,8 +11,6 @@
 | Reverse proxy / TLS | | |
 | Motore di deploy | | |
 | Origine delle variabili | | |
-| Porte pubblicate | | |
-| Utente del container | | |
 
 ## Flusso end-to-end
 
@@ -20,9 +18,9 @@
 
 ## Prerequisiti
 
-| Strumento | Versione | Da dove risulta |
-|---|---|---|
-| | | |
+| Strumento | File che fissa la versione |
+|---|---|
+| | |
 
 ## Sviluppo locale
 
@@ -39,15 +37,17 @@
 
 ## Variabili d'ambiente
 
-| Nome | Obbligatoria | Origine (file:riga) | Consumata da | Descrizione | Esempio |
-|---|---|---|---|---|---|
-| | | | | | |
+L'elenco delle variabili è in `{{.env.example}}`.
+
+{{Da dove arrivano i valori di produzione e chi li gestisce. Se il repo non lo dice, blocco NON DEDUCIBILE.}}
 
 ## Servizi
 
-| Servizio | Immagine o build | Porta interna | Volumi | Dipende da |
-|---|---|---|---|---|
-| | | | | |
+Immagini, porte, volumi e dipendenze: `{{compose.yaml}}`.
+
+| Servizio | Ruolo |
+|---|---|
+| | |
 
 ## Dati persistenti e backup
 
@@ -63,14 +63,6 @@
 - **Cause probabili:** {{…}}
 - **Come verificare:** {{comando}}
 - **Soluzione:** {{azione}}
-
-## Correzioni alla documentazione precedente
-
-<!-- Solo se il README sostituito conteneva affermazioni contraddette dal codice. -->
-
-| Cosa diceva | Cosa dice il codice | File che lo dimostra |
-|---|---|---|
-| | | |
 
 ## Da completare
 

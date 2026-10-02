@@ -21,8 +21,6 @@ Deve dare il quadro operativo d'insieme. Ordine consigliato:
 | Reverse proxy / TLS | | |
 | Motore di deploy | | |
 | Origine delle variabili | | |
-| Porte pubblicate | | |
-| Utente del container | | |
 
 Se una cella non è deducibile, scrivi `NON DEDUCIBILE` nella cella e apri il blocco esteso
 più sotto. Non lasciare celle vuote e non inventare il valore "tipico".
@@ -30,8 +28,8 @@ più sotto. Non lasciare celle vuote e non inventare il valore "tipico".
 **Flusso end-to-end**: i passi logici per portare il progetto online, dall'inizio alla fine.
 Serve a chi non ha mai visto il repo: deve poter seguire l'ordine senza saltare avanti.
 
-**Prerequisiti**: versioni di runtime, strumenti da installare, accessi necessari. Ricava le
-versioni dai file (`engines`, `FROM`, `.tool-versions`, lockfile), non dalla memoria.
+**Prerequisiti**: strumenti da installare e accessi necessari. Per la versione di un runtime
+scrivi il file che la fissa (`engines`, `FROM`, `.tool-versions`), non il numero.
 
 **Sviluppo locale**: avvio, arresto, pulizia, URL locali, come si vedono i log, come si entra
 in un container, come si lancia una migrazione. Ogni comando completo e copiabile.
@@ -40,12 +38,12 @@ in un container, come si lancia una migrazione. Ogni comando completo e copiabil
 succede al codice, come si fa rollback. Se il repo non contiene il meccanismo di deploy, questa
 sezione è un blocco `NON DEDUCIBILE`: è normalissimo e va detto.
 
-**Variabili d'ambiente**: sempre in tabella, vedi `assets/tabella-variabili.md`. Mai un blocco
-di `.env` incollato senza spiegazione.
+**Variabili d'ambiente**: l'elenco sta in `.env.example` e il documento rimanda lì, vedi
+`assets/variabili.md`.
 
-**Servizi**: uno per riga: ruolo, immagine o build, porta interna, volumi, dipendenze, comando
-di avvio. Se i servizi sono più di tre o hanno configurazione non banale, rimanda a un documento
-per servizio invece di gonfiare il README.
+**Servizi**: uno per riga, con il suo ruolo nel progetto. Immagine, porte, volumi e dipendenze
+stanno nel compose e il documento rimanda lì. Se i servizi sono più di tre o hanno procedure
+proprie, rimanda a un documento per servizio invece di gonfiare il README.
 
 **Backup e dati persistenti**: quali volumi contengono dati che non si possono perdere, e cosa
 li salva. Attenzione: identificare i volumi è quasi sempre deducibile, identificare la
@@ -66,18 +64,14 @@ massimo i cinque più gravi; gli altri vanno nella risposta.
 
 ## 2. Documento per servizio (`docs/NODE.md`, `docs/DATABASE.md`, …)
 
-Uno per servizio che abbia configurazione propria. Struttura fissa:
+Uno per servizio che abbia procedure proprie. Struttura fissa:
 
-1. **Architettura**: ruolo nello stack, se gira da solo o dipende da altri, chi dipende da lui.
-   Cita il file da cui ricavi la dipendenza (`depends_on`, la variabile di connessione, l'import).
-2. **Requisiti**: runtime, versione, risorse, configurazione di rete necessaria.
-3. **Variabili d'ambiente**: tabella nel formato di `assets/tabella-variabili.md`, limitata alle
-   variabili che *questo* servizio consuma. Attenzione a `env_file`: una variabile può finire in
-   più container di quanti sembri.
-4. **Comandi operativi**: avvio locale, avvio in produzione, come ci si collega, come si
+1. **Ruolo**: cosa fa nel progetto, cosa usa e chi lo usa. Immagine, porte, volumi, dipendenze e
+   variabili stanno nel compose e in `.env.example`: il documento rimanda lì.
+2. **Comandi operativi**: avvio locale, avvio in produzione, come ci si collega, come si
    eseguono le operazioni ordinarie (migrazioni, seed, svuotamento cache).
-5. **Deploy**: come viene aggiornato sul server. Se non deducibile, blocco esplicito.
-6. **Debug rapido**: comandi diretti per capire se è vivo: `docker compose ps`, `docker compose
+3. **Deploy**: come viene aggiornato sul server. Se non deducibile, blocco esplicito.
+4. **Debug rapido**: comandi diretti per capire se è vivo: `docker compose ps`, `docker compose
    logs -f <servizio>`, `pg_isready`, `redis-cli ping`, `curl` sull'endpoint di health. Solo
    quelli che hanno senso per *questo* servizio.
 
@@ -85,13 +79,6 @@ Uno per servizio che abbia configurazione propria. Struttura fissa:
 
 ## Regole trasversali
 
-- **Ogni valore ha un'origine.** Porte, host, percorsi e nomi si copiano dal file, non si
-  ricordano. Se in tabella c'è una colonna origine, riempila con `file:riga`.
-- **Il conflitto con la documentazione preesistente si dichiara.** Se il README attuale
-  contraddice il codice, aggiungi una tabella `Correzioni alla documentazione precedente` con
-  tre colonne: cosa diceva, cosa dice il codice, file che lo dimostra. Non correggere in
-  silenzio: chi legge deve sapere che quella cosa che credeva vera non lo è.
-- **I secret non si copiano mai**, nemmeno se sono versionati. Nella colonna Esempio va la
-  forma (`postgres://user:pass@db:5432/app`). Un secret reale trovato nel repo finisce in
-  "Punti da verificare".
+- **I secret non si copiano mai**, nemmeno se sono versionati. Un secret reale trovato nel repo
+  finisce in "Punti da verificare".
 - **Le sezioni si numerano** solo se il documento supera le due schermate.

@@ -80,7 +80,7 @@ sparsa: non collassare in range. -->
 | Eseguito da | {{chi}}, con {{host}} |
 | Capacità | fetch {{sì/no}}, shell HTTP {{sì/no}}, browser {{sì/no}} |
 | Sezioni applicate | {{elenco}} |
-| Perimetro | tag attivi {{…}}, {{N}} voci su 249 |
+| Perimetro | tag attivi {{…}}, {{N}} voci su {{M}} |
 | Promozioni da [M] ad automatiche | {{elenco ID}} |
 | Gate 1 | {{X}} voci riviste, {{Y}} declassate |
 | Vista sintetica | {{nome del file checklist spuntata}}, derivata da questo documento, che prevale in caso di divergenza |
