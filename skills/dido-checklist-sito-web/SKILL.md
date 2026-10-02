@@ -21,15 +21,15 @@ un lancio, dopo una migrazione, o come revisione periodica. Anche quando chiede 
 ("controlla la SEO tecnica di X"): in quel caso esegui le sole sezioni pertinenti, ma tieni
 formato del report e regole di onestà identici.
 
-## Passo 0 — Contesto (non saltarlo)
+## Passo 0. Contesto (non saltarlo)
 
 Senza queste risposte metà delle voci non è applicabile e rischi di segnalare come errori cose
 volute. Chiedi in una volta sola, e se l'utente non risponde procedi con le assunzioni scritte
 in testa al report:
 
 1. **URL** del sito e, se diverso, dell'ambiente da collaudare (staging o produzione).
-2. **Tipo**: vetrina · blog/editoriale · e-commerce · web app con login · portale multilingua.
-3. **Momento**: pre-lancio · post-migrazione (allora serve la lista degli URL vecchi) · audit
+2. **Tipo**: vetrina, blog/editoriale, e-commerce, web app con login, portale multilingua.
+3. **Momento**: pre-lancio, post-migrazione (allora serve la lista degli URL vecchi), audit
    su sito in esercizio.
 4. **Accessi disponibili**: Search Console, GA4, admin CMS, hosting, caselle email di test.
    Senza questi, intere sezioni restano `NON VERIFICATO` — dichiaralo subito, non alla fine.
@@ -38,10 +38,10 @@ in testa al report:
 Poi rileva le capacità dell'ambiente (Passo 0-bis) e definisci il perimetro con la mappa
 dei tag qui sotto.
 
-## Passo 0-bis — Rileva le capacità dell'ambiente (non darle per scontate)
+## Passo 0-bis. Rileva le capacità dell'ambiente (non darle per scontate)
 
 Questa skill gira su host diversi (claude.ai, Claude Code, API). **Non assumere quali
-strumenti hai: provalo, una volta sola, all'inizio, e scrivi l'esito in testa al report.**
+strumenti hai: provalo, una volta sola, all'inizio, e scrivi l'esito nell'appendice del report.**
 
 | Capacità | Prova | Se c'è | Se non c'è |
 |---|---|---|---|
@@ -60,10 +60,10 @@ allowlist: curl verso il sito del cliente non funziona e si usa solo il tool di 
 hai l'HTML ma non header, redirect né rendering JS. In Claude Code o via API la shell di
 norma c'è: **non riportare i limiti di claude.ai in un ambiente che non li ha.**
 
-## Dai tipi ai tag — mappa esplicita
+## Dai tipi ai tag: mappa esplicita
 
 Vocabolario completo, sette valori (**diversi** dai tag di modalità `[A]/[B]/[M]`):
-`#tutti` · `#lancio` · `#ecom` · `#login` · `#multi` · `#blog` · `#form`.
+`#tutti`, `#lancio`, `#ecom`, `#login`, `#multi`, `#blog`, `#form`.
 
 | Asse | Risposta al Passo 0 | Tag attivati |
 |---|---|---|
@@ -94,11 +94,11 @@ buchi veri.
 
 **Feature assente ≠ feature rotta.** Se una voce riguarda una funzionalità che il sito
 semplicemente non ha (ricerca interna, commenti, video, modali, testimonianze, llms.txt,
-area riservata, filtri), l'esito è `N/A — funzionalità non presente sul sito`, non `KO` e
+area riservata, filtri), l'esito è `N/A: funzionalità non presente sul sito`, non `KO` e
 non `NON VERIFICATO`. Verifica l'assenza prima di dichiararla: un `N/A` è un'osservazione
 e vale come tale.
 
-In testa al report scrivi: `Tag attivi: #tutti #ecom #form — voci in perimetro: N su 249`.
+Nell'appendice del report scrivi: `Tag attivi: #tutti #ecom #form, voci in perimetro: N su 249`.
 Senza quella riga il perimetro non è riproducibile.
 
 Definito il perimetro, carica `reference/checklist.md` sezione per sezione, quando stai
@@ -112,7 +112,7 @@ Ogni voce porta un tag di **modalità**, che dice chi può eseguirla:
 |---|---|---|
 | `[A]` | Automatica: basta scaricare e leggere la pagina | tu, da solo |
 | `[B]` | Serve un browser che clicchi, compili, navighi | tu se hai un browser agentico, altrimenti l'utente |
-| `[M]` | Manuale: giudizio umano, credenziali, denaro vero | l'utente — tu prepari le istruzioni |
+| `[M]` | Manuale: giudizio umano, credenziali, denaro vero | l'utente, tu prepari le istruzioni |
 
 La modalità è il **default**, non un destino: va combinata con le capacità rilevate al
 Passo 0-bis.
@@ -132,16 +132,16 @@ Non simulare mai l'output di uno strumento che non hai eseguito.
 ## Flusso
 
 ```
-QA sito — avanzamento:
+QA sito, avanzamento:
 [ ] 1. Contesto raccolto, sezioni applicabili filtrate, assunzioni scritte
 [ ] 2. Raccolta prove: home + 5-10 pagine campione (una per template), robots.txt,
        sitemap, 404, pagine legali, eventuali export forniti dall'utente
 [ ] 3. Esecuzione voci [A] sezione per sezione, annotando la prova per ciascuna
-[ ] 4. GATE 1 — test della prova su ogni esito emesso (vedi "I due gate di onestà")
-[ ] 5. Voci [B]/[M]: non inventare l'esito — scrivi l'istruzione operativa per chi le farà
+[ ] 4. GATE 1: test della prova su ogni esito emesso (vedi "I due gate di onestà")
+[ ] 5. Voci [B]/[M]: non inventare l'esito, scrivi l'istruzione operativa per chi le farà
 [ ] 6. Report: tabella per sezione + piano di intervento prioritizzato
 [ ] 7. Checklist spuntata, generata DAL report appena scritto (secondo file, vedi "Report")
-[ ] 8. GATE 2 — prima di consegnare (vedi "I due gate di onestà")
+[ ] 8. GATE 2: prima di consegnare (vedi "I due gate di onestà")
 ```
 
 Il **campionamento** del passo 2 conta più della quantità: una pagina per ciascun template
@@ -151,17 +151,17 @@ aggiungono informazione.
 
 ## Esiti e severità
 
-Esiti ammessi: `OK` · `KO` · `PARZIALE` · `N/A` · `NON VERIFICATO` (con motivo).
+Esiti ammessi: `OK`, `KO`, `PARZIALE`, `N/A`, `NON VERIFICATO` (con motivo).
 
 Severità di un `KO`:
 
-- **BLOCCANTE** — non si va live / va risolto entro 24h. Sito o pagine chiave irraggiungibili,
+- **BLOCCANTE**: non si va live / va risolto entro 24h. Sito o pagine chiave irraggiungibili,
   staging indicizzabile, checkout o form rotti, HTTPS assente o certificato scaduto, dati
   personali esposti, cookie non tecnici senza consenso, backup inesistenti.
-- **ALTA** — impatto diretto su traffico, conversioni, conformità o sicurezza. Da risolvere
+- **ALTA**: impatto diretto su traffico, conversioni, conformità o sicurezza. Da risolvere
   prima del lancio o nello sprint corrente.
-- **MEDIA** — degrada qualità o performance senza rompere nulla. Prossimo ciclo.
-- **BASSA** — rifinitura, debito tecnico, nice-to-have.
+- **MEDIA**: degrada qualità o performance senza rompere nulla. Prossimo ciclo.
+- **BASSA**: rifinitura, debito tecnico, nice-to-have.
 
 La severità indicata in checklist è il **valore di default**: alzala o abbassala in base al
 contesto e **scrivi perché**. Un `alt` mancante su un'icona decorativa non è come su un
@@ -176,7 +176,7 @@ Non sono raccomandazioni: sono condizioni di uscita.
 comando eseguito, nome del file dell'utente e punto in cui l'hai letto. Se la prova sarebbe
 una parafrasi, un'inferenza o un ricordo, l'esito è `NON VERIFICATO`. **Se la nota della
 riga contraddice l'esito, vince la nota.**
-Output obbligatorio: una riga nel report — `Gate 1: X voci riviste, Y declassate`.
+Output obbligatorio: una riga nell'appendice del report, `Gate 1: X voci riviste, Y declassate`.
 Se Y = 0 su un audit ampio, il gate non è stato eseguito: rifallo.
 
 **Gate 2 (prima di consegnare).** Ogni BLOCCANTE ha prova citabile e un'azione con
@@ -216,11 +216,12 @@ Usa `assets/report-template.md`. Regole che valgono più del formato:
 - **Ogni KO porta l'azione**, non solo il problema: cosa fare, dove, chi (dev / SEO / legale /
   cliente), stima grossolana dello sforzo.
 - **In testa al report**: data, ambiente collaudato, cosa NON è stato verificato e perché.
-  Questa sezione va scritta per prima, non aggiunta alla fine.
+  Questa sezione va scritta per prima, non aggiunta alla fine. Il resto del contesto (tipo di
+  sito, capacità, perimetro, promozioni, gate) va nell'appendice finale.
 - Il piano di intervento è **ordinato per severità, poi per rapporto impatto/sforzo**, e sta
   in una tabella sola: è l'unica pagina che verrà letta davvero.
 
-### La checklist spuntata — secondo file, sempre
+### La checklist spuntata (secondo file, sempre)
 
 Oltre al report consegna `checklist-esiti-{{sito}}.md`, con `assets/checklist-esiti.md`: le
 voci in perimetro raggruppate per sezione, casella spuntata **solo** dove l'esito è `OK`.
@@ -231,8 +232,8 @@ giudizio già passato per il Gate 1.
 
 Ogni casella vuota porta il motivo accanto: `KO` con severità, `PARZIALE`, `N/A`, oppure
 `NON VERIFICATO` con lo strumento mancante. Questo è il file che il cliente aprirà per primo e
-leggerà come "verde = fatto, vuoto = rotto": senza il motivo, i tuoi `NON VERIFICATO` — che
-sono il perimetro di validità del lavoro — gli si presentano come altrettante accuse.
+leggerà come "verde = fatto, vuoto = rotto": senza il motivo, i tuoi `NON VERIFICATO`, che
+sono il perimetro di validità del lavoro, gli si presentano come altrettante accuse.
 
 Se serve lavorarla in un foglio (ticket, assegnazioni, avanzamento nel tempo), esporta lo
 stesso contenuto anche in .csv o .xlsx, una riga per voce.

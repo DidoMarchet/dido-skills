@@ -1,6 +1,6 @@
 ---
 name: dido-platform-docs-writer
-description: Documentazione operativa di un repository — README, documento per servizio, tabella delle variabili d'ambiente, procedure di avvio e deploy, troubleshooting — ricavata esclusivamente dai file presenti nel repo, con esito NON DEDUCIBILE dichiarato su tutto ciò che i file non dimostrano. Usare quando l'utente chiede di documentare un repository, scrivere o rifare il README, spiegare come si avvia in locale o come va in produzione, allineare documentazione obsoleta al codice attuale, o segnala che nessuno sa più come far partire il progetto. Non per documentazione di prodotto, API reference generabile dal codice o testi commerciali.
+description: Documentazione operativa di un repository (README, documento per servizio, tabella delle variabili d'ambiente, procedure di avvio e deploy, troubleshooting) ricavata esclusivamente dai file presenti nel repo, con esito NON DEDUCIBILE dichiarato su tutto ciò che i file non dimostrano. Usare quando l'utente chiede di documentare un repository, scrivere o rifare il README, spiegare come si avvia in locale o come va in produzione, allineare documentazione obsoleta al codice attuale, o segnala che nessuno sa più come far partire il progetto. Non per documentazione di prodotto, API reference generabile dal codice o testi commerciali.
 ---
 
 # Documentazione operativa di un repository
@@ -10,7 +10,7 @@ capire cosa si è rotto quando si rompe. Il lettore è chi manutiene, non chi va
 serve sapere che il progetto è scalabile, gli serve il comando esatto e la variabile esatta.
 
 **Regola d'oro: si documenta solo ciò che i file del repository dimostrano.** Ogni affermazione
-operativa — una porta, una variabile, un comando, un dominio, un passo di deploy — deve essere
+operativa (una porta, una variabile, un comando, un dominio, un passo di deploy) deve essere
 riconducibile a un file preciso. Quando non lo è, l'esito è `NON DEDUCIBILE`, ed è un esito
 legittimo e frequente. Un README con dieci sezioni verificate e tre marcate NON DEDUCIBILE vale
 molto più di uno completo per metà inventato: è l'unico modo in cui questa documentazione resta
@@ -35,8 +35,8 @@ affidabile a sei mesi di distanza.
 
 - Rendere il progetto avviabile da chi non l'ha scritto, senza chiedere niente a nessuno.
 - Distinguere sempre **sviluppo locale** e **produzione**, e dire chi gestisce cosa in ciascuno.
-- Documentare la configurazione **reale rilevata nel repo** — orchestratore, proxy, motore di
-  deploy, gestore delle variabili — chiamandola col suo nome. Se il repo usa Coolify e Traefik
+- Documentare la configurazione **reale rilevata nel repo** (orchestratore, proxy, motore di
+  deploy, gestore delle variabili) chiamandola col suo nome. Se il repo usa Coolify e Traefik
   scrivi Coolify e Traefik; se usa Kubernetes, Fly.io o una unit `systemd`, scrivi quelli.
   **Nessuno stack è quello atteso.**
 - Prevenire i blocchi operativi: prerequisiti scomodi, dipendenze fra servizi, errori ricorrenti.
@@ -49,7 +49,7 @@ affidabile a sei mesi di distanza.
 - Ogni confronto fra ambienti in tabella, mai in paragrafo.
 - Imperativo e seconda persona per le istruzioni ("Avvia", "Verifica"), non condizionale.
 
-## Passo 1 — Discovery (l'inventario è parte dell'output)
+## Passo 1. Discovery (l'inventario è parte dell'output)
 
 Non scrivere una riga prima di aver letto i file. Non incollare in risposta il contenuto grezzo
 di ciò che leggi, ma **dichiara sempre cosa hai letto**: l'inventario è la base di prova del
@@ -63,11 +63,11 @@ distinguibile da una discovery non fatta.
 | Configurazione | `.env.example`, `config/`, `settings.*` | variabili, quali obbligatorie, quali hanno default |
 | Automazione | `Makefile`, `justfile`, `scripts/`, `.github/workflows/` | comandi reali, cosa gira in CI e cosa resta manuale |
 | Rete ed esposizione | label del proxy, `nginx.conf`, config del reverse proxy, ingress | chi termina TLS, chi instrada, quali host |
-| Storia | README attuale, `CHANGELOG`, `docs/` | cosa era vero prima — da verificare, mai da recepire |
+| Storia | README attuale, `CHANGELOG`, `docs/` | cosa era vero prima, da verificare e mai da recepire |
 
 Chiudi la discovery con questa riga, che apre la risposta:
 
-`Discovery: N file letti — stack {…} · servizi {…} · deploy {…} · non trovato: {elenco}`
+`Discovery: N file letti. Stack {…}, servizi {…}, deploy {…}. Non trovato: {elenco}.`
 
 Se un'area non ha file che la coprano (niente CI, niente proxy, niente backup) **quella è
 un'informazione**, non un buco da riempire: finisce in `non trovato`, e da lì nelle sezioni
@@ -147,11 +147,11 @@ entra nel documento solo se il componente che la causa compare fra i file letti:
 sezione TLS se nel repo non c'è chi emette i certificati, niente sezione DNS se nessun file
 nomina un dominio, niente crash loop da variabili mancanti se non esiste un `.env.example`.
 Il repertorio per componente sta in `reference/troubleshooting.md`, organizzato per
-tecnologia rilevata (reverse proxy · orchestratore container · CI/CD · database · accesso al
+tecnologia rilevata (reverse proxy, orchestratore container, CI/CD, database, accesso al
 server): usalo come repertorio da cui pescare, mai come indice da riempire.
 
-Se il repo usa una tecnologia che il repertorio non copre, scrivi comunque le voci — dedotte
-dai suoi file — e segnalale in coda sotto "Proposte di aggiornamento del repertorio", invece
+Se il repo usa una tecnologia che il repertorio non copre, scrivi comunque le voci (dedotte
+dai suoi file) e segnalale in coda sotto "Proposte di aggiornamento del repertorio", invece
 di aggiungerle in silenzio.
 
 ## Consegna
@@ -165,12 +165,12 @@ La risposta contiene, in quest'ordine:
 
 1. La riga di `Discovery` e la riga di `Gate`.
 2. L'elenco dei file creati o modificati, col percorso.
-3. **Da completare** — i blocchi NON DEDUCIBILE raccolti, ciascuno con chi può chiudere il punto.
-4. **Punti da verificare** — anomalie viste nel repo che il manutentore dovrebbe guardare
+3. **Da completare**: i blocchi NON DEDUCIBILE raccolti, ciascuno con chi può chiudere il punto.
+4. **Punti da verificare**: anomalie viste nel repo che il manutentore dovrebbe guardare
    (secret versionati, servizi senza healthcheck, script che puntano a host non definiti).
 
 **Riscrivere un documento esistente non è cancellarlo.** Se sostituisci un README, elenca le
 sezioni che hai tolto e perché (contraddette dal codice, duplicate, obsolete). Il contenuto
-non operativo che i file non dimostrano ma che nemmeno smentiscono — contatti, accordi,
-cronologia, note del team — si conserva così com'è: non è materiale da dedurre, quindi non è
+non operativo che i file non dimostrano ma che nemmeno smentiscono (contatti, accordi,
+cronologia, note del team) si conserva così com'è: non è materiale da dedurre, quindi non è
 materiale da rimuovere.

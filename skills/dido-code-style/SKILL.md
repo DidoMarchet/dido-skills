@@ -17,7 +17,7 @@ Quando il `CLAUDE.md` del progetto è più specifico, vale quello.
 
 ---
 
-# 1. Principi — ogni progetto, ogni linguaggio
+# 1. Principi per ogni progetto e linguaggio
 
 ## Contesto e continuità
 
@@ -94,6 +94,20 @@ Prematura è l'infrastruttura "per quando crescerà il traffico": cache, code, w
 - Una scelta non ovvia che c'è ha un commento che la spiega (es. `// Niente cache: ...`).
 - Un'assenza voluta che qualcuno potrebbe "correggere" ha un breve commento sul perché manca (es. niente cache del transporter per via del cluster PM2). Non è un marcatore `// removed X`: spiega una decisione di progetto, non la storia.
 
+## Testi
+
+Ogni testo che una persona legge (interfaccia, email, messaggi d'errore, commenti, doc, report) si scrive quando a quella persona serve per fare qualcosa. Frasi brevi, con le parole che usa chi legge. Prima di scriverne uno nuovo leggi quelli che ci sono già (template, file delle lingue, email) e tieni lo stesso registro e lo stesso tu o lei.
+
+In un'interfaccia una pagina, una sezione o una card ha titolo, contenuto e azioni. Sottotitoli, descrizioni e testi d'aiuto ci sono solo in tre casi:
+
+- un campo vuole un formato o ha un limite che non si vede ("Massimo 10 MB");
+- un'azione non si può annullare, e allora lo dice il dialog di conferma, non la pagina ("Eliminare l'account? Ordini e indirizzi non si recuperano.");
+- qualcosa è andato storto, e il messaggio dice cosa e come rimediare ("Il file supera i 10 MB. Scegline uno più leggero.").
+
+I bottoni dicono l'azione ("Salva", "Pubblica"), le label il nome della cosa.
+
+Punteggiatura normale: punto, virgola, due punti, parentesi. Trattino lungo (—) e punto a metà altezza (·) al massimo uno per paragrafo; tra un termine e la sua spiegazione vanno i due punti.
+
 ## Test
 
 - Ogni comportamento nuovo e ogni bug fix hanno un test che senza la modifica fallisce. Per un bug, scrivi prima il test e guardalo fallire.
@@ -101,19 +115,19 @@ Prematura è l'infrastruttura "per quando crescerà il traffico": cache, code, w
 - Non modificare un test solo per farlo passare. Se il cambio di comportamento è voluto, dillo nella modifica.
 - Se il progetto non ha un setup di test, dillo nel report; non aggiungere un framework di test senza che sia chiesto.
 
-## Sicurezza — analizza ogni modifica
+## Sicurezza in ogni modifica
 
 Ogni modifica passa un controllo di sicurezza prima di essere chiamata fatta, proporzionato a ciò che tocca: un ritocco CSS non ne ha bisogno, un endpoint nuovo ha bisogno di tutto.
 
-- **Input** — ogni input esterno (body, query, parametri, header, cookie, file caricati, webhook, risposte di API di terzi) è validato al confine: tipo, formato, lunghezza, valori ammessi.
-- **Autenticazione e autorizzazione** — chi può chiamarlo? Il controllo sta sul server, mai solo nascosto nella UI. Un utente può arrivare ai dati di un altro cambiando un id? Un account disattivato o declassato perde l'accesso subito?
-- **Esposizione dei dati** — le risposte restituiscono solo i campi che servono: mai hash di password, token, OTP, segreti, stack trace o errori del driver in produzione. I log non contengono mai password, token od OTP.
-- **Injection** — niente SQL, comandi shell o HTML costruiti concatenando stringhe: query parametrizzate / ORM, template con escape, niente `v-html` / `innerHTML` su contenuti controllati dall'utente.
-- **Segreti** — in env o cifrati a riposo; mai nel codice, nel repo, nei log o nel bundle client (`runtimeConfig.public` contiene solo valori pubblici per natura, es. token CMS in sola lettura).
-- **Abusi** — rate limit su tutto ciò che si può forzare o usare per spam (login, OTP, reset password, registrazione, upload, form di contatto). I token sono casuali, a scadenza e monouso. Le risposte di login e reset non rivelano se un account esiste.
-- **File** — controlla tipo e dimensione, salva con nomi generati, nessun percorso controllato dall'utente, contenuti privati scaricabili solo dietro autenticazione.
-- **Trasporto e browser** — allow-list CORS esplicita, cookie `HttpOnly` + `Secure` + il `SameSite` giusto, HTTPS in produzione.
-- **Dipendenze** — una dipendenza nuova deve servire davvero (non sostituibile con poche righe di codice), essere mantenuta e libera da vulnerabilità critiche note (`npm audit` / `pnpm audit`).
+- **Input.** Ogni input esterno (body, query, parametri, header, cookie, file caricati, webhook, risposte di API di terzi) è validato al confine: tipo, formato, lunghezza, valori ammessi.
+- **Autenticazione e autorizzazione.** Chi può chiamarlo? Il controllo sta sul server, mai solo nascosto nella UI. Un utente può arrivare ai dati di un altro cambiando un id? Un account disattivato o declassato perde l'accesso subito?
+- **Esposizione dei dati.** Le risposte restituiscono solo i campi che servono: mai hash di password, token, OTP, segreti, stack trace o errori del driver in produzione. I log non contengono mai password, token od OTP.
+- **Injection.** Niente SQL, comandi shell o HTML costruiti concatenando stringhe: query parametrizzate / ORM, template con escape, niente `v-html` / `innerHTML` su contenuti controllati dall'utente.
+- **Segreti.** In env o cifrati a riposo; mai nel codice, nel repo, nei log o nel bundle client (`runtimeConfig.public` contiene solo valori pubblici per natura, es. token CMS in sola lettura).
+- **Abusi.** Rate limit su tutto ciò che si può forzare o usare per spam (login, OTP, reset password, registrazione, upload, form di contatto). I token sono casuali, a scadenza e monouso. Le risposte di login e reset non rivelano se un account esiste.
+- **File.** Controlla tipo e dimensione, salva con nomi generati, nessun percorso controllato dall'utente, contenuti privati scaricabili solo dietro autenticazione.
+- **Trasporto e browser.** Allow-list CORS esplicita, cookie `HttpOnly` + `Secure` + il `SameSite` giusto, HTTPS in produzione.
+- **Dipendenze.** Una dipendenza nuova deve servire davvero (non sostituibile con poche righe di codice), essere mantenuta e libera da vulnerabilità critiche note (`npm audit` / `pnpm audit`).
 
 Poi:
 
@@ -127,7 +141,7 @@ Poi:
 - Dopo una modifica allo schema o al codice generato, rigenera prima di eseguire qualsiasi cosa (es. `npx prisma generate`).
 - Riporta in modo esplicito cosa è stato verificato e cosa no, e perché (es. "DB spento, test non eseguiti: ecco come lanciarli").
 
-## Campanelli d'allarme — fermati e correggi prima di andare avanti
+## Campanelli d'allarme: fermati e correggi prima di andare avanti
 
 | Pensiero | Realtà |
 |---|---|
@@ -152,9 +166,9 @@ Per la revisione di una modifica, o una richiesta come "trova bug":
 - Riporta solo problemi di gravità Alta e Media (vedi "Gravità" sotto). Niente trovato → "ok" in una riga.
 - Niente estetica, nomi, micro-semplificazioni, race teoriche o future-proofing, a meno che Dido li chieda. Mai aggiungere in fondo "e un paio di cose minori che ho notato".
 
-## Analisi completa — "analizza il repo"
+## Analisi completa ("analizza il repo")
 
-"Analizza il repo con la skill dido-code-style" — o un modulo, o una cartella — è la richiesta completa: Dido non elenca cosa controllare. Chiede esplicitamente ogni categoria della checklist qui sotto, quindi le restrizioni del progetto sugli audit per quelle categorie non valgono. L'estetica resta fuori.
+"Analizza il repo con la skill dido-code-style" (o un modulo, o una cartella) è la richiesta completa: Dido non elenca cosa controllare. Chiede esplicitamente ogni categoria della checklist qui sotto, quindi le restrizioni del progetto sugli audit per quelle categorie non valgono. L'estetica del codice resta fuori.
 
 ### Come lanciarla
 
@@ -168,7 +182,7 @@ Chiedere l'analisi con questa skill è il consenso all'esecuzione con più agent
      args: {
        skill: "${CLAUDE_SKILL_DIR}/SKILL.md",
        memoryDir: "<cartella della memoria di questo progetto, se c'è>",
-       scope: "<percorso o elenco di percorsi — solo per un modulo o una cartella>"
+       scope: "<percorso o elenco di percorsi, solo per un modulo o una cartella>"
      }
    })
    ```
@@ -185,22 +199,23 @@ Chiedere l'analisi con questa skill è il consenso all'esecuzione con più agent
 
 ### Checklist
 
-- **Bug** — logica sbagliata, casi che capitano davvero ma non sono gestiti, percorsi di errore rotti, race con uno scenario riproducibile.
-- **Effetti collaterali** — le regole di "Niente effetti collaterali nascosti" della Parte 1, più lo stato a livello di modulo condiviso tra richieste o worker.
-- **Sicurezza** — la checklist "Sicurezza" della Parte 1, applicata a ogni punto d'ingresso.
-- **Overengineering** — astrazioni con una sola implementazione o un solo utilizzatore, opzioni e parametri che nessuno passa, livelli che si limitano a inoltrare chiamate, configurazione che nessuno imposta.
-- **Codice morto e avanzi** — file / export / funzioni / dipendenze / variabili d'ambiente / chiavi di configurazione inutilizzati, codice commentato, shim di compatibilità, resti di funzionalità sostituite in codice, test o doc. Va dimostrato: grep di ogni candidato in cerca di utilizzatori reali.
-- **Semplicità e leggibilità** — codice che si può scrivere in modo sostanzialmente più semplice con lo stesso comportamento (mostra la versione più semplice), logica che duplica un helper esistente, nomi tanto fuorvianti da portare a usi sbagliati.
-- **Scalabilità e prestazioni** — le regole di "Scalabile per costruzione" della Parte 1. Solo colli di bottiglia reali, non "aggiungiamo una cache / una coda per sicurezza".
-- **Doc disallineate** — doc, spec dell'API, contratto per i client, `CLAUDE.md` che non corrispondono più al codice.
-- **Test** — test che falliscono, flussi critici (auth, permessi, scritture di dati) senza test, test che non verificano niente.
+- **Bug**: logica sbagliata, casi che capitano davvero ma non sono gestiti, percorsi di errore rotti, race con uno scenario riproducibile.
+- **Effetti collaterali**: le regole di "Niente effetti collaterali nascosti" della Parte 1, più lo stato a livello di modulo condiviso tra richieste o worker.
+- **Sicurezza**: la checklist "Sicurezza" della Parte 1, applicata a ogni punto d'ingresso.
+- **Overengineering**: astrazioni con una sola implementazione o un solo utilizzatore, opzioni e parametri che nessuno passa, livelli che si limitano a inoltrare chiamate, configurazione che nessuno imposta.
+- **Codice morto e avanzi**: file / export / funzioni / dipendenze / variabili d'ambiente / chiavi di configurazione inutilizzati, codice commentato, shim di compatibilità, resti di funzionalità sostituite in codice, test o doc. Va dimostrato: grep di ogni candidato in cerca di utilizzatori reali.
+- **Semplicità e leggibilità**: codice che si può scrivere in modo sostanzialmente più semplice con lo stesso comportamento (mostra la versione più semplice), logica che duplica un helper esistente, nomi tanto fuorvianti da portare a usi sbagliati.
+- **Scalabilità e prestazioni**: le regole di "Scalabile per costruzione" della Parte 1. Solo colli di bottiglia reali, non "aggiungiamo una cache / una coda per sicurezza".
+- **Doc disallineate**: doc, spec dell'API, contratto per i client, `CLAUDE.md` che non corrispondono più al codice.
+- **Test**: test che falliscono, flussi critici (auth, permessi, scritture di dati) senza test, test che non verificano niente.
+- **Testi**: testi d'interfaccia, email e messaggi d'errore che non seguono "Testi" della Parte 1 (descrizioni e sottotitoli fuori dai tre casi, errori che non dicono cosa è successo, la stessa cosa chiamata in modi diversi, trattini e punti a metà altezza usati come separatori) e commenti che ripetono il codice. Una voce per file, con le righe.
 
-### Verifica — un problema è smentito quando
+### Verifica: un problema è smentito quando
 
 - il codice non fa quello che il problema dice, o lo scenario non può verificarsi;
 - è documentato come voluto, fuori scope o limite noto (`CLAUDE.md`, doc, file dei limiti noti, un commento sul perché, una decisione registrata dopo un'analisi precedente);
 - il rischio è già coperto da un altro meccanismo ("una protezione per problema");
-- è estetica (nomi, ordine, formattazione, stile dei commenti), una micro-semplificazione senza un guadagno concreto, o "non è identico al file Y";
+- è estetica del codice (nomi, ordine, formattazione), una micro-semplificazione senza un guadagno concreto, o "non è identico al file Y";
 - è una race teorica o un caso limite senza scenario riproducibile, o future-proofing;
 - la prova manca o non si riproduce.
 
@@ -212,30 +227,33 @@ Nel dubbio: smentito. Un problema che regge prende la gravità definita sotto, q
 |---|---|
 | Alta | perdita o corruzione di dati, falla di sicurezza, errore visibile agli utenti, sessioni o credenziali perse, lock-out |
 | Media | stato incoerente in scenari documentati, retry o idempotenza rotti, collo di bottiglia reale, test che fallisce, doc dell'API che ingannano un client |
-| Bassa | overengineering, codice morto e avanzi, semplificazione con un guadagno concreto, altre doc disallineate, flusso critico senza test |
+| Bassa | overengineering, codice morto e avanzi, semplificazione con un guadagno concreto, altre doc disallineate, flusso critico senza test, testi |
 
 ### Report
 
 In italiano, in quest'ordine:
 
-1. **Intestazione** — repo o scope, data, stack.
-2. **Copertura** — file analizzati sul totale dei tracciati (pattern esclusi con il motivo), ogni comando con ✓ / ✗ / non eseguito (motivo e come lanciarlo), cosa non è stato controllato e perché.
-3. **Alta**, **Media**, **Bassa** — una voce per problema: `[file:line](link)` — problema — prova — fix minimo. Lo stesso problema trovato due volte è una voce sola.
-4. **Categorie senza problemi** — una riga che le elenca.
-5. **Verifica** — quanti problemi sono stati smentiti (dettagli su richiesta) e quelli non verificati con il motivo.
+1. **Intestazione**: repo o scope, data, stack.
+2. **Copertura**: file analizzati sul totale dei tracciati (pattern esclusi con il motivo), ogni comando con ✓ / ✗ / non eseguito (motivo e come lanciarlo), cosa non è stato controllato e perché.
+3. **Alta**, **Media**, **Bassa**: una voce per problema, scritta per Dido. In grassetto il link `[file:line](link)` e il problema in poche parole, poi due o tre frasi con cosa succede e a chi, la prova e il fix minimo. Lo stesso problema trovato due volte è una voce sola. Per esempio:
+
+   > **[orders.service.js:48](src/orders/orders.service.js#L48) Doppio clic, doppio ordine.** Due richieste ravvicinate creano due ordini, perché il controllo sul carrello già chiuso sta fuori dalla transazione. Riprodotto con due `POST /v1/orders` in parallelo. Fix: spostare il controllo dentro la transazione.
+
+4. **Categorie senza problemi**: una riga che le elenca.
+5. **Verifica**: quanti problemi sono stati smentiti (dettagli su richiesta) e quelli non verificati con il motivo.
 
 Niente confermato: intestazione, "ok", copertura.
 
 L'analisi non modifica il codice. Dopo, correggi ciò che Dido sceglie seguendo la Parte 1.
 
-### Dopo il report — continuità
+### Dopo il report
 
 - Un problema che Dido scarta si registra con il motivo dove l'analisi successiva lo leggerà: un commento sul perché accanto al codice se è locale, altrimenti il file dei limiti noti del progetto o le regole di revisione nel `CLAUDE.md` (crea `docs/LIMITI-NOTI.md` se il progetto non ha né l'uno né l'altro). La fase Contesto li legge, quindi non viene riproposto.
 - I fix seguono la Parte 1: prima il test di regressione, fix minimo, vecchio codice tolto, commit che dice cosa e perché.
 
 ---
 
-# 3. Backend — Node / Express / Prisma
+# 3. Backend (Node, Express, Prisma)
 
 Implementazione di riferimento: lo starter backend Node di Dido. I progetti derivati mantengono la stessa struttura.
 
@@ -245,7 +263,7 @@ Implementazione di riferimento: lo starter backend Node di Dido. I progetti deri
 |---|---|
 | Runtime | Node 22 (Alpine in Docker) |
 | Gestore pacchetti | npm (`package-lock.json`) |
-| Linguaggio | JavaScript puro, ESM (`"type": "module"`) — niente TypeScript tranne `prisma.config.ts` |
+| Linguaggio | JavaScript puro, ESM (`"type": "module"`), niente TypeScript tranne `prisma.config.ts` |
 | HTTP | Express 5 |
 | Database | PostgreSQL 15 + Prisma 7 con `@prisma/adapter-pg` |
 | Validazione | Zod |
@@ -254,7 +272,7 @@ Implementazione di riferimento: lo starter backend Node di Dido. I progetti deri
 | Mail | nodemailer + Handlebars |
 | Doc dell'API | OpenAPI servita su `/docs` e `/openapi.json` |
 | Test | vitest + supertest, E2E su un Postgres reale |
-| Deploy | Docker Compose — Coolify in produzione, Traefik + Dockge in locale |
+| Deploy | Docker Compose: Coolify in produzione, Traefik + Dockge in locale |
 | Lint / formattazione | ESLint + default di Prettier (virgolette doppie, punto e virgola) |
 
 Commenti, messaggi d'errore e doc sono in **italiano**.
@@ -264,7 +282,7 @@ Commenti, messaggi d'errore e doc sono in **italiano**.
 ```
 app/node/
 ├── src/
-│   ├── app.js                 # buildApp(): middleware, health, router /v1, 404 JSON, error handler — niente listen
+│   ├── app.js                 # buildApp(): middleware, health, router /v1, 404 JSON, error handler, niente listen
 │   ├── index.js               # connect + listen + job periodici
 │   ├── <module>/
 │   │   ├── <module>.routes.js
@@ -276,7 +294,7 @@ app/node/
 │   ├── database/postgres/     # client Prisma
 │   ├── docs/                  # spec OpenAPI, paths/, schemas/
 │   └── utils/                 # errors.js (HttpError), campi Zod condivisi, paginazione
-├── tests/                     # test E2E — non dentro src/
+├── tests/                     # test E2E, fuori da src/
 └── prisma/                    # schema.prisma + migrations/
 ```
 
@@ -294,7 +312,7 @@ app/node/
 | `*.service.js` | logica di business, lancia `HttpError` per gli errori di dominio | `req` / `res`, Zod, `res.status().json()` |
 
 ```js
-// controller — Express 5 passa le promise rifiutate all'error handler: niente try/catch
+// Express 5 passa le promise rifiutate all'error handler: niente try/catch nel controller
 export const putFrontendUrl = async (req, res) => {
   const { url } = frontendUrlSchema.parse(req.body);
   await upsertFrontendUrl(url, req.auth.sub);
@@ -303,7 +321,7 @@ export const putFrontendUrl = async (req, res) => {
 ```
 
 ```js
-// service — solo errori di dominio
+// Nel service solo errori di dominio
 if (!user) throw new HttpError(404, "Utente non trovato");
 ```
 
@@ -330,12 +348,12 @@ Meccanismi già presenti — usali, non duplicarli:
 
 - **Ogni rotta non pubblica** usa `authenticate()` (staff, il default) o `authenticate({ type: PRINCIPAL_TYPES.CUSTOMER })`: il claim `type` del JWT separa le audience e il principal viene riletto dal DB a ogni richiesta, quindi disattivazione e cambi di ruolo hanno effetto subito. Nessuna cache davanti a quella lettura.
 - **Permessi** più ristretti di `FULL_ACCESS_ROLES` si controllano in cima al controller (403), perché i ruoli con accesso completo superano il controllo `roles` di `authenticate()`.
-- **Proprietà dei dati** — una rotta self-service prende l'id del principal da `req.auth.sub`, mai dal body o dall'URL.
+- **Proprietà dei dati**: una rotta self-service prende l'id del principal da `req.auth.sub`, mai dal body o dall'URL.
 - **`select` di Prisma** con l'elenco esplicito dei campi (es. `STAFF_SELECT`, `CUSTOMER_SELECT`): `passwordHash`, `otpHash` e i token non arrivano mai in una risposta.
-- **Credenziali** — password con bcrypt (`auth/core/crypto.js`); OTP e token email salvati solo come sha256; il login con un utente inesistente esegue comunque bcrypt su un hash fittizio (stessi tempi, nessuna enumerazione degli account).
+- **Credenziali**: password con bcrypt (`auth/core/crypto.js`); OTP e token email salvati solo come sha256; il login con un utente inesistente esegue comunque bcrypt su un hash fittizio (stessi tempi, nessuna enumerazione degli account).
 - **Rate limiter** in `middleware/rate-limit.js` su ogni endpoint che si può forzare o usare per spam; store Redis condiviso quando gira più di un processo.
 - **Segreti** dalle env; i segreti runtime salvati in DB sono cifrati (AES-256-GCM, `config/runtime-crypto.js`) e l'API restituisce solo `hasPassword: bool`. `NODE_JWT_SECRET` e CORS sono validati all'avvio in produzione (fail fast).
-- **Errori in produzione** — messaggio generico sul 500, i dettagli del driver solo nel log del server.
+- **Errori in produzione**: messaggio generico sul 500, i dettagli del driver solo nel log del server.
 - **Audit log** per gli eventi rilevanti per la sicurezza (login e fallimenti, cambi di ruolo e di stato, modifiche di configurazione, eliminazioni); ogni nuovo tipo di evento documentato.
 
 ## Test
@@ -346,7 +364,7 @@ Meccanismi già presenti — usali, non duplicarli:
 
 ---
 
-# 4. Frontend — Nuxt / Vue
+# 4. Frontend (Nuxt, Vue)
 
 ## Stack
 
@@ -355,7 +373,7 @@ Meccanismi già presenti — usali, non duplicarli:
 | Framework | Nuxt 4 (`nuxt: ^4.x`) |
 | Gestore pacchetti | pnpm |
 | Linguaggio | JS per composable e plugin, TS per i file di configurazione |
-| Stato | Pinia — store in stile composition |
+| Stato | Pinia, store in stile composition |
 | GraphQL | @nuxtjs/apollo + `useGraphql()` personalizzato |
 | API REST | composable `useApiFetch()` personalizzato |
 | Form | FormKit + @formkit/nuxt |
@@ -456,10 +474,10 @@ project/
 │   ├── server/
 │   │   └── api/
 │   │       └── sitemap.js
-│   ├── stores/                           # Pinia — always plural
+│   ├── stores/                           # Pinia, always plural
 │   │   └── [store-name].js
 │   └── utils/
-├── configuration/                        # Nuxt config split by concern — root level
+├── configuration/                        # Nuxt config split by concern, at root level
 │   ├── apollo.ts
 │   ├── app.ts
 │   ├── build.ts
@@ -481,7 +499,7 @@ project/
 ├── i18n/locales/
 │   ├── it.js
 │   └── en.js
-├── nuxt.config.ts                        # thin — only spreads ./configuration/*
+├── nuxt.config.ts                        # thin: only spreads ./configuration/*
 ├── formkit.config.js
 ├── i18n.config.ts
 ├── tsconfig.json
@@ -492,7 +510,7 @@ project/
 
 ---
 
-## nuxt.config.ts — sempre snello
+## nuxt.config.ts sempre snello
 
 ```ts
 import apollo from './configuration/apollo'
@@ -622,7 +640,7 @@ export default {
 export default {
   nitro: {
     routeRules: {
-      '/**': { isr: true },                // ISR on all routes — no TTL, revalidate on deploy
+      '/**': { isr: true },                // ISR on all routes, no TTL: revalidate on deploy
       '/sitemap.xml': { prerender: true },
       // redirects:
       '/it/old-path/**': { redirect: { to: '/it/new-path', statusCode: 301 } },
@@ -680,7 +698,7 @@ components/widget/accordion/index.vue
 components/widget/accordion/style.scss
 ```
 
-**Doppio blocco script** — schema voluto:
+**Doppio blocco script**, schema voluto:
 
 ```vue
 <template>
@@ -702,9 +720,9 @@ const props = defineProps({
 
 Regole:
 - **Niente tag `<style>`** nei `.vue`: gli stili stanno sempre nel `style.scss` accanto
-- **Niente TypeScript** nei file `.vue` e nei composable — voluto
+- **Niente TypeScript** nei file `.vue` e nei composable (voluto)
 - **Prefisso `Lazy`** per i componenti pesanti: `<LazyPagesHomeProjects />`
-- **Importati in automatico** — mai importare i componenti a mano
+- **Importati in automatico**: mai importare i componenti a mano
 
 ---
 
@@ -725,7 +743,7 @@ Regole:
 const { lenis } = useLenis()
 provide('lenis', lenis)
 
-// Fetch global CMS config — always use an explicit key
+// Fetch global CMS config, always with an explicit key
 await useAsyncData('site-configuration', () => useStore().fetchConfiguration())
 
 const { locale } = useI18n()
@@ -756,7 +774,7 @@ const props = defineProps({
   error: { type: Object, required: true },
 })
 
-console.error(props.error)  // keep — required to surface the error
+console.error(props.error)  // keep: required to surface the error
 
 const { lenis } = useLenis()
 provide('lenis', lenis)
@@ -787,7 +805,7 @@ Un solo layout per tutta l'app: navigazione, cursore e footer stanno qui.
 
 ## Architettura SCSS
 
-### scss-react — breakpoints
+### scss-react per i breakpoint
 
 Repo: https://github.com/DidoMarchet/scss-react
 
@@ -821,7 +839,7 @@ Uso:
 }
 ```
 
-### scss-slamp — dimensioni fluide
+### scss-slamp per le dimensioni fluide
 
 Repo: https://github.com/DidoMarchet/scss-slamp
 
@@ -834,7 +852,7 @@ margin-top: slamp(40px, 120px);
 gap:        slamp(8px, 24px);
 ```
 
-### Sistema di moduli — `@use` / `@forward` (mai `@import`)
+### Sistema di moduli con `@use` e `@forward` (mai `@import`)
 
 ```scss
 /* vars/_index.scss */
@@ -850,7 +868,7 @@ gap:        slamp(8px, 24px);
 @forward 'links';
 @forward 'input';
 
-/* _core.scss — injected globally via Vite additionalData */
+/* _core.scss, injected globally via Vite additionalData */
 @forward 'vars/index';
 @forward 'mixins/index';
 ```
@@ -916,7 +934,7 @@ I `style.scss` dei componenti ricevono variabili e mixin in automatico: non serv
 
 Tutti i composable sono `.js`, niente TypeScript. Scelta voluta.
 
-### useGraphql — wrapper delle query GraphQL
+### useGraphql, il wrapper delle query GraphQL
 
 ```js
 // composables/graphql.js
@@ -947,14 +965,14 @@ export const useGraphql = async (query, variablesInput, options = { executeSSR: 
 }
 ```
 
-### useApiFetch — API REST con retry e refresh del token
+### useApiFetch, API REST con retry e refresh del token
 
 ```js
 // composables/api-fetch.js
 
 // Retry only network errors of idempotent methods: a POST or PATCH may have reached
 // the server before the connection dropped, and once a response has arrived the
-// request already happened — repeating it would duplicate it.
+// request already happened, and repeating it would duplicate it.
 const RETRYABLE_METHODS = ['GET', 'HEAD', 'PUT', 'DELETE']
 
 export const useApiFetch = ({ endpoint = '', initialToken = null, refreshTokenFunction = null } = {}) => {
@@ -1021,7 +1039,7 @@ export const useApiFetch = ({ endpoint = '', initialToken = null, refreshTokenFu
 }
 ```
 
-### useLenis — scroll fluido
+### useLenis per lo scroll fluido
 
 ```js
 // composables/lenis.js
@@ -1042,7 +1060,7 @@ export const useLenis = () => {
 }
 ```
 
-### useSeo — SEO + hreflang
+### useSeo per SEO e hreflang
 
 ```js
 // called in page <script setup>
@@ -1059,7 +1077,7 @@ Risultato: `"${title} | ${siteName} ${market}"` + tag OG + hreflang + `setI18nPa
 
 ---
 
-## Gestione dello stato — Pinia in stile composition
+## Gestione dello stato con Pinia in stile composition
 
 ```js
 // stores/index.js
@@ -1169,7 +1187,7 @@ export const onLeave = (el) => {
 
 ---
 
-## Direttive di animazione — plugin solo client
+## Direttive di animazione (plugin solo client)
 
 ```js
 // plugins/animation-directives.client.js
@@ -1194,7 +1212,7 @@ Uso: `v-anim-reveal-text`, `v-anim-scroll-speed`, `v-anim-parallax-element`.
 
 ---
 
-## Plugin Sentry — solo client
+## Plugin Sentry (solo client)
 
 ```js
 // plugins/sentry.client.js
@@ -1219,7 +1237,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
 ---
 
-## GraphQL — organizzazione delle query
+## Organizzazione delle query GraphQL
 
 ```js
 // graphql/craft/queries/index.js
@@ -1251,7 +1269,7 @@ Fetch policy di Apollo: sempre `cache-and-network`.
 
 ---
 
-## Dati statici — `bucket/`
+## Dati statici in `bucket/`
 
 Link di navigazione, array di filtri, liste di paesi, configurazione statica → `app/bucket/` come semplici export JS. Mai negli store, mai nel CMS.
 
@@ -1323,20 +1341,20 @@ export default {
 
 ## Riepilogo Nuxt
 
-1. **`nuxt.config.ts` snello** — configurazione in `configuration/`, mai inline
-2. **Nuxt 4: sorgenti in `app/`** — pagine, componenti, composable e store tutti dentro `app/`
-3. **`stores/` al plurale** — convenzione di Nuxt
-4. **Componente = cartella** — `categoria/nome/index.vue + style.scss`, niente `<style>` nei `.vue`
-5. **Doppio blocco script** — `<script>` per il `name`, `<script setup>` per la logica — voluto
-6. **Composable e plugin in `.js`** — niente TypeScript nei composable e nei plugin — voluto
-7. **SCSS con `@use`/`@forward`** — mai `@import` (deprecato in Dart Sass)
-8. **`slamp()` per le dimensioni** — fluide, mai px fissi per ciò che deve scalare
-9. **`@include react()`** — al massimo 2 breakpoint (`<medium`, `<large`) + 2 orientamenti
-10. **Layout `.row-1/2/3`** — larghezze di contenuto standard, non wrapper personalizzati
-11. **`window.lenis`** — impostato da `useLenis()`, usato nelle transizioni di pagina (fuori dal contesto Vue) — corretto
-12. **`bucket/` per i dati statici** — navigazione, filtri, liste: non store, non CMS
-13. **Suffisso `.client.js`** — per leaflet, sentry e direttive di animazione
-14. **Transizioni di pagina** — `assets/js/page-transitions/[page].js`, una per pagina
-15. **`useAsyncData` con chiave esplicita** — sempre, per evitare mismatch di idratazione SSR
-16. **ISR senza TTL** — `{ isr: true }` voluto, si rivalida al redeploy
-17. **`cache-and-network`** — fetch policy di Apollo ovunque
+1. **`nuxt.config.ts` snello**: configurazione in `configuration/`, mai inline
+2. **Sorgenti in `app/` (Nuxt 4)**: pagine, componenti, composable e store tutti dentro `app/`
+3. **`stores/` al plurale**, convenzione di Nuxt
+4. **Componente = cartella**: `categoria/nome/index.vue + style.scss`, niente `<style>` nei `.vue`
+5. **Doppio blocco script**: `<script>` per il `name`, `<script setup>` per la logica (voluto)
+6. **Composable e plugin in `.js`**: niente TypeScript nei composable e nei plugin (voluto)
+7. **SCSS con `@use`/`@forward`**, mai `@import` (deprecato in Dart Sass)
+8. **`slamp()` per le dimensioni**: fluide, mai px fissi per ciò che deve scalare
+9. **`@include react()`** con al massimo 2 breakpoint (`<medium`, `<large`) + 2 orientamenti
+10. **Layout `.row-1/2/3`**: larghezze di contenuto standard, non wrapper personalizzati
+11. **`window.lenis`**: impostato da `useLenis()`, usato nelle transizioni di pagina fuori dal contesto Vue (corretto)
+12. **`bucket/` per i dati statici**: navigazione, filtri, liste. Non store, non CMS
+13. **Suffisso `.client.js`** per leaflet, sentry e direttive di animazione
+14. **Transizioni di pagina** in `assets/js/page-transitions/[page].js`, una per pagina
+15. **`useAsyncData` con chiave esplicita**, sempre, per evitare mismatch di idratazione SSR
+16. **ISR senza TTL**: `{ isr: true }` voluto, si rivalida al redeploy
+17. **`cache-and-network`** come fetch policy di Apollo ovunque

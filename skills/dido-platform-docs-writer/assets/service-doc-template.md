@@ -3,8 +3,8 @@
 ## 1. Architettura
 
 **Ruolo:** {{…}}
-**Dipende da:** {{servizi}} — risulta da `{{file:riga}}`
-**Da lui dipendono:** {{servizi}} — risulta da `{{file:riga}}`
+**Dipende da:** {{servizi}} (da `{{file:riga}}`)
+**Da lui dipendono:** {{servizi}} (da `{{file:riga}}`)
 
 ## 2. Requisiti
 

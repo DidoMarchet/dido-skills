@@ -2,9 +2,6 @@
 
 {{Cosa fa, in due righe. Nessun aggettivo non misurabile.}}
 
-> `Discovery: {{N}} file letti — stack {{…}} · servizi {{…}} · deploy {{…}} · non trovato: {{elenco}}`
-> `Gate: {{X}} affermazioni riviste, {{Y}} declassate a NON DEDUCIBILE.`
-
 ## Ambienti a confronto
 
 | Aspetto | Sviluppo locale | Produzione |

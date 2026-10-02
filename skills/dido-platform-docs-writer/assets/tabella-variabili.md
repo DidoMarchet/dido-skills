@@ -1,4 +1,4 @@
-# Tabella delle variabili d'ambiente — convenzioni fisse
+# Tabella delle variabili d'ambiente: convenzioni fisse
 
 Formato obbligatorio:
 

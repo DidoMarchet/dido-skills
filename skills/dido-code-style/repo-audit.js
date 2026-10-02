@@ -20,7 +20,7 @@ if (!args?.skill) throw new Error('Manca args.skill: percorso assoluto di SKILL.
 const SCOPE = args.scope ? [].concat(args.scope).join(', ') : null
 const SEVERITIES = ['Alta', 'Media', 'Bassa']
 
-const RULES = `Regole: leggi ${args.skill} fino all'intestazione "# 3." (Parte 1 e Parte 2: principi, checklist, criteri di verifica, gravità). Leggi la Parte 3 (backend Node) o la Parte 4 (Nuxt/Vue) solo se riguarda il codice che hai davanti. Testi in italiano.`
+const RULES = `Regole: leggi ${args.skill} fino all'intestazione "# 3." (Parte 1 e Parte 2: principi, checklist, criteri di verifica, gravità). Leggi la Parte 3 (backend Node) o la Parte 4 (Nuxt/Vue) solo se riguarda il codice che hai davanti. Testi in italiano e brevi: title in poche parole, problem in una o due frasi su cosa succede e a chi, evidence le righe o il comando che lo mostrano, fix la modifica minima.`
 
 const FINDING = {
   type: 'object',
@@ -28,7 +28,7 @@ const FINDING = {
     severity: { type: 'string', enum: SEVERITIES },
     category: {
       type: 'string',
-      enum: ['bug', 'side-effect', 'sicurezza', 'overengineering', 'codice-morto', 'semplicita', 'scalabilita', 'doc', 'test'],
+      enum: ['bug', 'side-effect', 'sicurezza', 'overengineering', 'codice-morto', 'semplicita', 'scalabilita', 'doc', 'test', 'testi'],
     },
     file: { type: 'string' },
     line: { type: 'integer' },
@@ -215,7 +215,7 @@ const verifyOne = (f, i, ctx) =>
     `Prova a SMENTIRE questo problema trovato dall'analisi del repository nella directory corrente.
 
 ${RULES}
-Usa i criteri di "Verifica — un problema è smentito quando" e le definizioni di "Gravità" della Parte 2.
+Usa i criteri di "Verifica: un problema è smentito quando" e le definizioni di "Gravità" della Parte 2.
 
 ${contextBlock(ctx)}
 
@@ -235,7 +235,7 @@ const verifyMinor = (findings, ctx, label) =>
     `Prova a SMENTIRE, uno per uno, questi problemi di gravità Bassa trovati dall'analisi del repository nella directory corrente.
 
 ${RULES}
-Usa i criteri di "Verifica — un problema è smentito quando" e le definizioni di "Gravità" della Parte 2.
+Usa i criteri di "Verifica: un problema è smentito quando" e le definizioni di "Gravità" della Parte 2.
 
 ${contextBlock(ctx)}
 
@@ -268,8 +268,8 @@ const judge = (f, votes, planned) => {
 }
 
 // Alta/Media: due scettici, il terzo solo se i primi due non concordano su smentita o
-// gravità. L'esito è identico a tre verdetti sempre — quando concordano il terzo non
-// cambierebbe la maggioranza né la mediana — con un agente in meno.
+// gravità. L'esito è identico a tre verdetti sempre (quando concordano il terzo non
+// cambierebbe la maggioranza né la mediana), con un agente in meno.
 const verifyMajor = async (f, ctx) => {
   const first = (await parallel([0, 1].map((i) => () => verifyOne(f, i, ctx)))).filter(Boolean)
   const agree =

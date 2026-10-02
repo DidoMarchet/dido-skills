@@ -1,4 +1,4 @@
-# Troubleshooting — repertorio per tecnologia rilevata
+# Troubleshooting: repertorio per tecnologia rilevata
 
 **Regola d'ingresso: una voce entra nel documento solo se il componente che la causa compare
 fra i file letti nella discovery.** Niente sezione TLS se nessun file emette certificati,
@@ -77,6 +77,6 @@ Formato di ogni voce nel documento finale:
 
 ## Manutenzione di questo repertorio
 
-Se documenti uno stack che questo file non copre, scrivi comunque le voci — dedotte dai file di
-quel repository — e segnalale in coda al documento prodotto sotto **"Proposte di aggiornamento
+Se documenti uno stack che questo file non copre, scrivi comunque le voci (dedotte dai file di
+quel repository) e segnalale in coda al documento prodotto sotto **"Proposte di aggiornamento
 del repertorio"**, invece di aggiungerle qui in silenzio.
