@@ -1,6 +1,6 @@
 ---
 name: dido-backend
-description: Usare ogni volta che si scrive, modifica o revisiona il codice di un backend di Dido, anche per poche righe: rotte e controller, validazione dell'input, gestione degli errori e status code, autenticazione e permessi, refresh token e OTP, rate limit, transazioni, migration, mail, audit log, variabili d'ambiente, spec OpenAPI, test E2E. Vale anche per lo starter Node con Express e Prisma e per i progetti nati da lì.
+description: Usare ogni volta che si scrive, modifica o revisiona il codice di un backend di Dido, anche per poche righe (rotte e controller, validazione dell'input, gestione degli errori e status code, autenticazione e permessi, refresh token e OTP, rate limit, transazioni, migration, mail, audit log, variabili d'ambiente, spec OpenAPI, test E2E). Vale anche per lo starter Node con Express e Prisma e per i progetti nati da lì.
 ---
 
 # Backend di Dido

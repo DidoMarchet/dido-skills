@@ -1,6 +1,6 @@
 ---
 name: dido-checklist-sito-web
-description: Usare quando l'utente chiede di collaudare, controllare, fare il QA o l'audit di un sito web, prima di un lancio, dopo una migrazione, come revisione periodica o per una due diligence, anche solo per una parte: tecnica, performance, accessibilità, SEO, GEO e ricerca con AI, e-commerce, email, privacy e legale, sicurezza, analytics, contenuti, monitoraggio, consegna al cliente.
+description: Usare quando l'utente chiede di collaudare, controllare, fare il QA o l'audit di un sito web, prima di un lancio, dopo una migrazione, come revisione periodica o per una due diligence, anche solo per una parte (tecnica, performance, accessibilità, SEO, GEO e ricerca con AI, e-commerce, email, privacy e legale, sicurezza, analytics, contenuti, monitoraggio, consegna al cliente).
 ---
 
 # Checklist QA sito web

@@ -1,6 +1,6 @@
 ---
 name: dido-frontend-nuxt
-description: Usare ogni volta che si scrive, modifica, revisiona o crea codice in un frontend Nuxt di Dido, anche per un ritocco a un componente o a uno stile: pagine, componenti Vue, composable, store Pinia, SCSS con scss-react e slamp, configurazione di Nuxt, query GraphQL con Apollo, ISR, transizioni con GSAP e Lenis.
+description: Usare ogni volta che si scrive, modifica, revisiona o crea codice in un frontend Nuxt di Dido, anche per un ritocco a un componente o a uno stile (pagine, componenti Vue, composable, store Pinia, SCSS con scss-react e slamp, configurazione di Nuxt, query GraphQL con Apollo, ISR, transizioni con GSAP e Lenis).
 ---
 
 # Frontend Nuxt di Dido
