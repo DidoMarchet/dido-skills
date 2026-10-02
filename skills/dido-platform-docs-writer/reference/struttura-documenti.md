@@ -51,12 +51,14 @@ per servizio invece di gonfiare il README.
 li salva. Attenzione: identificare i volumi è quasi sempre deducibile, identificare la
 *strategia* di backup quasi mai. Sono due cose separate e vanno scritte separate.
 
-**Problemi comuni**: vedi `reference/troubleshooting.md`, derivate dai componenti reali.
+**Problemi comuni**: vedi `reference/troubleshooting.md`, derivate dai componenti reali. Al
+massimo cinque voci, le più probabili per questo repo.
 
 **Da completare**: tutti i blocchi `NON DEDUCIBILE` raccolti in fondo, con chi può chiuderli.
 
 **Punti da verificare**: anomalie viste durante la lettura (secret versionati, servizi senza
-healthcheck, lockfile mancante, script che puntano a host non definiti da nessuna parte).
+healthcheck, lockfile mancante, script che puntano a host non definiti da nessuna parte). Al
+massimo i cinque più gravi; gli altri vanno nella risposta.
 
 **Documenti collegati**: link ai documenti per servizio.
 

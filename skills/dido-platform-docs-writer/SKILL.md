@@ -43,6 +43,14 @@ affidabile a sei mesi di distanza.
 
 ### Vincoli di scrittura, al posto del tono
 
+- Ogni frase serve a chi deve avviare, aggiornare o riparare il progetto. Con uno o due servizi
+  il README sta intorno alle 1.000 parole e non supera le 1.500; con più servizi resta un quadro
+  d'insieme e il dettaglio va nei documenti per servizio.
+- Il file da cui viene un valore si scrive nelle colonne di origine delle tabelle e nei blocchi
+  NON DEDUCIBILE. Nel testo si cita solo quando chi legge deve aprire quel file: il controllo
+  riga per riga lo fa il gate, non il documento.
+- Frasi brevi e punteggiatura normale: trattino lungo al massimo uno per paragrafo, tra un
+  termine e la sua spiegazione i due punti.
 - Niente aggettivi non misurabili ("potente", "scalabile", "moderno"): se non è un valore o un
   comando, non è documentazione operativa.
 - Ogni comando in un blocco `bash` copiabile e completo, non a frammenti in prosa.
@@ -148,11 +156,12 @@ sezione TLS se nel repo non c'è chi emette i certificati, niente sezione DNS se
 nomina un dominio, niente crash loop da variabili mancanti se non esiste un `.env.example`.
 Il repertorio per componente sta in `reference/troubleshooting.md`, organizzato per
 tecnologia rilevata (reverse proxy, orchestratore container, CI/CD, database, accesso al
-server): usalo come repertorio da cui pescare, mai come indice da riempire.
+server): usalo come repertorio da cui pescare, mai come indice da riempire. Nel documento
+vanno al massimo cinque voci, le più probabili per questo repo.
 
 Se il repo usa una tecnologia che il repertorio non copre, scrivi comunque le voci (dedotte
-dai suoi file) e segnalale in coda sotto "Proposte di aggiornamento del repertorio", invece
-di aggiungerle in silenzio.
+dai suoi file) e segnalale nella risposta sotto "Proposte di aggiornamento del repertorio",
+invece di aggiungerle in silenzio. Nel documento non vanno: è del progetto, non della skill.
 
 ## Consegna
 
@@ -163,11 +172,16 @@ assumere quale sia il tuo.
 
 La risposta contiene, in quest'ordine:
 
-1. La riga di `Discovery` e la riga di `Gate`.
+1. La riga di `Discovery` e la riga di `Gate`, una riga ciascuna: nomi e numeri, non descrizioni.
 2. L'elenco dei file creati o modificati, col percorso.
 3. **Da completare**: i blocchi NON DEDUCIBILE raccolti, ciascuno con chi può chiudere il punto.
 4. **Punti da verificare**: anomalie viste nel repo che il manutentore dovrebbe guardare
    (secret versionati, servizi senza healthcheck, script che puntano a host non definiti).
+   Nel documento vanno al massimo i cinque più gravi, quelli che impediscono l'avvio o
+   espongono dati e segreti; gli altri stanno solo nella risposta.
+5. **Proposte di aggiornamento del repertorio**, se ce ne sono.
+
+Ogni voce di questi elenchi sta in una riga.
 
 **Riscrivere un documento esistente non è cancellarlo.** Se sostituisci un README, elenca le
 sezioni che hai tolto e perché (contraddette dal codice, duplicate, obsolete). Il contenuto

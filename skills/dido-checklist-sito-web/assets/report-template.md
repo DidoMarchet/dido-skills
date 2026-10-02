@@ -84,7 +84,3 @@ sparsa: non collassare in range. -->
 | Promozioni da [M] ad automatiche | {{elenco ID}} |
 | Gate 1 | {{X}} voci riviste, {{Y}} declassate |
 | Vista sintetica | {{nome del file checklist spuntata}}, derivata da questo documento, che prevale in caso di divergenza |
-
-## Proposte di aggiornamento checklist
-
-<!-- Voci risultate obsolete o mancanti durante l'esecuzione. -->

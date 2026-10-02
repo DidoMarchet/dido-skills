@@ -55,6 +55,8 @@
 
 ## Problemi comuni
 
+<!-- Al massimo cinque voci, le più probabili per questo repo. -->
+
 ### {{Titolo breve del problema}}
 
 - **Sintomo:** {{…}}
@@ -64,7 +66,7 @@
 
 ## Correzioni alla documentazione precedente
 
-Da compilare solo se il README sostituito conteneva affermazioni contraddette dal codice.
+<!-- Solo se il README sostituito conteneva affermazioni contraddette dal codice. -->
 
 | Cosa diceva | Cosa dice il codice | File che lo dimostra |
 |---|---|---|
@@ -72,14 +74,15 @@ Da compilare solo se il README sostituito conteneva affermazioni contraddette da
 
 ## Da completare
 
-Blocchi NON DEDUCIBILE raccolti, ciascuno con chi può chiudere il punto.
+<!-- Blocchi NON DEDUCIBILE raccolti, ciascuno con chi può chiudere il punto. -->
 
 > **NON DEDUCIBILE — {{argomento}}.** Nel repository non c'è nessun file che descriva {{cosa}}.
 > File controllati: {{elenco}}. Per completare la sezione serve: {{chi o cosa}}.
 
 ## Punti da verificare
 
-Anomalie viste nel repository, non richieste ma da segnalare.
+<!-- Al massimo le cinque anomalie più gravi: quelle che impediscono l'avvio o espongono dati e
+segreti. Le altre vanno nella risposta. -->
 
 - {{…}}
 

@@ -211,6 +211,8 @@ di validità del documento. Puoi spostarli in appendice, non cancellarli.
 
 Usa `assets/report-template.md`. Regole che valgono più del formato:
 
+- **Il report lo legge il cliente**: frasi brevi, con le sue parole. Tag, modalità e gate
+  stanno solo nell'appendice. Trattino lungo al massimo uno per paragrafo.
 - **Ogni KO porta la sua prova**: URL preciso, riga di codice, screenshot, valore misurato.
   "Meta description assente" senza URL è un'opinione, non un rilievo.
 - **Ogni KO porta l'azione**, non solo il problema: cosa fare, dove, chi (dev / SEO / legale /
@@ -255,5 +257,6 @@ Prima di segnalare, controlla di non essere caduto in uno di questi:
 ## Manutenzione della checklist
 
 `reference/checklist.md` invecchia: metriche, obblighi e strumenti cambiano. Se durante
-l'esecuzione una voce risulta superata o ne manca una rilevante, segnalalo in fondo al report
-sotto "Proposte di aggiornamento checklist" invece di correggere in silenzio.
+l'esecuzione una voce risulta superata o ne manca una rilevante, segnalalo nella risposta
+sotto "Proposte di aggiornamento checklist" invece di correggere in silenzio. Nel report non
+va: è del cliente, non della skill.

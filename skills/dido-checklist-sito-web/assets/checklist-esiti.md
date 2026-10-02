@@ -14,11 +14,11 @@ Tutte le altre caselle restano vuote **e portano sempre il motivo scritto di seg
 casella vuota non significa "rotto": significa "non spuntata, per il motivo che leggi
 accanto". Una casella vuota senza motivo è un errore di compilazione, non un esito.
 
-- [x] `XXX-00` voce verificata e conforme
-- [ ] `XXX-00` voce con un problema (**KO ALTA**, piano #4)
-- [ ] `XXX-00` voce verificata solo in parte (**PARZIALE**: osservata solo su /blog)
-- [ ] `XXX-00` voce non pertinente a questo sito (*N/A: nessuna ricerca interna*)
-- [ ] `XXX-00` voce non verificabile qui (*NON VERIFICATO: serve accesso a Search Console*)
+- `[x]` `XXX-00` voce verificata e conforme
+- `[ ]` `XXX-00` voce con un problema (**KO ALTA**, piano #4)
+- `[ ]` `XXX-00` voce verificata solo in parte (**PARZIALE**: osservata solo su /blog)
+- `[ ]` `XXX-00` voce non pertinente a questo sito (*N/A: nessuna ricerca interna*)
+- `[ ]` `XXX-00` voce non verificabile qui (*NON VERIFICATO: serve accesso a Search Console*)
 
 <!-- Come si compila
 

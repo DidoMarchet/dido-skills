@@ -10,7 +10,7 @@ browser interattivo · `[M]` manuale/umana (credenziali, denaro, giudizio, strum
 
 ---
 
-## 1. GO — Go-live, ambiente e migrazione `#lancio`
+## 1. GO Go-live, ambiente e migrazione `#lancio`
 
 Sezione da eseguire **per prima** in caso di lancio o migrazione: qui stanno gli errori che
 annullano tutto il resto del lavoro.
@@ -59,7 +59,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 2. TEC — Tecnica e front-end
+## 2. TEC Tecnica e front-end
 
 **`TEC-01` HTML semantico** — `[A]` `MEDIA` `#tutti`
 `Come:` ispeziona la struttura delle pagine campione. · `OK se:` uso corretto di `header`, `nav`, `main`, `article`, `section`, `footer`; un solo `main` per pagina.
@@ -111,15 +111,15 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 3. PRF — Performance
+## 3. PRF Performance
 
-**`PRF-01` Core Web Vitals — LCP** — `[M]` `ALTA` `#tutti`
+**`PRF-01` Core Web Vitals: LCP** — `[M]` `ALTA` `#tutti`
 `Come:` PageSpeed Insights o CrUX sui template principali. · `OK se:` LCP ≤ 2,5 s al 75° percentile su mobile.
 
-**`PRF-02` Core Web Vitals — INP** — `[M]` `ALTA` `#tutti`
+**`PRF-02` Core Web Vitals: INP** — `[M]` `ALTA` `#tutti`
 `Come:` idem. **INP ha sostituito FID come Core Web Vital da marzo 2024**: se una checklist parla ancora di FID, è da aggiornare. · `OK se:` INP ≤ 200 ms.
 
-**`PRF-03` Core Web Vitals — CLS** — `[M]` `ALTA` `#tutti`
+**`PRF-03` Core Web Vitals: CLS** — `[M]` `ALTA` `#tutti`
 `Come:` idem, controllando anche i cambi di layout tardivi (banner, font, pubblicità). · `OK se:` CLS ≤ 0,1.
 
 **`PRF-04` Dati di campo vs laboratorio** — `[M]` `MEDIA` `#tutti`
@@ -151,7 +151,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 4. ACC — Accessibilità
+## 4. ACC Accessibilità
 
 > **Contesto normativo:** dal 28 giugno 2025 lo European Accessibility Act si applica anche a
 > e-commerce e servizi digitali al consumatore sopra la soglia di microimpresa. Il riferimento
@@ -208,7 +208,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 5. SEO — SEO tecnica
+## 5. SEO SEO tecnica
 
 **`SEO-01` Indicizzabilità delle pagine chiave** — `[A]` `BLOCCANTE` `#tutti`
 `Come:` meta robots, X-Robots-Tag, robots.txt sulle pagine strategiche. · `OK se:` indicizzabili e crawlabili.
@@ -272,7 +272,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 6. ONP — SEO on-page e contenuti indicizzabili
+## 6. ONP SEO on-page e contenuti indicizzabili
 
 **`ONP-01` Title tag** — `[A]` `ALTA` `#tutti`
 `Come:` estrai i title di tutte le pagine campione. · `OK se:` unici, pertinenti, ~50-60 caratteri, keyword principale in apertura, nessuno mancante o duplicato.
@@ -306,7 +306,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 7. GEO — Visibilità nei motori e assistenti AI
+## 7. GEO Visibilità nei motori e assistenti AI
 
 **`GEO-01` File llms.txt** — `[A]` `MEDIA` `#tutti`
 `Come:` GET /llms.txt. · `OK se:` presente, accessibile, aggiornato, con struttura e link corretti. Nota: è una convenzione emergente, non uno standard supportato ufficialmente da tutti i provider — utile ma non risolutivo.
@@ -334,7 +334,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 8. NAV — Navigazione e interfaccia
+## 8. NAV Navigazione e interfaccia
 
 **`NAV-01` Navigazione principale** — `[B]` `ALTA` `#tutti`
 `Come:` clicca ogni voce, incluse le tendine. · `OK se:` tutti i link funzionano, portano dove promettono, i menu si aprono anche da tastiera e su touch.
@@ -383,7 +383,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 9. FRM — Form e conversione
+## 9. FRM Form e conversione
 
 **`FRM-01` Invio del form** — `[B]` `BLOCCANTE` `#form`
 `Come:` compila e invia ogni form del sito. · `OK se:` arriva a destinazione (verifica la casella reale, non solo il messaggio a schermo).
@@ -417,7 +417,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 10. ACT — Account utente `#login`
+## 10. ACT Account utente `#login`
 
 **`ACT-01` Registrazione** — `[B]` `ALTA` `#login`
 `Come:` crea un account nuovo. · `OK se:` processo completo, validazioni corrette, email di conferma con link funzionante e non scaduto.
@@ -448,7 +448,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 11. ECM — E-commerce `#ecom`
+## 11. ECM E-commerce `#ecom`
 
 **`ECM-01` Schede prodotto** — `[B]` `ALTA` `#ecom`
 `Come:` controlla un campione. · `OK se:` prezzo, disponibilità, descrizione, immagini, varianti e spese di spedizione corretti e coerenti col gestionale.
@@ -512,7 +512,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 12. EML — Email transazionali e deliverability
+## 12. EML Email transazionali e deliverability
 
 **`EML-01` SPF** — `[M]` `ALTA` `#tutti`
 `Come:` interroga il record TXT del dominio. · `OK se:` presente, include tutti i mittenti reali, entro il limite di 10 lookup.
@@ -570,7 +570,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 13. LEG — Privacy, consenso e adempimenti legali
+## 13. LEG Privacy, consenso e adempimenti legali
 
 > Qui si concentrano i rilievi più frequentemente contestati in Italia. Tu rilevi indizi e
 > segnali cosa manca: **la valutazione di conformità spetta a un legale**, e va scritto.
@@ -637,7 +637,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 14. SEC — Sicurezza
+## 14. SEC Sicurezza
 
 **`SEC-01` HTTPS ovunque** — `[A]` `BLOCCANTE` `#tutti`
 `Come:` cerca risorse in http:// nelle pagine. · `OK se:` nessun mixed content, tutto il sito in HTTPS.
@@ -698,7 +698,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 15. ANL — Analytics, tracciamento e marketing
+## 15. ANL Analytics, tracciamento e marketing
 
 **`ANL-01` Analytics installato una volta sola** — `[A]` `ALTA` `#tutti`
 `Come:` cerca duplicazioni del tag GA4 nel sorgente e in GTM. · `OK se:` una sola implementazione, su tutte le pagine.
@@ -744,7 +744,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 16. CNT — Contenuti editoriali
+## 16. CNT Contenuti editoriali
 
 **`CNT-01` Ortografia e grammatica** — `[M]` `MEDIA` `#tutti`
 `Come:` revisione con strumento + lettura umana. · `OK se:` nessun refuso nelle pagine chiave, in particolare in titoli, menu e CTA.
@@ -778,7 +778,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 17. MON — Monitoraggio ed esercizio
+## 17. MON Monitoraggio ed esercizio
 
 **`MON-01` Monitoraggio uptime** — `[M]` `ALTA` `#tutti`
 `Come:` UptimeRobot, Pingdom o equivalente. · `OK se:` attivo su home e su una pagina critica (es. checkout), con avvisi a persone reali.
@@ -818,7 +818,7 @@ annullano tutto il resto del lavoro.
 
 ---
 
-## 18. HND — Consegna e chiusura progetto `#lancio`
+## 18. HND Consegna e chiusura progetto `#lancio`
 
 **`HND-01` Credenziali consegnate** — `[M]` `ALTA` `#lancio`
 `Come:` elenca tutti gli accessi. · `OK se:` consegnati al cliente in modo sicuro (password manager, non email), con proprietà a suo nome.
@@ -844,21 +844,21 @@ annullano tutto il resto del lavoro.
 
 | Sezione | Voci | Prevalentemente |
 |---|---|---|
-| GO — Go-live e migrazione | 14 | manuale/strumenti |
-| TEC — Tecnica e front-end | 16 | automatica |
-| PRF — Performance | 12 | strumenti esterni |
-| ACC — Accessibilità | 16 | mista |
-| SEO — SEO tecnica | 20 | automatica |
-| ONP — On-page | 10 | mista |
-| GEO — AI search | 8 | automatica |
-| NAV — Navigazione | 15 | browser |
-| FRM — Form | 10 | browser |
-| ACT — Account | 9 | browser |
-| ECM — E-commerce | 20 | browser/manuale |
-| EML — Email | 18 | manuale |
-| LEG — Privacy e legale | 20 | mista |
-| SEC — Sicurezza | 19 | manuale |
-| ANL — Analytics | 14 | browser |
-| CNT — Contenuti | 10 | manuale |
-| MON — Monitoraggio | 12 | manuale |
-| HND — Consegna | 6 | manuale |
+| GO Go-live e migrazione | 14 | manuale/strumenti |
+| TEC Tecnica e front-end | 16 | automatica |
+| PRF Performance | 12 | strumenti esterni |
+| ACC Accessibilità | 16 | mista |
+| SEO SEO tecnica | 20 | automatica |
+| ONP On-page | 10 | mista |
+| GEO AI search | 8 | automatica |
+| NAV Navigazione | 15 | browser |
+| FRM Form | 10 | browser |
+| ACT Account | 9 | browser |
+| ECM E-commerce | 20 | browser/manuale |
+| EML Email | 18 | manuale |
+| LEG Privacy e legale | 20 | mista |
+| SEC Sicurezza | 19 | manuale |
+| ANL Analytics | 14 | browser |
+| CNT Contenuti | 10 | manuale |
+| MON Monitoraggio | 12 | manuale |
+| HND Consegna | 6 | manuale |
