@@ -45,6 +45,8 @@ app/node/
 
 `buildApp()` è separato da `index.js`, così i test importano l'app senza avviare il listener.
 
+Ogni modulo si monta in `app.js` sul sub-router `api`, con una riga. Come si aggiunge un modulo è in `docs/ARCHITETTURA-NODE.md` §11 dello starter, e per toglierlo si fa lo stesso elenco al contrario.
+
 ## Livelli
 
 | File | Fa | Mai |
@@ -89,7 +91,7 @@ Il gestore globale è `middleware/error-handler.js`, registrato per ultimo:
 - Nuova migration con `npm run db:migrate -- --name <nome>`, mai una nuova init. Dopo, `npx prisma generate` e i test.
 - Adapter con factory solo per lo storage dei file: `files/storage/index.js` + `local.js`, con `s3.js` quando servirà.
 - Modifica dell'API: la spec OpenAPI in `src/docs/` cambia nella stessa modifica. Le doc cambiano solo per ciò che la spec non dice (flussi, decisioni).
-- Mail: tutto in `src/mailer/`, e chi manda una mail importa da `mailer/index.js`. Config SMTP e URL del frontend si risolvono a ogni invio, senza cache del transporter.
+- Mail: tutto in `src/mailer/`, e chi manda una mail importa da `mailer/index.js`. Config SMTP e URL del frontend si risolvono a ogni invio, senza cache del transporter. Senza SMTP l'app parte con un avviso nel log, i login con OTP rispondono 503 e lo staff con l'OTP disattivato entra lo stesso.
 - Audit: `auditLog` e `auditLogWithActor` da `audit/audit.logger.js`, su file JSON-lines.
 - PM2 in cluster in produzione, quindi niente stato in memoria del processo.
 - Nuovo progetto dallo starter: `node scripts/rename-project.mjs <slug>`, prima senza `--apply` per vedere cosa cambia. La procedura completa è in `docs/NEW-PROJECT.md` dello starter.
@@ -103,7 +105,7 @@ Il gestore globale è `middleware/error-handler.js`, registrato per ultimo:
 - Credenziali in `auth/core/crypto.js`: bcrypt per le password, sha256 per refresh token (`Session.refreshTokenHash`), OTP, challenge (`otpChallengeHash`) e token email, hash fittizio per il login con un utente che non esiste.
 - OTP: la challenge sta nei cookie HttpOnly `otpChallenge` e `customerOtpChallenge`, tentativi e scadenza in `auth/core/otp.js`, il limite per IP in `otpLimiter`.
 - Sessioni: rotazione in `rotateSession` (transazione con `deleteMany` e conteggio). Disattivazione e cambio password eliminano le sessioni nella stessa transazione, in `updateStaff` e `updateCustomer`.
-- Rate limit in `middleware/rate-limit.js`, con Redis condiviso quando gira più di un processo.
+- Rate limit in `middleware/rate-limit.js`, con Redis condiviso quando gira più di un processo. Senza `NODE_REDIS_URI` i contatori stanno in memoria. Con Redis giù i limiter lasciano passare (`passOnStoreError: true`), e `commandTimeout: 500` in `redis/client.js` fa fallire subito i comandi invece di farli aspettare.
 - Segreti runtime cifrati con AES-256-GCM in `config/runtime-crypto.js`, con la chiave derivata da `NODE_JWT_SECRET`. `NODE_JWT_SECRET` e CORS si validano all'avvio in produzione.
 
 ## Test

@@ -9,7 +9,7 @@ npx skills add DidoMarchet/dido-skills --skill <name> -g   # every project (user
 npx skills update <name>                                    # pull the latest version
 ```
 
-A skill loads only when the task matches it. The writing rules that apply everywhere, chat replies included, are in [claude/CLAUDE.md](claude/CLAUDE.md). On a new machine, add them once to your user-level `CLAUDE.md`:
+A skill loads only when the task matches it. The rules that apply everywhere are in [claude/CLAUDE.md](claude/CLAUDE.md): how to write, chat replies included, and how to work alongside superpowers. On a new machine, add them once to your user-level `CLAUDE.md`:
 
 ```bash
 mkdir -p ~/.claude && curl -fsSL https://raw.githubusercontent.com/DidoMarchet/dido-skills/main/claude/CLAUDE.md >> ~/.claude/CLAUDE.md

@@ -9,13 +9,14 @@ Linee guida per ogni backend di Dido. **Skill richiesta:** dido-code-style, con 
 
 Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file, sta in `riferimento/node-express-prisma.md`: leggilo quando lavori sullo starter o su un progetto nato da lì. Un progetto derivato può aver cambiato un dettaglio, e allora vale quello che trovi nel suo codice. Quando il `CLAUDE.md` del progetto è più specifico, vale quello.
 
-## Livelli
+## Livelli e moduli
 
 - Rotte, controller, service, accesso ai dati. Niente livello repository: il service usa direttamente il client del database.
 - La rotta dichiara endpoint e middleware, senza logica.
 - Il controller valida l'input in cima, chiama il service e costruisce la risposta. Non tocca il database.
 - Il service ha la logica di business e lancia gli errori di dominio. Non conosce la richiesta HTTP né la validazione, e non scrive la risposta.
 - L'app si costruisce senza aprire la porta e il listen sta in un altro file, così i test importano l'app senza avviare il server.
+- Un modulo di dominio è una cartella con rotte, schemi, controller e service, e si aggancia all'app con una riga, il mount delle sue rotte. Gli altri moduli lo usano dal suo service, e i servizi condivisi (mail, storage, audit) dal loro punto d'ingresso.
 
 ## Contratto dell'API
 
@@ -69,6 +70,7 @@ Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file
 
 - Con più processi i contatori stanno in uno store condiviso, altrimenti ogni processo conta per conto suo.
 - Un limite si lega all'IP o alla challenge, mai solo all'account. Un contatore per account lo fa scattare chiunque conosca l'email, ed è un lock-out.
+- Se lo store condiviso non risponde, il limite lascia passare la richiesta. Un guasto del rate limit non deve bloccare login e refresh, e i tentativi per codice OTP restano contati nel database.
 
 ## Dati
 
@@ -79,7 +81,7 @@ Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file
 
 ## Configurazione e segreti
 
-- Ogni variabile d'ambiente ha lo stesso nome in tutti i file env (locale, produzione, esempio). Quelle obbligatorie in produzione bloccano l'avvio se mancano.
+- Ogni variabile d'ambiente ha lo stesso nome in tutti i file env (locale, produzione, esempio). Se mancano in produzione, bloccano l'avvio solo quelle che servono a tutta l'app (database, segreto dei token, CORS). Senza quelle di un servizio opzionale (SMTP, Redis, un'API di terzi) l'app parte, il servizio resta spento e il log lo dice.
 - I segreti di configurazione salvati nel database, come la password SMTP, sono cifrati. L'API dice solo se ci sono (`hasPassword: true`), mai il valore.
 - La configurazione che cambia a runtime si risolve a ogni uso (database, poi env, poi default). Una cache la renderebbe vecchia negli altri processi.
 
@@ -93,6 +95,7 @@ Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file
 ## Test
 
 - Test end-to-end contro l'app costruita senza listen, con i path completi (`/v1/...`) e un database reale, meglio un container usa e getta che quello di sviluppo. Nessuna mail parte davvero.
+- Un flusso che usa un servizio esterno ha anche un test con il servizio che non risponde (es. la mail che non parte dà 503).
 - Ogni file di test usa un prefisso univoco nei dati che crea, e alla fine cancella solo quelli.
 - Se i vincoli unique farebbero scontrare file di test in parallelo, i file girano in sequenza.
 

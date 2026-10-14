@@ -48,6 +48,18 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 - Niente parametri, opzioni o flag che nessuno passa. Nessuna versione "generica" di una funzione specifica.
 - Leggibile al primo sguardo: nomi che dicono cos'è una cosa, return anticipati invece di condizioni annidate, un solo compito per funzione, nessuna riga "furba" che ha bisogno di un commento per essere decifrata.
 
+## Modulare, ogni parte si può togliere
+
+Le parti lavorano insieme, ma ognuna si può togliere o spegnere e il resto continua a funzionare, tranne ciò che ha davvero bisogno di lei. Un legame nascosto non si vede il giorno in cui lo scrivi, perché c'è tutto. Si vede quando qualcuno toglie una funzionalità o un servizio smette di rispondere.
+
+- Tutto ciò che appartiene a una funzionalità porta il suo nome: la sua cartella e, dove lo stack divide per tipo (componenti, query, lingue, schema del database, spec dell'API, file env), un file, una cartella o una sezione con quel nome. Così chi la toglie trova tutti i pezzi, e oltre a quelli cancella solo le poche righe che la agganciano, come il mount delle rotte o l'import nel layout.
+- Una parte usa le altre dal loro punto d'ingresso (l'index del modulo, il service, il composable, le prop), mai dai file interni o dal loro stato. Così un grep dell'import dice chi la usa, e l'interno cambia senza toccare nessuno.
+- Le parti opzionali dipendono dal nucleo, mai il contrario. Il nucleo non importa le statistiche, l'error tracking o un widget di terzi: sono loro che si agganciano con i meccanismi del framework (hook, eventi, middleware, plugin, slot). Non è il client delle API a chiamare l'error tracking, è l'error tracking che ascolta gli errori.
+- Una parte che manca, non è configurata o non risponde spegne solo ciò che ne ha bisogno. Un'operazione che non può farne a meno fallisce da sola, con un errore chiaro. Se la parte è di contorno (log, audit, statistiche, una notifica), l'operazione riesce lo stesso e il problema va nel log. Vale per ciò che può mancare davvero, come servizi esterni, configurazione e dati del CMS. Per il codice interno resta "Una protezione per problema".
+- All'avvio blocca solo la configurazione che serve a tutto, come database e segreti. Se manca quella di una parte opzionale, la parte resta spenta e il log lo dice.
+- Modulare non vuol dire più astrazione. Bastano i nomi e le cartelle per funzionalità, i punti d'ingresso, le dipendenze in una direzione e i meccanismi che il framework ha già. Niente sistemi di plugin, registry, bus di eventi o feature flag fatti in casa: vale "Semplice e leggibile".
+- Prima di dire fatto, chiediti cosa si rompe se togli la parte che hai scritto, e cerca chi la importa: devono uscire solo i suoi punti d'aggancio. Per una parte opzionale o un servizio esterno prova anche senza, dove si può (senza la sua variabile, con il servizio spento). Il resto deve partire e funzionare.
+
 ## Scalabile per costruzione, niente scalabilità prematura
 
 Il codice continua a funzionare quando dati e traffico crescono: è progettazione, non ottimizzazione.
@@ -148,6 +160,9 @@ Poi:
 |---|---|
 | "Tengo la vecchia funzione / il campo / la variabile per compatibilità" | Nessuno l'ha chiesto. Cancellala in questa modifica, con test e doc. |
 | "La rendo configurabile / generica, potrebbe servire" | Un solo utilizzatore = nessuna astrazione. Scrivi la versione specifica. |
+| "Importo direttamente il file interno, faccio prima" | Passa dal suo punto d'ingresso, o la prossima modifica a quella parte rompe la tua. |
+| "Chiamo le statistiche / l'error tracking da qui" | È la parte opzionale che si aggancia al nucleo, con un hook o un evento. |
+| "Senza questa variabile l'app non parte, così se ne accorgono" | Se serve a una parte sola, spegne quella parte e il log lo dice. |
 | "Aggiungo una cache / una coda, per sicurezza" | Niente misura, niente cache. |
 | "Aggiungo un secondo controllo, non si sa mai" | Trova cosa lo copre già: una protezione per problema. |
 | "Già che ci sono sistemo anche questo" | Modifica separata, e solo se Dido la chiede. |
@@ -173,8 +188,8 @@ Per la revisione di una modifica, o una richiesta come "trova bug":
 | Gravità | Cosa |
 |---|---|
 | Alta | perdita o corruzione di dati, falla di sicurezza, errore visibile agli utenti, sessioni o credenziali perse, lock-out |
-| Media | stato incoerente in scenari documentati, retry o idempotenza rotti, collo di bottiglia reale, test che fallisce, doc dell'API che ingannano un client |
-| Bassa | overengineering, codice morto e avanzi, semplificazione con un guadagno concreto, altre doc disallineate, copie nelle doc, flusso critico senza test, testi |
+| Media | stato incoerente in scenari documentati, retry o idempotenza rotti, collo di bottiglia reale, test che fallisce, doc dell'API che ingannano un client, una parte opzionale o un servizio esterno che, se manca o non risponde, fa cadere anche ciò che non ne ha bisogno |
+| Bassa | overengineering, codice morto e avanzi, semplificazione con un guadagno concreto, altre doc disallineate, copie nelle doc, flusso critico senza test, testi, altri problemi di modularità (file interni importati, il nucleo che importa una parte opzionale, pezzi di una funzionalità sparsi) |
 
 ## Analisi completa ("analizza il repo")
 

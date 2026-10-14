@@ -38,6 +38,7 @@ Un'analisi dura decine di minuti e costa centinaia di migliaia di token anche pe
 - **Effetti collaterali**: le regole di "Niente effetti collaterali nascosti" della Parte 1, più lo stato a livello di modulo condiviso tra richieste o worker.
 - **Sicurezza**: la checklist "Sicurezza" della Parte 1, applicata a ogni punto d'ingresso.
 - **Overengineering**: astrazioni con una sola implementazione o un solo utilizzatore, opzioni e parametri che nessuno passa, livelli che si limitano a inoltrare chiamate, configurazione che nessuno imposta.
+- **Modularità**: le regole di "Modulare, ogni parte si può togliere" della Parte 1. Una parte opzionale o un servizio esterno che, se manca o non risponde, fa cadere anche il resto (l'avvio, una pagina, una richiesta che non ne ha bisogno); il nucleo che importa una parte opzionale; file interni di un'altra parte importati al posto del suo punto d'ingresso; pezzi di una funzionalità sparsi in file che non c'entrano. Si dimostra con lo scenario (cosa si toglie o si spegne, cosa si rompe) o con il grep degli import.
 - **Codice morto e avanzi**: file / export / funzioni / dipendenze / variabili d'ambiente / chiavi di configurazione inutilizzati, codice commentato, shim di compatibilità, resti di funzionalità sostituite in codice, test o doc. Va dimostrato: grep di ogni candidato in cerca di utilizzatori reali.
 - **Semplicità e leggibilità**: codice che si può scrivere in modo sostanzialmente più semplice con lo stesso comportamento (mostra la versione più semplice), logica che duplica un helper esistente, nomi tanto fuorvianti da portare a usi sbagliati.
 - **Scalabilità e prestazioni**: le regole di "Scalabile per costruzione" della Parte 1. Solo colli di bottiglia reali, non "aggiungiamo una cache / una coda per sicurezza".
@@ -51,7 +52,7 @@ Un'analisi dura decine di minuti e costa centinaia di migliaia di token anche pe
 - è documentato come voluto, fuori scope o limite noto (`CLAUDE.md`, doc, file dei limiti noti, un commento sul perché, una decisione registrata dopo un'analisi precedente);
 - il rischio è già coperto da un altro meccanismo ("una protezione per problema");
 - è estetica del codice (nomi, ordine, formattazione), una micro-semplificazione senza un guadagno concreto, o "non è identico al file Y";
-- è una race teorica o un caso limite senza scenario riproducibile, o future-proofing;
+- è una race teorica o un caso limite senza scenario riproducibile, o future-proofing (togliere o spegnere una parte non lo è, perché la Parte 1 lo chiede);
 - la prova manca o non si riproduce.
 
 Nel dubbio: smentito. Un problema che regge prende la gravità definita in `SKILL.md`, qualunque cosa abbia detto chi l'ha trovato. Alta e Media sopravvivono con 2 conferme su 3.

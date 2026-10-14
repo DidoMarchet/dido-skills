@@ -44,6 +44,7 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 - Un componente è una cartella `components/<area>/<nome>/` con `index.vue`, `style.scss` e i suoi asset, raggruppata per dominio (`article/`, `navigation/`).
 - In `widget/` stanno solo i componenti agnostici e riusabili: ricevono tutto da prop ed espongono slot. Un pattern ripetuto, come un carosello, esiste una volta sola come widget. Un componente di una sezione specifica resta nella sua area.
 - Ordine nel `.vue`: `<template>`, `<script setup>`, `<style lang="scss" src="./style.scss"></style>`. Gli stili non sono scoped.
+- Un componente usa solo le classi del suo blocco e quelle del design system, e parla con gli altri con prop, eventi, slot o uno store, mai cercando il loro DOM. Gli stili arrivano insieme al loro componente: le classi di un altro spariscono quando lo togli, o in una pagina dove non c'è.
 - Asset permanenti in `app/assets/img/` con nomi kebab-case descrittivi per la SEO (`<azienda>-logo.svg`), i segnaposto in una cartella a parte. In `<img>` il path va in `src`, e l'`import` serve solo quando l'URL finisce in JS. Le icone sono SVG usate come immagini, ricolorate con un secondo file o con `mask`.
 
 ## SCSS
@@ -76,6 +77,7 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 - SEO e hreflang con `useSeo()` nella pagina. Con gli slug localizzati servono `generateSeoLocaleParams` e `setI18nParams`, altrimenti gli alternate dichiarano URL che non esistono.
 - `useLenis()` si inizializza una volta sola per l'app, nel layout o in `app.vue`.
 - Una terza parte che serve a tutto il sito (analytics, error tracking, consenso) è un plugin. Una che serve a una pagina o a un componente (un form, un widget di prenotazione, un player) è un composable per l'effetto più un componente per il markup.
+- La libreria di una terza parte la importa solo il suo plugin o il suo composable, che senza la sua config non fa niente. Così si toglie cancellando quei file, la dipendenza e il punto in cui si usa. Se deve ricevere qualcosa dal sito, come gli errori di GraphQL per l'error tracking, è lei che si aggancia a un hook (`apollo:error`, `vue:error`).
 - Gli embed si vestono con il design system: niente CSS del servizio, le classi dei tuoi bottoni. Se il servizio rende in un `<iframe>` non si può vestire, quindi va verificato prima di prometterlo.
 - Prima di dire cosa fa una terza parte, misura quali domini contatta e quali cookie scrive.
 - Le sorgenti dinamiche lato server, come la sitemap, non usano l'SDK client, paginano dove il servizio lo chiede e non rompono il build quando falliscono. Un modello con pagina di dettaglio entra nella sitemap interrogando ogni lingua.
@@ -105,4 +107,5 @@ Oltre a quanto chiede dido-code-style:
 - la pagina toccata risponde 200 con zero errori in console e nel log, compresi i mismatch di idratazione;
 - test verdi sulle util toccate;
 - screenshot alla colonna più stretta e alla più larga, dove si può;
-- se hai toccato una terza parte, domini e cookie misurati.
+- se hai toccato una terza parte, domini e cookie misurati;
+- con una terza parte nuova, la pagina risponde 200 anche senza la sua variabile d'ambiente.

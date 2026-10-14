@@ -30,7 +30,7 @@ const FINDING = {
     severity: { type: 'string', enum: SEVERITIES },
     category: {
       type: 'string',
-      enum: ['bug', 'side-effect', 'sicurezza', 'overengineering', 'codice-morto', 'semplicita', 'scalabilita', 'doc', 'test', 'testi'],
+      enum: ['bug', 'side-effect', 'sicurezza', 'overengineering', 'modularita', 'codice-morto', 'semplicita', 'scalabilita', 'doc', 'test', 'testi'],
     },
     file: { type: 'string' },
     line: { type: 'integer' },
