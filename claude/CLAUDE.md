@@ -10,7 +10,7 @@ Punteggiatura normale: punto, virgola, due punti, parentesi. Trattino lungo e pu
 
 Le skill di Dido dicono com'è fatto il codice, superpowers come si procede. Dove si scontrano vale questo.
 
-- Niente subagenti per scrivere, rivedere o provare codice e skill, se non li chiedo. Se servono, prima dimmi quanti sono e quanti token costano. Le review le fai tu, sul diff.
+- Un subagente si usa quando serve davvero: lo valuti tu caso per caso, in base al progetto. Di solito serve per cercare in tanto codice quando conta solo la conclusione, o per lavori indipendenti in parallelo. Per scrivere codice e per le review, che fai tu sul diff, di solito no. Prima di lanciarne più di uno, o di provare le skill con agenti, dimmi quanti sono e quanti token costano.
 - Spec e piani restano in chat. Nel repo vanno solo se li chiedo.
 - I test seguono dido-code-style: un test che senza la modifica fallisce, nessun framework nuovo senza chiedere. Il codice già scritto non si butta per rifarlo in TDD, e non si aggiunge dependency injection solo per testarlo.
 - Un lavoro lungo o su più repo comincia con una stima di quanto è grande.
