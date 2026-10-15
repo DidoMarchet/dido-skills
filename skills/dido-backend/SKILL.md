@@ -61,7 +61,9 @@ Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file
 
 - Password con bcrypt. Refresh token, codici OTP, challenge e token monouso (verifica email, reset) si salvano solo come sha256: il valore in chiaro sta solo nel cookie o nel messaggio inviato.
 - Il login con un utente che non esiste esegue comunque bcrypt su un hash fittizio, così i tempi non rivelano quali account esistono.
-- Il refresh token sta in un cookie HttpOnly e ruota a ogni uso dentro una transazione. Con due refresh concorrenti ne vince uno solo e l'altro riceve 401. Mettere in fila i refresh tra le tab è compito del client.
+- Il refresh token sta in un cookie HttpOnly e ruota a ogni uso dentro una transazione. Ogni login apre una famiglia di sessioni: la rotazione segna la sessione vecchia come revocata, invece di cancellarla, e crea la nuova nella stessa famiglia. Con due refresh concorrenti ne vince uno solo e l'altro riceve 401.
+- Se torna un refresh token già ruotato, si eliminano tutte le sessioni della sua famiglia, compresa quella nata dalla rotazione, la risposta è 401 e l'audit lo registra: è un furto o un refresh ripetuto, e i due casi non si distinguono. Gli altri dispositivi restano collegati. Per questo il client fa un refresh alla volta, anche tra le schede: il server non ha finestre di tolleranza.
+- Ogni famiglia ha una durata massima dal login, che la rotazione non allunga: poi serve un nuovo login.
 - L'OTP vale solo insieme alla challenge emessa dal login, in un cookie HttpOnly con lo sha256 nel database. Senza la challenge il tentativo non conta, così chi conosce solo l'email non può bruciare i tentativi di un altro e bloccargli il login.
 - Ogni codice OTP ha pochi tentativi e una scadenza breve, e si cancella dopo l'uso. Finiti i tentativi serve un nuovo login, non un blocco temporaneo dell'account.
 - Disattivare un account o cambiarne la password elimina le sue sessioni nella stessa transazione. Su un account disattivato cadono subito anche gli access token, perché il middleware rilegge il principal. Dopo un cambio di password, invece, restano validi fino alla scadenza.

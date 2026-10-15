@@ -23,7 +23,7 @@ Un account disattivato riceve 401 anche sul refresh e torna al login. Se il mess
 
 ## Sessione
 
-- Il backend ruota il refresh token a ogni uso, e di due refresh concorrenti ne vince uno solo: l'altro riceve 401 e slogga l'utente. Per questo il refresh è una funzione sola, usata dal client API e dal ripristino al caricamento della pagina. Chi arriva mentre un refresh è in corso aspetta la stessa promise:
+- Il backend ruota il refresh token a ogni uso, e di due refresh concorrenti ne vince uno solo: l'altro riceve 401 e, se arriva dopo la rotazione, chiude la sessione del dispositivo per tutte le tab. Per questo il refresh è una funzione sola, usata dal client API e dal ripristino al caricamento della pagina. Chi arriva mentre un refresh è in corso aspetta la stessa promise:
 
   ```js
   // Dentro lo store di auth: una promise per istanza dello store, quindi in SSR una per richiesta

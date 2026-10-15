@@ -94,7 +94,7 @@ Il gestore globale è `middleware/error-handler.js`, registrato per ultimo:
 - Mail: tutto in `src/mailer/`, e chi manda una mail importa da `mailer/index.js`. Config SMTP e URL del frontend si risolvono a ogni invio, senza cache del transporter. Senza SMTP l'app parte con un avviso nel log, i login con OTP rispondono 503 e lo staff con l'OTP disattivato entra lo stesso.
 - Audit: `auditLog` e `auditLogWithActor` da `audit/audit.logger.js`, su file JSON-lines.
 - PM2 in cluster in produzione, quindi niente stato in memoria del processo.
-- Nuovo progetto dallo starter: `node scripts/rename-project.mjs <slug>`, prima senza `--apply` per vedere cosa cambia. La procedura completa è in `docs/NEW-PROJECT.md` dello starter.
+- Nuovo progetto dallo starter: `node scripts/rename-project.mjs <slug>`, prima senza `--apply` per vedere cosa cambia. `--apply` vuole prima `npm ci` in `app/node`, perché riformatta con prettier i file che cambia. La procedura completa è in `docs/NEW-PROJECT.md` dello starter.
 
 ## Dove sta ogni protezione
 
@@ -104,12 +104,13 @@ Il gestore globale è `middleware/error-handler.js`, registrato per ultimo:
 - Campi in uscita: `select` espliciti, come `STAFF_SELECT` e `CUSTOMER_SELECT`.
 - Credenziali in `auth/core/crypto.js`: bcrypt per le password, sha256 per refresh token (`Session.refreshTokenHash`), OTP, challenge (`otpChallengeHash`) e token email, hash fittizio per il login con un utente che non esiste.
 - OTP: la challenge sta nei cookie HttpOnly `otpChallenge` e `customerOtpChallenge`, tentativi e scadenza in `auth/core/otp.js`, il limite per IP in `otpLimiter`.
-- Sessioni: rotazione in `rotateSession` (transazione con `deleteMany` e conteggio). Disattivazione e cambio password eliminano le sessioni nella stessa transazione, in `updateStaff` e `updateCustomer`.
+- Sessioni: famiglie in `auth/core/session.js` (AD-19 in `docs/DECISIONI-ARCHITETTURA.md`). `rotateSession` revoca la vecchia con un `updateMany` condizionale su `revokedAt` e crea la nuova nella stessa famiglia. Un token già revocato chiude la famiglia (`revokeSessionFamily`, audit `*_REFRESH_REUSE_DETECTED`), e la durata massima è `NODE_SESSION_MAX_DAYS`. Disattivazione e cambio password eliminano le sessioni nella stessa transazione, in `updateStaff` e `updateCustomer`.
 - Rate limit in `middleware/rate-limit.js`, con Redis condiviso quando gira più di un processo. Senza `NODE_REDIS_URI` i contatori stanno in memoria. Con Redis giù i limiter lasciano passare (`passOnStoreError: true`), e `commandTimeout: 500` in `redis/client.js` fa fallire subito i comandi invece di farli aspettare.
 - Segreti runtime cifrati con AES-256-GCM in `config/runtime-crypto.js`, con la chiave derivata da `NODE_JWT_SECRET`. `NODE_JWT_SECRET` e CORS si validano all'avvio in produzione.
 
 ## Test
 
 - vitest e supertest in `app/node/tests/`, fuori da `src/`, contro `buildApp()`. Postgres reale, meglio un container usa e getta su un'altra porta, e SMTP irraggiungibile. La procedura è nel `CLAUDE.md` dello starter.
+- La CI (`.github/workflows/ci.yml`) ripete schema, lint, formato e test su un Postgres usa e getta a ogni push su `main` e a ogni pull request.
 - Ogni file di test usa il prefisso `test-<uuid>-` e in `afterAll` cancella solo ciò che corrisponde.
 - `fileParallelism: false`, perché i vincoli unique andrebbero in conflitto.
