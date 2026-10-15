@@ -43,6 +43,7 @@ Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file
 - In produzione il 500 e gli errori del database hanno un messaggio generico. Dettaglio e stack vanno nei log del server, e il 500 lascia un evento nell'audit.
 - Il service lancia solo errori di dominio. Validazione ed errori del database salgono da soli fino al gestore, quindi niente try/catch nel controller per tradurli.
 - Gli errori si lanciano con il meccanismo del progetto. Nello starter è `new HttpError(404, "Utente non trovato")`. Un progetto derivato può avere un catalogo degli errori, con codici stabili e messaggi in un posto solo: se c'è, si usa il codice del catalogo. Prima di scriverne uno, guarda come lo fa il codice vicino.
+- Le risposte d'errore dei parser del body hanno gli header CORS come le altre: il CORS si monta prima dei parser. Senza quegli header il browser mostra all'app un JSON malformato (400) o un body troppo grande (413) come un errore di rete, e l'app non vede lo status.
 
 ## Validazione
 
@@ -61,6 +62,7 @@ Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file
 
 - Password con bcrypt. Refresh token, codici OTP, challenge e token monouso (verifica email, reset) si salvano solo come sha256: il valore in chiaro sta solo nel cookie o nel messaggio inviato.
 - Il login con un utente che non esiste esegue comunque bcrypt su un hash fittizio, così i tempi non rivelano quali account esistono.
+- La password di un account nuovo la sceglie chi apre il link arrivato nella casella (verifica email o invito), mai chi lo registra. Altrimenti un estraneo registra l'email di un altro con una password sua e, quando il proprietario verifica l'indirizzo, entra in un account verificato. Fino al link l'account ha una password casuale; la verifica imposta quella scelta e, nella stessa transazione, chiude sessioni e OTP aperti prima.
 - Il refresh token sta in un cookie HttpOnly e ruota a ogni uso dentro una transazione. Ogni login apre una famiglia di sessioni: la rotazione segna la sessione vecchia come revocata, invece di cancellarla, e crea la nuova nella stessa famiglia. Con due refresh concorrenti ne vince uno solo e l'altro riceve 401.
 - Se torna un refresh token già ruotato, si eliminano tutte le sessioni della sua famiglia, compresa quella nata dalla rotazione, la risposta è 401 e l'audit lo registra: è un furto o un refresh ripetuto, e i due casi non si distinguono. Gli altri dispositivi restano collegati. Per questo il client fa un refresh alla volta, anche tra le schede: il server non ha finestre di tolleranza.
 - Ogni famiglia ha una durata massima dal login, che la rotazione non allunga: poi serve un nuovo login.
