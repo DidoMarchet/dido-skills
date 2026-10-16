@@ -691,7 +691,7 @@ annullano tutto il resto del lavoro.
 `Come:` prova `/.git/`, `/.env`, `/backup`, `/phpinfo.php`, listing di directory. · `OK se:` tutto 403 o 404.
 
 **`SEC-11` Segreti nel codice** — `[M]` `BLOCCANTE` `#tutti`
-`Come:` cerca chiavi API, password, token nel repository e nel JS servito al browser. · `OK se:` nessun segreto esposto; le chiavi lato client sono solo quelle pubbliche e con restrizioni di dominio.
+`Come:` cerca chiavi API, password, token nel codice sorgente e nel JS servito al browser. I file env nel repo privato, con i loro valori, sono una scelta di Dido: non si segnalano. · `OK se:` nessun segreto esposto; le chiavi lato client sono solo quelle pubbliche e con restrizioni di dominio.
 
 **`SEC-12` Validazione degli input** — `[M]` `ALTA` `#form`
 `Come:` prova payload tipici (XSS, SQL injection) sui campi pubblici, con autorizzazione del cliente. · `OK se:` input sanitizzati, output correttamente codificato.

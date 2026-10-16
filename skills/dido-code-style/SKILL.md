@@ -80,14 +80,21 @@ Prematura è l'infrastruttura "per quando crescerà il traffico": cache, code, w
 
 ## Niente codice morto
 
-- Niente codice commentato, funzioni / export / import / variabili / dipendenze / variabili d'ambiente / chiavi di configurazione / file inutilizzati. La storia la tiene git.
+- Niente codice commentato, funzioni / export / import / variabili / dipendenze / chiavi di configurazione / file inutilizzati. La storia la tiene git. I file env e le loro variabili non rientrano: vedi "File env".
 - Niente percorsi di fallback per situazioni che non esistono più. Niente TODO per lavori che nessuno ha in programma.
 
 ## Quando cambi qualcosa, togli il vecchio
 
-- Sostituisci X con Y → cancella X **nella stessa modifica**: codice, test, variabili d'ambiente (tutti i file env + compose), doc, spec dell'API, configurazione.
+- Sostituisci X con Y → cancella X **nella stessa modifica**: codice, test, doc, spec dell'API, configurazione. I file env no: vedi "File env".
 - Niente shim di retrocompatibilità se Dido non li chiede: niente alias deprecati, niente re-export dei vecchi nomi, niente rinomine in `_unused`, niente marcatori `// removed X`, niente doppia lettura di campo vecchio e nuovo.
 - Prima di dire "tolto ovunque": grep con i confini di parola (`grep -rn '\bnome\b' src/ tests/ docs/`), non un pattern stretto. Test e query/filtri sono dove si nascondono gli avanzi.
+
+## File env
+
+- Ogni repo ha tre file env alla root, tutti nel repo: `.env.example`, `.env.local` (sviluppo) e `.env.production`. Niente altri file env fuori da git.
+- Contengono i valori veri, segreti compresi, perché i repo sono privati. `CHANGE_ME` solo dove il valore va generato o preso altrove.
+- Non si tolgono e non si accorpano, anche quando due sono uguali. Nessuna variabile e nessun valore si toglie, si svuota o diventa un segnaposto se Dido non lo chiede, anche quando il codice non lo legge più.
+- Una variabile nuova va in tutti e tre, con lo stesso nome.
 
 ## Una protezione per problema
 
@@ -136,7 +143,7 @@ Ogni modifica passa un controllo di sicurezza prima di essere chiamata fatta, pr
 - **Autenticazione e autorizzazione.** Chi può chiamarlo? Il controllo sta sul server, mai solo nascosto nella UI. Un utente può arrivare ai dati di un altro cambiando un id? Un account disattivato o declassato perde l'accesso subito?
 - **Esposizione dei dati.** Le risposte restituiscono solo i campi che servono: mai hash di password, token, OTP, segreti, stack trace o errori del driver in produzione. I log non contengono mai password, token od OTP.
 - **Injection.** Niente SQL, comandi shell o HTML costruiti concatenando stringhe: query parametrizzate / ORM, template con escape, niente `v-html` / `innerHTML` su contenuti controllati dall'utente.
-- **Segreti.** In env o cifrati a riposo; mai nel codice, nel repo, nei log o nel bundle client (lì vanno solo valori pubblici per natura, es. un token CMS in sola lettura).
+- **Segreti.** Nei file env del repo (vedi "File env") o cifrati a riposo; mai nel codice, nei log o nel bundle client (lì vanno solo valori pubblici per natura, es. un token CMS in sola lettura).
 - **Abusi.** Rate limit su tutto ciò che si può forzare o usare per spam (login, OTP, reset password, registrazione, upload, form di contatto). Ogni protezione (contatore, blocco, limite) si guarda anche da chi la può far scattare: se un estraneo la fa scattare sull'account di un altro, è un lock-out. I token sono casuali, a scadenza e monouso. Le risposte di login e reset non rivelano se un account esiste.
 - **File.** Controlla tipo e dimensione, salva con nomi generati, nessun percorso controllato dall'utente, contenuti privati scaricabili solo dietro autenticazione.
 - **Trasporto e browser.** Allow-list CORS esplicita, cookie `HttpOnly` + `Secure` + il `SameSite` giusto, HTTPS in produzione.
@@ -159,6 +166,7 @@ Poi:
 | Pensiero | Realtà |
 |---|---|
 | "Tengo la vecchia funzione / il campo / la variabile per compatibilità" | Nessuno l'ha chiesto. Cancellala in questa modifica, con test e doc. |
+| "Questo file env è un doppione / questa variabile d'ambiente non la legge nessuno, la tolgo" | I file env restano come li ha fatti Dido, con tutti i valori. Si toccano solo se lo chiede. |
 | "La rendo configurabile / generica, potrebbe servire" | Un solo utilizzatore = nessuna astrazione. Scrivi la versione specifica. |
 | "Importo direttamente il file interno, faccio prima" | Passa dal suo punto d'ingresso, o la prossima modifica a quella parte rompe la tua. |
 | "Chiamo le statistiche / l'error tracking da qui" | È la parte opzionale che si aggancia al nucleo, con un hook o un evento. |
