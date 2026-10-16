@@ -44,7 +44,7 @@ Un'analisi dura decine di minuti e costa centinaia di migliaia di token anche pe
 - **Scalabilità e prestazioni**: le regole di "Scalabile per costruzione" della Parte 1. Solo colli di bottiglia reali, non "aggiungiamo una cache / una coda per sicurezza".
 - **Doc disallineate e copie**: doc, spec dell'API e `CLAUDE.md` che non corrispondono più al codice, e le copie come le definisce "Un fatto, un posto" della Parte 1, anche se oggi sono giuste. Una copia si dimostra con il file che definisce già la stessa cosa; il fix è toglierla e rimandare a quel file. Una voce per file, con le righe.
 - **Test**: test che falliscono, flussi critici (auth, permessi, scritture di dati) senza test, test che non verificano niente.
-- **Testi**: testi d'interfaccia, email e messaggi d'errore che non seguono "Testi" della Parte 1 (descrizioni e sottotitoli fuori dai tre casi, errori che non dicono cosa è successo, la stessa cosa chiamata in modi diversi, trattini e punti a metà altezza usati come separatori) e commenti che ripetono il codice. Una voce per file, con le righe.
+- **Testi**: testi d'interfaccia, email e messaggi d'errore che non seguono "Testi" della Parte 1 (descrizioni e sottotitoli fuori dai tre casi, errori che non dicono cosa è successo, la stessa cosa chiamata in modi diversi, trattini e punti a metà altezza usati come separatori, virgolette caporali) e commenti che ripetono il codice. Una voce per file, con le righe.
 
 ## Verifica: un problema è smentito quando
 

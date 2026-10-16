@@ -126,7 +126,7 @@ In un'interfaccia una pagina, una sezione o una card ha titolo, contenuto e azio
 
 I bottoni dicono l'azione ("Salva", "Pubblica"), le label il nome della cosa.
 
-Punteggiatura normale: punto, virgola, due punti, parentesi. Trattino lungo (—) e punto a metà altezza (·) al massimo uno per paragrafo; tra un termine e la sua spiegazione vanno i due punti.
+Punteggiatura normale: punto, virgola, due punti, parentesi e virgolette dritte ("…"), mai le caporali (« »). In un'interfaccia il nome di un bottone, di uno stato o di un campo citato in una frase va in grassetto; dove il testo non ha formattazione (toast, hint, messaggi d'errore) va tra virgolette dritte. Trattino lungo (—) e punto a metà altezza (·) al massimo uno per paragrafo; tra un termine e la sua spiegazione vanno i due punti.
 
 ## Test
 
