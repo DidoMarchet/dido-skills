@@ -98,9 +98,9 @@ Prematura è l'infrastruttura "per quando crescerà il traffico": cache, code, w
 
 ## Una protezione per problema
 
-- Se un bug o un rischio è già coperto da un meccanismo, non aggiungerne un secondo "per sicurezza".
-- Niente gestione degli errori per casi impossibili: niente null check dopo una guardia che lancia già, niente try/catch attorno a codice che non può lanciare, niente ri-validazione di dati già validati a monte.
-- Valida al confine (input utente, API esterne, variabili d'ambiente all'avvio), poi fidati del codice interno.
+- Se un bug o un rischio è già coperto da un meccanismo, non aggiungerne un secondo "per sicurezza". Più copie dei dati contro guasti diversi (il dispositivo perso, il server ripristinato da un backup, un errore dell'utente) non sono doppioni: ognuna copre un problema suo.
+- Niente gestione degli errori per casi impossibili: niente null check dopo una guardia che lancia già, niente try/catch attorno a codice che non può lanciare, niente ri-validazione di dati già validati a monte. Impossibile vuol dire escluso dal codice, per esempio da una guardia poco prima, non "mai visto".
+- Valida al confine, poi fidati del codice interno. Il confine è tutto ciò che il codice non controlla: input utente, API esterne, variabili d'ambiente all'avvio e, nel browser, l'archivio locale (quota piena, dati cancellati dal browser, connessione chiusa), la rete, le altre schede, la pagina chiusa o sospesa dal sistema. Lì un errore non è mai impossibile.
 
 ## Modifiche minime
 
