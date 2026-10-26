@@ -19,7 +19,7 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 
 - **Componi con il design system.** Margini e padding con le classi utility, i gap con i token, la larghezza con le righe (`.row-*`). Riusa tipografia, bottoni e card che ci sono già, niente spaziature su misura.
 - **Token pragmatici.** I token sono variabili SCSS esposte come classi numerate, non un sistema formale di design token. Un valore usato una volta sola si scrive dov'è, sono token solo i valori ricorrenti.
-- **Valori disciplinati.** Numeri pieni o multipli di 5, anche nelle misure di layout, e font a multipli di 2 o 4. I valori vengono dal Figma, non si inventano.
+- **Valori disciplinati.** Numeri pieni o multipli di 5, anche nelle misure di layout, e font a multipli di 2 o 4. Se il progetto ha un Figma, i valori vengono da lì e non si inventano.
 - **Degrada, non cadere.** Un dato o una config che manca produce uno stato gestito (fallback, messaggio, sezione assente), mai una pagina in errore. In SSR una proprietà letta su un oggetto che può mancare fa fallire tutta la pagina, quindi il valore di sicurezza va dove leggi (`config?.chiave ?? default`).
 
 ## JS e Vue
