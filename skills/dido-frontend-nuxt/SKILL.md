@@ -19,7 +19,8 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 
 - **Componi con il design system.** Margini e padding con le classi utility, i gap con i token, la larghezza con le righe (`.row-*`). Riusa tipografia, bottoni e card che ci sono già, niente spaziature su misura.
 - **Token pragmatici.** I token sono variabili SCSS esposte come classi numerate, non un sistema formale di design token. Un valore usato una volta sola si scrive dov'è, sono token solo i valori ricorrenti.
-- **Valori disciplinati.** Numeri pieni o multipli di 5, anche nelle misure di layout, e font a multipli di 2 o 4. Se il progetto ha un Figma, i valori vengono da lì e non si inventano.
+- **Valori disciplinati.** Numeri pieni o multipli di 5, anche nelle misure di layout, e font a multipli di 2 o 4. Se il progetto ha un Figma, i valori vengono da lì e non si inventano, ma si arrotondano: un valore che non è un token della scala né un multiplo di 5 diventa il più vicino dei due (67 → 65, 17 → 16).
+- **Testi staccati dalle righe.** Un testo, un titolo o una CTA non stanno mai appoggiati a una riga visibile (righe della griglia di sfondo, divisori verticali): hanno un padding minimo dalla riga anche se il Figma li allinea lì, con un token del progetto applicato da una classe. Le immagini possono toccarla.
 - **Degrada, non cadere.** Un dato o una config che manca produce uno stato gestito (fallback, messaggio, sezione assente), mai una pagina in errore. In SSR una proprietà letta su un oggetto che può mancare fa fallire tutta la pagina, quindi il valore di sicurezza va dove leggi (`config?.chiave ?? default`).
 
 ## JS e Vue
@@ -52,6 +53,7 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 - Ogni `style.scss` e ogni partial apre con il toolbox, che dà token e mixin senza emettere CSS: `@use "~/assets/styles/scss/core" as *;`. Arriva anche da `additionalData`, ma scritto in cima il file si legge da solo.
 - Un token che `core` non `@forward`-a non esiste nei file che lo usano: un file nuovo in `vars/` o `mixins/` va aggiunto al suo `_index.scss`.
 - Fluido con `slamp(min, max)`. La finestra di viewport si configura una volta per progetto, e si passa esplicita solo per una finestra diversa.
+- Font e spazi grandi sempre fluidi: i titoli della scala, i font da 40px in su scritti nei componenti, e margin, padding, gap, `top` e `bottom` da 80px in su. Il massimo viene dal Figma desktop, il minimo dallo stesso elemento nel Figma mobile. Dove il frame mobile manca, il minimo si stima (circa la metà, poi arrotondato). Un valore che cambiava solo con `react("large")` diventa uno `slamp` tra i due. Restano fissi il testo corrente e i token di spazio piccoli. La spaziatura negativa dei titoli va in `em`, così scende col font.
 - Media query con `@include react("chiave")` (`large`, `<medium`), mai `>=` scritti a mano. L'hover sta sempre dentro `react("pointer-and-hover")`, così sul touch non resta attaccato.
 - Classi, non mixin: i token diventano classi numerate generate da un `@each` sulla scala, nel layer giusto (`layout/`, `typo/`). I mixin servono solo per gli helper responsive e per i comportamenti interattivi, come la sottolineatura animata dei link.
 - Margini e padding con le classi, i `gap` con i token nello stile del componente, la larghezza con `.row-*`. Uno sfondo a tutta pagina è una sezione con una row dentro.
@@ -86,6 +88,9 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 ## Motion
 
 - Una sola easing di sito e durate a token. Lineare solo per il motion legato allo scroll. Il pinning si fa con `position: sticky`, non in JS.
+- Easing e durate stanno solo nei token SCSS, e il JS li legge con un modulo SCSS: mai numeri ricopiati nel JS.
+- GSAP per il motion che segue lo scroll (parallasse, testo che si accende, header che si nasconde), con ScrollTrigger agganciato a Lenis così si aggiorna nello stesso frame. GSAP anche per lo scroll comandato e per l'inerzia.
+- Le transizioni singole su `transform` e `opacity` (comparsa allo scroll, entrata di una modale, tendine, hover) restano in CSS o `element.animate`. Girano fuori dal thread principale e restano fluide anche mentre la pagina carica, GSAP no.
 - `prefers-reduced-motion` sempre rispettato: niente scale o translate animati.
 - Mai lo zoom delle immagini all'hover: al massimo un overlay o il testo.
 
