@@ -54,6 +54,7 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 - Un token che `core` non `@forward`-a non esiste nei file che lo usano: un file nuovo in `vars/` o `mixins/` va aggiunto al suo `_index.scss`.
 - Fluido con `slamp(min, max)`. La finestra di viewport si configura una volta per progetto, e si passa esplicita solo per una finestra diversa.
 - Font e spazi grandi sempre fluidi: i titoli della scala, i font da 40px in su scritti nei componenti, e margin, padding, gap, `top` e `bottom` da 80px in su. Il massimo viene dal Figma desktop, il minimo dallo stesso elemento nel Figma mobile. Dove il frame mobile manca, il minimo si stima (circa la metà, poi arrotondato). Un valore che cambiava solo con `react("large")` diventa uno `slamp` tra i due. Restano fissi il testo corrente e i token di spazio piccoli. La spaziatura negativa dei titoli va in `em`, così scende col font.
+- Margini e padding laterali mai fissi, salvo indicazioni di Dido: il margine della pagina va con `slamp` dal mobile al desktop, con un token del progetto (es. `$side-margin: slamp($grid-gutter, $grid-margin)`), e una colonna larga fissa nel Figma desktop si stringe sotto il desktop. Con i valori di 1920 fissi, a 1024 margini e colonne laterali tolgono il posto al contenuto.
 - Media query con `@include react("chiave")` (`large`, `<medium`), mai `>=` scritti a mano. L'hover sta sempre dentro `react("pointer-and-hover")`, così sul touch non resta attaccato.
 - Classi, non mixin: i token diventano classi numerate generate da un `@each` sulla scala, nel layer giusto (`layout/`, `typo/`). I mixin servono solo per gli helper responsive e per i comportamenti interattivi, come la sottolineatura animata dei link.
 - Margini e padding con le classi, i `gap` con i token nello stile del componente, la larghezza con `.row-*`. Uno sfondo a tutta pagina è una sezione con una row dentro.
@@ -111,6 +112,6 @@ Oltre a quanto chiede dido-code-style:
 - lint pulito, JS e CSS, sui file toccati;
 - la pagina toccata risponde 200 con zero errori in console e nel log, compresi i mismatch di idratazione;
 - test verdi sulle util toccate;
-- screenshot alla colonna più stretta e alla più larga, dove si può;
+- l'interfaccia toccata guardata a 375, 768, 1024, 1440 e 1920 con le skill di design del progetto (impeccable, design-taste-frontend, mobile-native, dove ci sono): il contenuto si legge, è bilanciato e si usa bene. Non basta che non si rompa;
 - se hai toccato una terza parte, domini e cookie misurati;
 - con una terza parte nuova, la pagina risponde 200 anche senza la sua variabile d'ambiente.
