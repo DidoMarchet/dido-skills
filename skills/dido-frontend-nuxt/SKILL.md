@@ -56,6 +56,7 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 - Font e spazi grandi sempre fluidi: i titoli della scala, i font da 40px in su scritti nei componenti, e margin, padding, gap, `top` e `bottom` da 80px in su. Il massimo viene dal Figma desktop, il minimo dallo stesso elemento nel Figma mobile. Dove il frame mobile manca, il minimo si stima (circa la metà, poi arrotondato). Un valore che cambiava solo con `react("large")` diventa uno `slamp` tra i due. Restano fissi il testo corrente e i token di spazio piccoli. La spaziatura negativa dei titoli va in `em`, così scende col font.
 - Margini e padding laterali mai fissi, salvo indicazioni di Dido: il margine della pagina va con `slamp` dal mobile al desktop, con un token del progetto (es. `$side-margin: slamp($grid-gutter, $grid-margin)`), e una colonna larga fissa nel Figma desktop si stringe sotto il desktop. Con i valori di 1920 fissi, a 1024 margini e colonne laterali tolgono il posto al contenuto.
 - Media query con `@include react("chiave")` (`large`, `<medium`), mai `>=` scritti a mano. L'hover sta sempre dentro `react("pointer-and-hover")`, così sul touch non resta attaccato.
+- Ogni elemento cliccabile ha un hover, con la transizione del sito (durata a token, easing di sito): mai un cambio istantaneo, anche dove il Figma lo ha. I testi-azione ("Chiudi", "Filtra", i link) prendono la sottolineatura animata del progetto, i bottoni a icona un tono più scuro o un fondo, quelli pieni un tono più scuro dello stesso colore. Il feedback al tocco si decide a parte.
 - Classi, non mixin: i token diventano classi numerate generate da un `@each` sulla scala, nel layer giusto (`layout/`, `typo/`). I mixin servono solo per gli helper responsive e per i comportamenti interattivi, come la sottolineatura animata dei link.
 - Margini e padding con le classi, i `gap` con i token nello stile del componente, la larghezza con `.row-*`. Uno sfondo a tutta pagina è una sezione con una row dentro.
 - Motion con una sola easing di sito e durate a token (`$speed-*`), in `vars/_timings.scss`.
@@ -92,6 +93,7 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 - Easing e durate stanno solo nei token SCSS, e il JS li legge con un modulo SCSS: mai numeri ricopiati nel JS.
 - GSAP per il motion che segue lo scroll (parallasse, testo che si accende, header che si nasconde), con ScrollTrigger agganciato a Lenis così si aggiorna nello stesso frame. GSAP anche per lo scroll comandato e per l'inerzia.
 - Le transizioni singole su `transform` e `opacity` (comparsa allo scroll, entrata di una modale, tendine, hover) restano in CSS o `element.animate`. Girano fuori dal thread principale e restano fluide anche mentre la pagina carica, GSAP no.
+- Il velo di una modale entra ed esce insieme alla superficie, mai di colpo: sul `::backdrop` serve `@starting-style` per l'entrata e `overlay` e `display` in `allow-discrete` per l'uscita.
 - `prefers-reduced-motion` sempre rispettato: niente scale o translate animati.
 - Mai lo zoom delle immagini all'hover: al massimo un overlay o il testo.
 
