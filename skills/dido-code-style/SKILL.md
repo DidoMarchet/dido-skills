@@ -44,6 +44,7 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 
 - Scrivi il codice più semplice che risolve il requisito di **oggi**. Non il prossimo, non quello ipotetico.
 - Tre righe simili valgono più di un'astrazione prematura. Estrai un helper quando ci sono punti di chiamata ripetuti reali, non prima.
+- **Una cosa, un componente.** Se una parte fa quasi quello che fa un'altra che c'è già (una fila che scorre, un menu a tendina, una dissolvenza, un helper), usa la stessa: lo stesso componente, composable o libreria. Se serve, estendila con il minimo (una prop, uno slot, una variabile CSS). Due parti che fanno la stessa cosa sono già i punti di chiamata reali: mai una seconda copia, neanche di poche regole CSS. Prima di scrivere, cerca nel repo chi lo fa già.
 - Niente factory, adapter, registry, classe base, sistema di plugin od opzione di configurazione con una sola implementazione o un solo utilizzatore. Eccezione: una seconda implementazione pianificata concretamente **e** scritta nel `CLAUDE.md` del progetto (es. storage dei file `local` → `s3`).
 - Niente parametri, opzioni o flag che nessuno passa. Nessuna versione "generica" di una funzione specifica.
 - Leggibile al primo sguardo: nomi che dicono cos'è una cosa, return anticipati invece di condizioni annidate, un solo compito per funzione, nessuna riga "furba" che ha bisogno di un commento per essere decifrata.
@@ -107,6 +108,7 @@ Prematura è l'infrastruttura "per quando crescerà il traffico": cache, code, w
 - Un fix cambia le righe rotte, non il modulo. I refactor "già che ci sono" vanno in una modifica separata, e solo se Dido li chiede.
 - Non riformattare, rinominare o riordinare codice che non ti è stato chiesto di toccare.
 - Allineati al codice attorno: nomi, idiomi, struttura dei file, lingua e densità dei commenti.
+- Il codice che c'è già non è una regola. Dove va contro queste skill (copie, componenti doppi, un metodo diverso da quello scritto qui), valgono le skill e le indicazioni di Dido, anche se quel codice l'ha scritto qualcun altro. Segui loro e scrivi la differenza nel report.
 
 ## Commenti
 
@@ -168,6 +170,8 @@ Poi:
 | "Tengo la vecchia funzione / il campo / la variabile per compatibilità" | Nessuno l'ha chiesto. Cancellala in questa modifica, con test e doc. |
 | "Questo file env è un doppione / questa variabile d'ambiente non la legge nessuno, la tolgo" | I file env restano come li ha fatti Dido, con tutti i valori. Si toccano solo se lo chiede. |
 | "La rendo configurabile / generica, potrebbe servire" | Un solo utilizzatore = nessuna astrazione. Scrivi la versione specifica. |
+| "Mi serve quasi quello che fa X, lo riscrivo qui" | Usa X ed estendilo con una prop o uno slot. Una seconda copia è un bug che aspetta. |
+| "Il codice accanto fa così, ha già la sua copia" | Il codice che c'è non è una regola: valgono le skill. Segui loro e segnala la differenza. |
 | "Importo direttamente il file interno, faccio prima" | Passa dal suo punto d'ingresso, o la prossima modifica a quella parte rompe la tua. |
 | "Chiamo le statistiche / l'error tracking da qui" | È la parte opzionale che si aggancia al nucleo, con un hook o un evento. |
 | "Senza questa variabile l'app non parte, così se ne accorgono" | Se serve a una parte sola, spegne quella parte e il log lo dice. |
