@@ -95,16 +95,25 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 
 ## Motion
 
+- Le animazioni si fanno con GSAP: entrate e uscite, modali, fogli e cassetti, tendine, schede, comparse allo scroll, sequenze e microinterazioni. Restano in CSS solo gli hover e le pressioni di bottoni e link (colore, fondo, sottolineatura, la stretta alla pressione).
+- Si anima a componenti. Un movimento che si ripete esiste una volta sola, in un composable (`useXMotion`) o in un widget, e i componenti lo riusano invece di scriversi la loro timeline. La modale è un widget unico con entrata e uscita in GSAP, usato da fogli, cassetti e ricerca. La dissolvenza tra due contenuti è un wrapper unico: una `<Transition :css="false">` con gli hook in GSAP.
+- Le animazioni di un componente nascono dentro `gsap.context()`, con il suo elemento come scope, e si annullano con `revert()` quando si smonta. Girano solo nel client, da `onMounted` in poi.
+- Apertura e chiusura sono la stessa timeline, con `play()` e `reverse()`: chi chiude a metà apertura torna indietro da dove è, senza ripartire da zero. Tutte le parti di un passaggio (l'header che si svuota e la ricerca che compare) stanno nella stessa timeline, mai metà in CSS e metà in GSAP.
 - Una sola easing di sito e durate a token. Lineare solo per il motion legato allo scroll. Il pinning si fa con `position: sticky`, non in JS.
-- Easing e durate stanno solo nei token SCSS, e il JS li legge con un modulo SCSS: mai numeri ricopiati nel JS.
-- GSAP per il motion che segue lo scroll (parallasse, testo che si accende, header che si nasconde), con ScrollTrigger agganciato a Lenis così si aggiorna nello stesso frame. GSAP anche per lo scroll comandato e per l'inerzia.
-- Le transizioni singole su `transform` e `opacity` (comparsa allo scroll, entrata di una modale, tendine, hover) restano in CSS o `element.animate`. Girano fuori dal thread principale e restano fluide anche mentre la pagina carica, GSAP no.
-- Il velo di una modale entra ed esce insieme alla superficie, mai di colpo: sul `::backdrop` serve `@starting-style` per l'entrata e `overlay` e `display` in `allow-discrete` per l'uscita. Un foglio o un cassetto scorre senza dissolvenza, e il `<dialog>` ha `overflow: hidden`, altrimenti mentre la superficie entra da fuori compare la sua scrollbar.
+- Easing e durate stanno solo nei token SCSS, e il JS li legge con un modulo SCSS: mai numeri ricopiati nel JS. GSAP prende l'easing del sito e la durata di base da `gsap.defaults`.
+- Il motion che segue lo scroll (parallasse, testo che si accende, header che si nasconde) usa ScrollTrigger agganciato a Lenis, così si aggiorna nello stesso frame. GSAP anche per lo scroll comandato e per l'inerzia.
+- Ogni animazione gira a tutti i fotogrammi dello schermo (60 o 120 al secondo), senza scatti:
+  - si muove e si ingrandisce solo con `transform` e `opacity` (`x`, `y`, `scale`, `rotation`, `autoAlpha`), mai con `width`, `top`, `margin` o `padding`. L'altezza si anima solo dove il contenuto sotto deve spostarsi (una fisarmonica), su un blocco piccolo. `clip-path` e `filter` solo su superfici piccole, quando con `transform` non si può;
+  - i valori che non cambiano durante il movimento (`transformPerspective`, `transformOrigin`) si fissano prima con `gsap.set`: dentro un `to()` GSAP li anima da zero, e la forma salta nei primi fotogrammi;
+  - GSAP gira sul thread principale, quindi mentre si anima il thread resta libero. Il contenuto è montato e misurato prima di partire (prima tutte le letture, poi le scritture), le immagini sono già caricate e Vue non ridisegna niente di grande nello stesso momento;
+  - `will-change` solo sulle superfici che si muovono, più elementi uguali con `stagger`, i valori che seguono il puntatore con `gsap.quickTo`;
+  - si verifica rallentando GSAP (`gsap.globalTimeline.timeScale(0.1)`) e guardando i fotogrammi uno per uno: tra due fotogrammi la forma non salta.
+- Il velo di una modale è un elemento nella stessa timeline della superficie, perché GSAP non anima il `::backdrop`, che resta trasparente. Un foglio o un cassetto scorre senza dissolvenza, e il `<dialog>` ha `overflow: hidden`, altrimenti mentre la superficie entra da fuori compare la sua scrollbar.
 - Un movimento che attraversa lo schermo (foglio, cassetto, pannello) dura in base alla corsa: un token di riferimento (es. `$speed-medium` per 1000px) con la radice della distanza, tra due durate a token. Più breve sul telefono, più lungo sul desktop.
-- Un contenuto che compare al posto di un altro (schede, pannelli con `v-show`) entra in dissolvenza, mai a scatto: `@starting-style` gli dà il punto di partenza quando torna in `display`.
+- Un contenuto che compare al posto di un altro (schede, pannelli con `v-show`) entra in dissolvenza con il wrapper di dissolvenza, mai a scatto.
 - La superficie di una modale animata in entrata ha `will-change: transform`: se il browser toglie il suo livello a fine animazione, al primo ridisegno (il primo hover) testo e immagini sfarfallano.
 - In una galleria le immagini stanno tutte nel riquadro, una sopra l'altra e solo la corrente visibile: al cambio quella nuova è già caricata. Sempre con `NuxtImg`.
-- `prefers-reduced-motion` sempre rispettato: niente scale o translate animati.
+- `prefers-reduced-motion` sempre rispettato: niente scale o translate animati, al massimo una dissolvenza. Si legge quando l'animazione parte, perché può cambiare mentre si naviga.
 - Mai lo zoom delle immagini all'hover: al massimo un overlay o il testo.
 
 ## Accessibilità e SEO
