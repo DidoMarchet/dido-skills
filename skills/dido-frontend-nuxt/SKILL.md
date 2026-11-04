@@ -45,6 +45,7 @@ Nei progetti nati dal boilerplate le regole che una macchina sa controllare le c
 
 - Un componente è una cartella `components/<area>/<nome>/` con `index.vue`, `style.scss` e i suoi asset, raggruppata per dominio (`article/`, `navigation/`).
 - In `widget/` stanno solo i componenti agnostici e riusabili: ricevono tutto da prop ed espongono slot. Un pattern ripetuto, come un carosello, esiste una volta sola come widget. Un componente di una sezione specifica resta nella sua area.
+- Stesso tipo di elemento, stesso comportamento in tutto il sito: un pattern ripetuto, mai una pagina con controlli che funzionano a modo loro. Tutti i caroselli e le file che scorrono si trascinano, scorrono e rispondono alle frecce allo stesso modo, qualunque cosa contengano; tutte le schede, le sottolineature, gli hover, le dissolvenze e i cambi d'immagine si muovono uguali, con la stessa easing e lo stesso stato alla pressione. Il file di un componente contiene solo ciò che è suo: quello che si ripete (comportamento, hover, sottolineatura, manina, valori del motion) sta una volta sola nel widget, composable, mixin o classe globale che lo fa, e il componente lo usa.
 - Ordine nel `.vue`: `<template>`, `<script setup>`, `<style lang="scss" src="./style.scss"></style>`. Gli stili non sono scoped.
 - Un componente usa solo le classi del suo blocco e quelle del design system, e parla con gli altri con prop, eventi, slot o uno store, mai cercando il loro DOM. Gli stili arrivano insieme al loro componente: le classi di un altro spariscono quando lo togli, o in una pagina dove non c'è.
 - Asset permanenti in `app/assets/img/` con nomi kebab-case descrittivi per la SEO (`<azienda>-logo.svg`), i segnaposto in una cartella a parte. In `<img>` il path va in `src`, e l'`import` serve solo quando l'URL finisce in JS. Le icone sono SVG usate come immagini, ricolorate con un secondo file o con `mask`.
@@ -135,6 +136,7 @@ Oltre a quanto chiede dido-code-style:
 - lint pulito, JS e CSS, sui file toccati;
 - la pagina toccata risponde 200 con zero errori in console e nel log, compresi i mismatch di idratazione;
 - test verdi sulle util toccate;
+- ogni elemento della parte toccata confrontato con quelli simili del sito (carosello con carosello, schede con schede, link con link): stesso componente e stesso comportamento, compresi trascinamento, hover, pressione e transizioni;
 - l'interfaccia toccata guardata a 375, 768, 1024, 1440 e 1920 con le skill di design del progetto (impeccable, design-taste-frontend, mobile-native, dove ci sono): il contenuto si legge, è bilanciato e si usa bene. Non basta che non si rompa;
 - se hai toccato una terza parte, domini e cookie misurati;
 - con una terza parte nuova, la pagina risponde 200 anche senza la sua variabile d'ambiente.
