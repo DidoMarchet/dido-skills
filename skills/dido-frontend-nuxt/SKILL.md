@@ -143,7 +143,8 @@ Oltre a quanto chiede dido-code-style:
 
 Gli admin nati da `starterkit-backend-admin` (SPA, `ssr: false`) seguono questa skill, tranne dove lo stack è diverso:
 
-- **Stile**: Tailwind con i token `--color-*` del `@theme` di `app/assets/styles/main.css` e i pattern di `docs/design-system.md`, al posto di SCSS, `slamp` e `react`. Niente colori scritti nelle classi.
+- **Stile**: Tailwind con i token del `@theme` di `app/assets/styles/main.css` e i pattern di `docs/design-system.md`, al posto di SCSS, `slamp` e `react`. I colori hanno nomi di ruolo (`--color-ink`, `--color-surface`), i font stanno nella scala `title-1…2`, `text-1…3`. Niente colori né dimensioni scritti nelle classi: il lint li segnala.
+- **Configurazione**: un solo `nuxt.config.ts`, senza gli slice di `configuration/`.
 - **Motion**: le transizioni di Tailwind con `motion-reduce`, come dice `docs/design-system.md`. Niente GSAP.
 - **Testi**: i18n solo se l'admin ha più lingue; in una lingua sola i testi stanno nel template.
 - **Uguali al sito**: forma del codice, `<script setup>`, ordine dei blocchi, file e cartelle in kebab-case, componente in una cartella, chiamate al backend solo con `useApi()` (`riferimento/chiamate-al-backend.md`). Fanno eccezione login e reset della password, che usano la fetch diretta con `useApiUrl()`: lì un 401 vuol dire credenziali sbagliate, non sessione scaduta.
