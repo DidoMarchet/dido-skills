@@ -10,10 +10,12 @@ Stai aiutando **Dido Marchet** a costruire applicazioni web. Segui queste conven
 | Compito | Cosa leggere |
 |---|---|
 | Scrivere o modificare codice | Parte 1, più la skill dello stack |
+| Un lavoro di più passi o di più sessioni | dido-planning |
 | Revisionare una modifica, "trova bug" | Parte 1 + Parte 2 "Revisioni e caccia ai bug" |
 | Analizzare un repo, un modulo o una cartella | `analisi.md`, accanto a questo file |
+| Usare una skill che non è `dido-*` | `riferimento/skill-di-terzi.md`, accanto a questo file, e quello della skill dello stack |
 
-Quando il `CLAUDE.md` del progetto è più specifico, vale quello.
+Quando il `CLAUDE.md` del progetto è più specifico, vale quello. Dove una skill di terzi dice altro, valgono le skill `dido-*` e le eccezioni dei file `skill-di-terzi.md`.
 
 ---
 
@@ -28,6 +30,7 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 - Leggi il `CLAUDE.md` del progetto, le doc a cui rimanda e la memoria: lì ci sono decisioni, vincoli e limiti noti. Non riproporre ciò che è documentato come scartato o fuori scope (es. `docs/LIMITI-NOTI.md`) e non riaprire una decisione già presa.
 - Scopri cosa è stato fatto prima nella zona che tocchi: `git log --oneline -- <path>`, i commit recenti, i commenti sul perché, i test collegati. Capisci perché il codice è fatto così prima di cambiarlo.
 - Leggi tutto il flusso coinvolto, non solo la riga da cambiare: chiamanti, test, doc che lo descrivono. Cerca helper esistenti da riusare prima di scriverne di nuovi.
+- La documentazione di una libreria si legge per la versione installata (dal lockfile), non per l'ultima uscita.
 - Se il progetto ha gemelli derivati dallo stesso starter, guarda come hanno risolto lo stesso problema e segui la stessa convenzione.
 - Se qualcosa non è chiaro o contraddice le doc, chiedi: non tirare a indovinare e non scavalcare in silenzio una decisione presa.
 - **Le parti chiuse non si toccano senza il consenso di Dido.** Quando Dido chiude una parte finita, il progetto la elenca in `docs/parti-chiuse.md`, richiamato dal `CLAUDE.md`. Lì non si cambia niente senza il suo ok dato in quel momento: né aspetto, né comportamento, né refactor, né allineamenti alle skill. Quello che è finito resta, così non si rifà e un'altra sessione non lo smonta. L'unica eccezione è una modifica strutturale a un componente generale (widget, composable, token) che la parte chiusa usa: la parte chiusa resta uguale nell'aspetto e nel comportamento, lo verifichi guardandola, e il report dice quale parte chiusa hai toccato e come l'hai provata. Se la modifica cambierebbe ciò che si vede o come funziona, prima chiedi.
@@ -39,7 +42,7 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 - Dopo la modifica cerca nel repo le parole chiave che hai toccato. Dove una doc copia ciò che hai cambiato, togli tutta la copia, non solo la riga che hai cambiato, e metti il rimando alla fonte invece di aggiornarla. Le procedure e le decisioni scritte nelle doc che non valgono più si correggono.
 - I messaggi di commit dicono cosa è cambiato e perché, nella lingua del progetto.
 - I fatti che codice e git non dicono (una decisione e il suo motivo, un vincolo, una scadenza, un riferimento esterno) vanno in memoria.
-- Il report finale dice cosa è cambiato, cosa è stato verificato e cosa resta aperto, così il passo successivo parte dai fatti.
+- Il report finale dice cosa è cambiato, cosa è stato verificato, cosa resta aperto e le scelte fatte senza chiedere (un default, un'interpretazione), così il passo successivo parte dai fatti e Dido può correggere le scelte.
 
 ## Semplice e leggibile
 
@@ -49,6 +52,13 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 - Niente factory, adapter, registry, classe base, sistema di plugin od opzione di configurazione con una sola implementazione o un solo utilizzatore. Eccezione: una seconda implementazione pianificata concretamente **e** scritta nel `CLAUDE.md` del progetto (es. storage dei file `local` → `s3`).
 - Niente parametri, opzioni o flag che nessuno passa. Nessuna versione "generica" di una funzione specifica.
 - Leggibile al primo sguardo: nomi che dicono cos'è una cosa, return anticipati invece di condizioni annidate, un solo compito per funzione, nessuna riga "furba" che ha bisogno di un commento per essere decifrata.
+
+## Forma del codice
+
+- Funzioni con le arrow (`const nome = (args) => {}`), mai `function`, anche nelle callback. Fanno eccezione solo le API che vogliono `this`, con il motivo scritto accanto. Le arrow non sono hoistate: si definiscono prima dell'uso.
+- Nomi interi in camelCase, che dicono cos'è la cosa: `article`, `currentArticle`, `index`, `rows`. Niente lettere singole o abbreviazioni (`a`, `e`, `el`, `cur`, `out`): per eventi ed errori `event` ed `error`. Restano gli idiomi del framework, come `req`, `res` e `next` in Express. Attento a non riusare un nome dello scope esterno.
+- Niente `console.log` di debug lasciati nel codice. I log che servono davvero (l'avvio di un server, un errore) passano dal logger del progetto o da `console.warn` e `console.error`. `eslint-disable` solo per una riga, con il motivo accanto.
+- Il lint del progetto controlla queste regole e quelle della skill dello stack: un errore si corregge, non si spegne.
 
 ## Modulare, ogni parte si può togliere
 
@@ -127,15 +137,28 @@ In un'interfaccia una pagina, una sezione o una card ha titolo, contenuto e azio
 - un'azione non si può annullare, e allora lo dice il dialog di conferma, non la pagina ("Eliminare l'account? Ordini e indirizzi non si recuperano.");
 - qualcosa è andato storto, e il messaggio dice cosa e come rimediare ("Il file supera i 10 MB. Scegline uno più leggero.").
 
-I bottoni dicono l'azione ("Salva", "Pubblica"), le label il nome della cosa.
+I bottoni dicono l'azione ("Salva", "Pubblica"), le label il nome della cosa. La stessa cosa si chiama sempre con lo stesso nome, in tutta l'interfaccia e nei messaggi.
+
+- Un dialog di conferma ripete l'azione nella domanda e sul bottone ("Eliminare 3 file?", **Elimina**). Cosa si perde lo dice solo se l'azione non si annulla, in concreto.
+- Un esito si dice con il fatto ("Salvato", "Link copiato"), un caricamento si vede dallo stato. Niente scuse, formule d'empatia, esclamazioni o emoji.
+- Login, registrazione, OTP e reset non dicono mai se un account esiste: si mostra il messaggio generico del backend, come errore del form e non sotto il campo email.
+- Un testo sta nello spazio che il layout gli dà, anche nella lingua più lunga.
 
 Punteggiatura normale: punto, virgola, due punti, parentesi e virgolette dritte ("…"), mai le caporali (« »). In un'interfaccia il nome di un bottone, di uno stato o di un campo citato in una frase va in grassetto; dove il testo non ha formattazione (toast, hint, messaggi d'errore) va tra virgolette dritte. Trattino lungo (—) e punto a metà altezza (·) al massimo uno per paragrafo; tra un termine e la sua spiegazione vanno i due punti.
 
+## Bug
+
+- Prima la causa, poi il fix: leggi tutto l'errore, riproducilo, guarda cosa è cambiato (`git log`, `git diff`).
+- Un'ipotesi alla volta, con la modifica più piccola che la prova. Se non regge, annullala prima di provarne un'altra.
+- Dopo tre fix che non funzionano ti fermi: il problema è l'impostazione. Parlane con Dido invece di provare il quarto.
+- I log aggiunti per capire si tolgono prima di chiudere.
+
 ## Test
 
-- Ogni comportamento nuovo e ogni bug fix hanno un test che senza la modifica fallisce. Per un bug, scrivi prima il test e guardalo fallire.
-- Testa il comportamento dall'interfaccia pubblica (rotta HTTP, componente renderizzato, output della CLI), non gli interni.
-- Non modificare un test solo per farlo passare. Se il cambio di comportamento è voluto, dillo nella modifica.
+- Ogni comportamento nuovo e ogni bug fix hanno un test che senza la modifica fallisce. Per un bug, scrivi prima il test e guardalo fallire. Un test scritto dopo la modifica si prova togliendo la modifica: deve fallire, e per il motivo giusto (l'asserzione, non un import rotto).
+- Testa il comportamento dall'interfaccia pubblica (rotta HTTP, componente renderizzato, output della CLI), non gli interni. Si finge solo il confine (rete, CMS, auto-import del framework), mai un modulo interno, e un mock ha la forma completa della risposta vera.
+- Il valore atteso si scrive a mano, mai calcolato con il codice sotto test. Niente snapshot né soglie di coverage. Nei test asincroni si aspetta la condizione, non un tempo fisso.
+- Non modificare un test solo per farlo passare. Se il cambio di comportamento è voluto, dillo nella modifica. Un test non si salta e non passa grazie a un retry: `.only`, `.skip`, `.todo` e `retry` non restano.
 - Se il progetto non ha un setup di test, dillo nel report; non aggiungere un framework di test senza che sia chiesto.
 
 ## Sicurezza in ogni modifica
@@ -163,6 +186,9 @@ Poi:
 - Non dire mai "fatto" o "funziona" senza averlo eseguito: test, lint e formattazione in sola verifica, build, il comando vero, l'endpoint vero. "Compila" non vuol dire "funziona".
 - Dopo una modifica allo schema o al codice generato, rigenera prima di eseguire qualsiasi cosa (es. `npx prisma generate`).
 - Riporta in modo esplicito cosa è stato verificato e cosa no, e perché (es. "DB spento, test non eseguiti: ecco come lanciarli").
+- Il resoconto di un subagente non è una prova: guarda il diff e rilancia tu la verifica.
+- Una decisione (tenere, togliere, cambiare) si basa solo su ciò che hai letto per intero o eseguito. Quello che non hai letto lo dici ("non letto") e non diventa una raccomandazione.
+- Ogni analisi e ogni report dicono cosa hai letto per intero, cosa in parte e cosa no. Ogni affermazione porta la sua prova: il file e la riga, o il comando con il suo output. Quello che viene da un subagente si dice, e le citazioni su cui decidi si ricontrollano.
 
 ## Campanelli d'allarme: fermati e correggi prima di andare avanti
 
@@ -181,6 +207,9 @@ Poi:
 | "Già che ci sono sistemo anche questo" | Modifica separata, e solo se Dido la chiede. |
 | "Questo sembra sbagliato, lo cambio" | Leggi prima commenti, git log e doc: potrebbe essere una decisione. |
 | "Compila, quindi è fatto" | Eseguilo, e riporta cosa hai eseguito. |
+| "Dalla descrizione si capisce cosa fa, non serve leggerlo tutto" | Si decide solo su ciò che si è letto per intero. |
+| "Il subagente dice che passa" | Guarda il diff e rilancia la verifica. |
+| "Provo un altro fix" (dopo tre) | Fermati: è l'impostazione. Parlane con Dido. |
 | "Le doc le aggiorno dopo" | Nella stessa modifica, o non succede mai. |
 | "Aggiorno anche la tabella nel README" | Se ripete il codice, toglila e metti il rimando alla fonte. |
 
@@ -195,6 +224,12 @@ Per la revisione di una modifica, o una richiesta come "trova bug":
 - Parti dal presupposto che il codice funzioni: l'onere della prova sta sul problema segnalato.
 - Riporta solo problemi di gravità Alta e Media (vedi "Gravità" sotto). Niente trovato → "ok" in una riga.
 - Niente estetica, nomi, micro-semplificazioni, race teoriche o future-proofing, a meno che Dido li chieda. Mai aggiungere in fondo "e un paio di cose minori che ho notato".
+
+## Quando ricevi una revisione
+
+- Un commento (di un collega, di Codex, di un subagente, di una PR) si controlla sul codice prima di applicarlo.
+- Se per questo repo è sbagliato, rispondi con il motivo tecnico. Se chiede di "fare bene" una cosa, cerca chi la usa: se nessuno, proponi di toglierla.
+- Se un punto non è chiaro, chiedi prima di toccare gli altri.
 
 ## Gravità
 
