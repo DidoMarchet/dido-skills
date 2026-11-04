@@ -9,6 +9,8 @@ Linee guida per ogni backend di Dido. **Skill richiesta:** dido-code-style, con 
 
 Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file, sta in `riferimento/node-express-prisma.md`: leggilo quando lavori sullo starter o su un progetto nato da lì. Un progetto derivato può aver cambiato un dettaglio, e allora vale quello che trovi nel suo codice. Quando il `CLAUDE.md` del progetto è più specifico, vale quello.
 
+Prima di seguire una skill che non è `dido-*` (Prisma, Postgres, Docker, Redocly, Coolify) leggi `riferimento/skill-di-terzi.md`: dove dice altro, vale lui.
+
 ## Livelli e moduli
 
 - Rotte, controller, service, accesso ai dati. Niente livello repository: il service usa direttamente il client del database.
