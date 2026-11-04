@@ -28,12 +28,12 @@ documento esistente si toglie, anche se è ancora giusta, e al suo posto va il r
 
 - **Documentazione di prodotto o per l'utente finale**: guide per chi *usa* l'applicazione,
   non per chi la fa girare. Sono un altro mestiere e un altro tono.
-- **API reference generabile dal codice** (OpenAPI, docstring, typedoc): lì si genera, non si
-  scrive a mano, e scriverla a mano significa creare una seconda verità che diverge.
+- **API reference** (la spec OpenAPI, docstring, typedoc): sta nella sua fonte, e riscriverla
+  in un documento crea una seconda verità che diverge.
 - **Repository che non hai potuto leggere**: solo un URL, uno screenshot, o la descrizione a
   voce dell'utente. Senza file non c'è niente da dedurre — dillo e fermati, non ricostruire.
 - **Scelte di architettura o di stack**: questa skill descrive ciò che c'è, non propone ciò che
-  dovrebbe esserci. Se durante la lettura emergono problemi (secret versionati, servizi senza
+  dovrebbe esserci. Se durante la lettura emergono problemi (secret fuori dai file env, servizi senza
   healthcheck, script che puntano a host non definiti da nessuna parte) annotali in coda al
   documento sotto "Punti da verificare" e vai avanti: il manuale non diventa una review.
 - **Modifiche minime** (un comando da correggere, un rimando da aggiornare): falle e basta,
@@ -188,7 +188,7 @@ La risposta contiene, in quest'ordine:
 2. L'elenco dei file creati o modificati, col percorso.
 3. **Da completare**: i blocchi NON DEDUCIBILE raccolti, ciascuno con chi può chiudere il punto.
 4. **Punti da verificare**: anomalie viste nel repo che il manutentore dovrebbe guardare
-   (secret versionati, servizi senza healthcheck, script che puntano a host non definiti).
+   (secret fuori dai file env, servizi senza healthcheck, script che puntano a host non definiti).
    Nel documento vanno al massimo i cinque più gravi, quelli che impediscono l'avvio o
    espongono dati e segreti; gli altri stanno solo nella risposta.
 5. **Proposte di aggiornamento del repertorio**, se ce ne sono.

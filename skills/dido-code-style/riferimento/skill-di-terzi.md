@@ -18,7 +18,7 @@ Le skill di terzi danno conoscenza (un'API, una diagnosi, un controllo), ma spes
 
 ## Processo
 
-- Il processo lo danno dido-planning (lavori grandi) e dido-code-style (tutto il resto). Brainstorming obbligatori, spec o piani in cartelle di uno strumento, TDD che cancella il codice scritto prima del test, worktree, commit in momenti o formati diversi da quelli di dido-planning, revisioni con altre soglie di gravità (i "Minor" non si riportano): non valgono, anche se una skill dice di usarli "sempre". Fuori da un piano i commit si fanno solo su richiesta.
+- Il processo lo danno dido-planning (lavori grandi) e dido-code-style (tutto il resto). Brainstorming obbligatori, spec o piani in cartelle di uno strumento, TDD che cancella il codice scritto prima del test, worktree, commit in momenti o formati diversi da quelli di dido-code-style e dido-planning, revisioni con altre soglie di gravità (i "Minor" non si riportano): non valgono, anche se una skill dice di usarli "sempre".
 - Un piano eseguito con dei subagenti segue dido-planning: i test che un subagente dichiara si rilanciano, le decisioni di prodotto si chiedono a Dido.
 - Trovata la causa di un bug, si corregge in un punto: niente controlli ripetuti a ogni livello né guardie per i test nel codice.
 - Dove una skill dice di andare avanti con un segnaposto e la scelta va contro il progetto, si chiede a Dido.

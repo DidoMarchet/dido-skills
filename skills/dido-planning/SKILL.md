@@ -17,7 +17,7 @@ Una richiesta piccola (un fix, un ritocco, una pagina) non passa da qui: si fa e
 
 ## Dove stanno le cose
 
-Nel `docs/` del repo principale del progetto: quello che il suo `CLAUDE.md` indica, di solito l'app. Gli altri repo dello stesso progetto (backend, admin) tengono il loro stato in `docs/ROADMAP.md` e rimandano ai documenti del repo principale: una copia sola. I nomi dei file vengono da App Writer, dove il metodo è nato.
+Nel `docs/` del repo principale del progetto: quello che il suo `CLAUDE.md` indica, di solito l'app. Gli altri repo dello stesso progetto (backend, admin) tengono il loro stato in `docs/ROADMAP.md` e rimandano ai documenti del repo principale: una copia sola.
 
 | File | Cosa |
 |---|---|
@@ -66,7 +66,7 @@ Nel `docs/` del repo principale del progetto: quello che il suo `CLAUDE.md` indi
 - Un invariante del charter non si viola mai: se un passo sembra chiederlo, ci si ferma e si chiede.
 - Una scelta tecnica non banale va nel registro delle decisioni (vedi la tabella) nella stessa modifica: contesto, scelta, cosa è stato verificato, alternative scartate. Se cambia il charter, si aggiorna anche lui.
 - Ogni passo finisce verificato (dido-code-style, "Fatto vuol dire verificato") e con "Dove siamo" aggiornato: cosa è fatto, come è stato provato, cosa resta, le scelte fatte senza chiedere.
-- Un commit per passo, con piano e passo nel messaggio, nella lingua del progetto: `M3 step 9b.10: capitolo o scena quando si aggiunge ai Pareri`.
+- Un commit per passo (dido-code-style dice quando), con piano e passo nel messaggio, nella lingua del progetto: `M2 step 4: filtri della lista ordini`.
 
 ## Chiudere
 

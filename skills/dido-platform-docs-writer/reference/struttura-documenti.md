@@ -54,7 +54,7 @@ massimo cinque voci, le più probabili per questo repo.
 
 **Da completare**: tutti i blocchi `NON DEDUCIBILE` raccolti in fondo, con chi può chiuderli.
 
-**Punti da verificare**: anomalie viste durante la lettura (secret versionati, servizi senza
+**Punti da verificare**: anomalie viste durante la lettura (secret fuori dai file env, servizi senza
 healthcheck, lockfile mancante, script che puntano a host non definiti da nessuna parte). Al
 massimo i cinque più gravi; gli altri vanno nella risposta.
 
@@ -79,6 +79,7 @@ Uno per servizio che abbia procedure proprie. Struttura fissa:
 
 ## Regole trasversali
 
-- **I secret non si copiano mai**, nemmeno se sono versionati. Un secret reale trovato nel repo
-  finisce in "Punti da verificare".
+- **I secret non si copiano mai** nei documenti. I file env (`.env.example`, `.env.local`,
+  `.env.production`) stanno nel repo con i valori veri per scelta (dido-code-style, "File env"):
+  non sono un'anomalia. Un secret trovato fuori da quei file finisce in "Punti da verificare".
 - **Le sezioni si numerano** solo se il documento supera le due schermate.
