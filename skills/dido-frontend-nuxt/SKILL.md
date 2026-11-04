@@ -9,27 +9,28 @@ Il metodo dei frontend Nuxt di Dido. **Skill richiesta:** dido-code-style, con i
 
 **Implementazione di riferimento:** il boilerplate Nuxt 4 di Dido (`DidoMarchet/starter-kit-nuxt-webapp` su GitHub). Un sito nuovo parte da lì, e lì si legge il codice di composable, plugin e configurazione. I fatti del boilerplate (cosa è già cablato, moduli, rendering, sistema SCSS) stanno nei suoi `docs/project-architecture.md` e `docs/scss-system.md`.
 
-Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style.md`. Se il progetto dice una cosa diversa da questa skill, vale il progetto, e la differenza va segnalata nel report perché una delle due fonti è da correggere. In un progetto più vecchio con convenzioni diverse, allineati al codice attorno.
+Nei progetti nati dal boilerplate le regole che una macchina sa controllare le controlla il lint (`eslint.starter.mjs`, `stylelint.starter.mjs`), dopo ogni modifica e prima di ogni commit. Se il progetto dice una cosa diversa da questa skill, vale il progetto, e la differenza va segnalata nel report perché una delle due fonti è da correggere.
 
 | Stai per toccare | Leggi |
 |---|---|
 | chiamate a un backend di Dido: login, token, errori | `riferimento/chiamate-al-backend.md` |
+| un admin (SPA con Tailwind) | la sezione "Admin" in fondo |
+| una skill che non è `dido-*` (design, GSAP, DatoCMS, Vue, FormKit…) | `riferimento/skill-di-terzi.md` |
 
 ## Principi
 
 - **Componi con il design system.** Margini e padding con le classi utility, i gap con i token, la larghezza con le righe (`.row-*`). Riusa tipografia, bottoni e card che ci sono già, niente spaziature su misura.
 - **Token pragmatici.** I token sono variabili SCSS esposte come classi numerate, non un sistema formale di design token. Un valore usato una volta sola si scrive dov'è, sono token solo i valori ricorrenti.
-- **Valori disciplinati.** Numeri pieni o multipli di 5, anche nelle misure di layout, e font a multipli di 2 o 4. Se il progetto ha un Figma, i valori vengono da lì e non si inventano, ma si arrotondano: un valore che non è un token della scala né un multiplo di 5 diventa il più vicino dei due (67 → 65, 17 → 16).
+- **Valori disciplinati.** Numeri pieni o multipli di 5, anche nelle misure di layout, e font a multipli di 2 o 4. Se il progetto ha un Figma, i valori vengono da lì e non si inventano, ma si arrotondano: un valore che non è un token della scala né un multiplo di 5 diventa il più vicino dei due (67 → 65, 17 → 16). Le regole di questa skill valgono sopra il layout: una differenza dal frame dovuta a loro non è un errore.
+- **Dal Figma.** Prima di scrivere si legge il Figma con l'MCP (struttura, valori, screenshot del nodo giusto) e si misurano content box, gap e padding: niente a memoria.
 - **Testi staccati dalle righe.** Un testo, un titolo o una CTA non stanno mai appoggiati a una riga visibile (righe della griglia di sfondo, divisori verticali): hanno un padding minimo dalla riga anche se il Figma li allinea lì, con un token del progetto applicato da una classe. Le immagini possono toccarla.
 - **Degrada, non cadere.** Un dato o una config che manca produce uno stato gestito (fallback, messaggio, sezione assente), mai una pagina in errore. In SSR una proprietà letta su un oggetto che può mancare fa fallire tutta la pagina, quindi il valore di sicurezza va dove leggi (`config?.chiave ?? default`).
 
 ## JS e Vue
 
-- Arrow function sempre (`const nome = (args) => {}`), mai `function`. Le arrow non sono hoistate, quindi si definiscono prima dell'uso. Fanno eccezione solo le API che vogliono `function` per `this`.
-- Sempre `<script setup>`, niente Options API. Il nome del componente si dichiara con `defineOptions({ name: "WidgetMediaText" })`.
+- Arrow function, nomi interi e niente `console.log`: "Forma del codice" in dido-code-style.
+- Sempre `<script setup>`, niente Options API. Il nome del componente lo dà Nuxt dal percorso (`components/widget/media-text/index.vue` è `WidgetMediaText`), quindi niente `defineOptions({ name })`.
 - Gli effetti su DOM, scroll e animazioni stanno in un composable (`app/composables/`, `useX`), che espone stato e azioni e non markup. La logica pura sta in `app/utils/`, con i suoi test. Query e chiamate stanno in cartelle dedicate, mai dentro i componenti.
-- Nomi interi in camelCase: `article`, `currentArticle`, `index`, `rows`. Niente lettere singole o abbreviazioni (`a`, `cur`, `el`, `out`). Per eventi ed errori preferisci `event` ed `error` a `e` ed `err`, e attento a non riusare un nome dello scope esterno.
-- Niente `console.log` lasciati, e `eslint-disable` solo con il motivo scritto accanto.
 - Niente testo statico nei template: il brand viene dalla config (`siteName`), le label da i18n, i contenuti dal CMS.
 
 ## Nomi
@@ -82,15 +83,15 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 
 ## Dati e terze parti
 
-- Il CMS si legge solo con `useGraphql()`, con query e fragment in `app/graphql/<cms>/`. Le chiamate REST passano da `useApiFetch()`. Le pagine non parlano direttamente con Apollo o con il client HTTP.
+- Il CMS si legge solo con `useGraphql()`, con query e fragment in `app/graphql/<cms>/`. Dentro lavorano `useAsyncData` di Nuxt e il client del CMS (`@datocms/cda-client`), che importano solo `useGraphql()` e le sorgenti lato server. Le chiamate REST passano da `useApiFetch()`. Pagine e componenti non parlano mai con il client del CMS o con quello HTTP.
 - Un errore del CMS non è una pagina che non esiste: la pagina risponde 500, e 404 solo quando il contenuto non c'è.
 - SEO e hreflang con `useSeo()` nella pagina. Con gli slug localizzati servono `generateSeoLocaleParams` e `setI18nParams`, altrimenti gli alternate dichiarano URL che non esistono.
 - `useLenis()` si inizializza una volta sola per l'app, nel layout o in `app.vue`. Ogni contenitore che scorre da solo (foglio di una modale, cassetto, menu a tendina, pannello dei filtri) ha lo stesso scorrimento fluido della pagina con un Lenis suo, nel ticker di GSAP. Il contenitore ha un figlio solo, perché Lenis ricalcola quanto si può scorrere quando cambia la misura del primo figlio. Lenis cerca `data-lenis-prevent` solo dentro il proprio contenitore, e gli eventi che arrivano da un'altra modale aperta sopra non lo devono muovere.
 - Una terza parte che serve a tutto il sito (analytics, error tracking, consenso) è un plugin. Una che serve a una pagina o a un componente (un form, un widget di prenotazione, un player) è un composable per l'effetto più un componente per il markup.
-- La libreria di una terza parte la importa solo il suo plugin o il suo composable, che senza la sua config non fa niente. Così si toglie cancellando quei file, la dipendenza e il punto in cui si usa. Se deve ricevere qualcosa dal sito, come gli errori di GraphQL per l'error tracking, è lei che si aggancia a un hook (`apollo:error`, `vue:error`).
+- La libreria di una terza parte la importa solo il suo plugin o il suo composable, che senza la sua config non fa niente. Così si toglie cancellando quei file, la dipendenza e il punto in cui si usa. Se deve ricevere qualcosa dal sito, come gli errori di GraphQL per l'error tracking, è lei che si aggancia a un hook (quello che `useGraphql()` chiama sugli errori, `vue:error`).
 - Gli embed si vestono con il design system: niente CSS del servizio, le classi dei tuoi bottoni. Se il servizio rende in un `<iframe>` non si può vestire, quindi va verificato prima di prometterlo.
 - Prima di dire cosa fa una terza parte, misura quali domini contatta e quali cookie scrive.
-- Le sorgenti dinamiche lato server, come la sitemap, non usano l'SDK client, paginano dove il servizio lo chiede e non rompono il build quando falliscono. Un modello con pagina di dettaglio entra nella sitemap interrogando ogni lingua.
+- Le sorgenti dinamiche lato server, come la sitemap, chiamano il servizio dal server senza passare dall'app, paginano dove il servizio lo chiede e non rompono il build quando falliscono. Un modello con pagina di dettaglio entra nella sitemap interrogando ogni lingua.
 - Lo schema del CMS cambia solo con migration versionate, mai a mano sull'ambiente live.
 
 ## Motion
@@ -98,15 +99,16 @@ Nei progetti nati dal boilerplate lo stesso metodo sta anche in `docs/code-style
 - Le animazioni si fanno con GSAP: entrate e uscite, modali, fogli e cassetti, tendine, schede, comparse allo scroll, sequenze e microinterazioni. Restano in CSS solo gli hover e le pressioni di bottoni e link (colore, fondo, sottolineatura, la stretta alla pressione).
 - Si anima a componenti. Un movimento che si ripete esiste una volta sola, in un composable (`useXMotion`) o in un widget, e i componenti lo riusano invece di scriversi la loro timeline. La modale è un widget unico con entrata e uscita in GSAP, usato da fogli, cassetti e ricerca. La dissolvenza tra due contenuti è un wrapper unico: una `<Transition :css="false">` con gli hook in GSAP.
 - Le animazioni di un componente nascono dentro `gsap.context()`, con il suo elemento come scope, e si annullano con `revert()` quando si smonta. Girano solo nel client, da `onMounted` in poi.
-- Apertura e chiusura sono la stessa timeline, con `play()` e `reverse()`: chi chiude a metà apertura torna indietro da dove è, senza ripartire da zero. Tutte le parti di un passaggio (l'header che si svuota e la ricerca che compare) stanno nella stessa timeline, mai metà in CSS e metà in GSAP.
-- Una sola easing di sito e durate a token. Lineare solo per il motion legato allo scroll. Il pinning si fa con `position: sticky`, non in JS.
-- Easing e durate stanno solo nei token SCSS, e il JS li legge con un modulo SCSS: mai numeri ricopiati nel JS. GSAP prende l'easing del sito e la durata di base da `gsap.defaults`.
-- Il motion che segue lo scroll (parallasse, testo che si accende, header che si nasconde) usa ScrollTrigger agganciato a Lenis, così si aggiorna nello stesso frame. GSAP anche per lo scroll comandato e per l'inerzia.
+- Apertura e chiusura sono la stessa timeline, con `play()` e `reverse()`, anche quando la chiusura parte dalla tastiera (Esc): chi chiude a metà apertura torna indietro da dove è, senza ripartire da zero. Tutte le parti di un passaggio (l'header che si svuota e la ricerca che compare) stanno nella stessa timeline, mai metà in CSS e metà in GSAP.
+- Una sola easing di sito e durate a token. Lineare solo per il motion legato allo scroll e per i loop continui (marquee, loader). Il pinning si fa con `position: sticky`, non in JS.
+- Easing, durate e stagger stanno solo nei token SCSS (`$ease-site`, `$speed-*`, `$stagger` in `vars/_timings.scss`), e il JS li legge con un modulo SCSS: mai numeri ricopiati nel JS. Un plugin client registra i plugin di GSAP e imposta una volta sola `gsap.defaults` con l'easing del sito e la durata di base.
+- Il motion che segue lo scroll (parallasse, testo che si accende, header che si nasconde) usa ScrollTrigger agganciato a Lenis, così si aggiorna nello stesso frame. Lo scroll comandato (un'ancora, "torna su") passa da `lenis.scrollTo`, mai da `window.scrollTo` o da un secondo sistema di scroll. L'inerzia si fa con GSAP.
+- Un popover o una tendina nasce dal suo bottone (`transformOrigin` verso di lui). Dopo il primo tooltip, i successivi compaiono senza ritardo finché il puntatore resta lì. Un elemento che si trascina (foglio, carosello) si chiude o scorre in base alla velocità del gesto, con resistenza ai bordi: Draggable e InertiaPlugin di GSAP.
 - Ogni animazione gira a tutti i fotogrammi dello schermo (60 o 120 al secondo), senza scatti:
   - si muove e si ingrandisce solo con `transform` e `opacity` (`x`, `y`, `scale`, `rotation`, `autoAlpha`), mai con `width`, `top`, `margin` o `padding`. L'altezza si anima solo dove il contenuto sotto deve spostarsi (una fisarmonica), su un blocco piccolo. `clip-path` e `filter` solo su superfici piccole, quando con `transform` non si può;
   - i valori che non cambiano durante il movimento (`transformPerspective`, `transformOrigin`) si fissano prima con `gsap.set`: dentro un `to()` GSAP li anima da zero, e la forma salta nei primi fotogrammi;
   - GSAP gira sul thread principale, quindi mentre si anima il thread resta libero. Il contenuto è montato e misurato prima di partire (prima tutte le letture, poi le scritture), le immagini sono già caricate e Vue non ridisegna niente di grande nello stesso momento;
-  - `will-change` solo sulle superfici che si muovono, più elementi uguali con `stagger`, i valori che seguono il puntatore con `gsap.quickTo`;
+  - `will-change` solo sulle superfici che si muovono, più elementi uguali con `stagger` a token, i valori che seguono il puntatore con `gsap.quickTo`;
   - si verifica rallentando GSAP (`gsap.globalTimeline.timeScale(0.1)`) e guardando i fotogrammi uno per uno: tra due fotogrammi la forma non salta.
 - Il velo di una modale è un elemento nella stessa timeline della superficie, perché GSAP non anima il `::backdrop`, che resta trasparente. Un foglio o un cassetto scorre senza dissolvenza, e il `<dialog>` ha `overflow: clip`: senza, mentre la superficie entra da fuori compare la sua scrollbar. Non `hidden`, che dal codice si scorre ancora: il focus che `showModal()` mette nel contenuto, ancora fuori schermo con la superficie, fa scorrere il dialogo fino a lui, e la superficie compare già al suo posto mentre GSAP la muove.
 - Un movimento che attraversa lo schermo (foglio, cassetto, pannello) dura in base alla corsa: un token di riferimento (es. `$speed-medium` per 1000px) con la radice della distanza, tra due durate a token. Più breve sul telefono, più lungo sul desktop.
@@ -136,3 +138,12 @@ Oltre a quanto chiede dido-code-style:
 - l'interfaccia toccata guardata a 375, 768, 1024, 1440 e 1920 con le skill di design del progetto (impeccable, design-taste-frontend, mobile-native, dove ci sono): il contenuto si legge, è bilanciato e si usa bene. Non basta che non si rompa;
 - se hai toccato una terza parte, domini e cookie misurati;
 - con una terza parte nuova, la pagina risponde 200 anche senza la sua variabile d'ambiente.
+
+## Admin
+
+Gli admin nati da `starterkit-backend-admin` (SPA, `ssr: false`) seguono questa skill, tranne dove lo stack è diverso:
+
+- **Stile**: Tailwind con i token `--color-*` del `@theme` di `app/assets/styles/main.css` e i pattern di `docs/design-system.md`, al posto di SCSS, `slamp` e `react`. Niente colori scritti nelle classi.
+- **Motion**: le transizioni di Tailwind con `motion-reduce`, come dice `docs/design-system.md`. Niente GSAP.
+- **Testi**: i18n solo se l'admin ha più lingue; in una lingua sola i testi stanno nel template.
+- **Uguali al sito**: forma del codice, `<script setup>`, ordine dei blocchi, file e cartelle in kebab-case, componente in una cartella, chiamate al backend solo con `useApi()` (`riferimento/chiamate-al-backend.md`).
