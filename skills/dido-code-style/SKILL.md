@@ -30,6 +30,7 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 - Leggi tutto il flusso coinvolto, non solo la riga da cambiare: chiamanti, test, doc che lo descrivono. Cerca helper esistenti da riusare prima di scriverne di nuovi.
 - Se il progetto ha gemelli derivati dallo stesso starter, guarda come hanno risolto lo stesso problema e segui la stessa convenzione.
 - Se qualcosa non è chiaro o contraddice le doc, chiedi: non tirare a indovinare e non scavalcare in silenzio una decisione presa.
+- **Le parti chiuse non si toccano senza il consenso di Dido.** Quando Dido chiude una parte finita, il progetto la elenca in `docs/parti-chiuse.md`, richiamato dal `CLAUDE.md`. Lì non si cambia niente senza il suo ok dato in quel momento: né aspetto, né comportamento, né refactor, né allineamenti alle skill. Quello che è finito resta, così non si rifà e un'altra sessione non lo smonta. L'unica eccezione è una modifica strutturale a un componente generale (widget, composable, token) che la parte chiusa usa: la parte chiusa resta uguale nell'aspetto e nel comportamento, lo verifichi guardandola, e il report dice quale parte chiusa hai toccato e come l'hai provata. Se la modifica cambierebbe ciò che si vede o come funziona, prima chiedi.
 
 **Durante e dopo**
 
