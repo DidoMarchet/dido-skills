@@ -22,7 +22,7 @@ Un'analisi dura decine di minuti e costa centinaia di migliaia di token anche pe
    })
    ```
    Se `scriptPath` viene rifiutato, leggi lo script e passane il contenuto come `script`. Se lo strumento Workflow non esiste (un altro agente o un altro host), esegui tu le stesse fasi, nello stesso ordine, con dei subagenti se li hai.
-3. Quando torna, scrivi dal suo risultato il report descritto sotto.
+3. Quando torna, scrivi dal suo risultato il report descritto sotto. La fase Verifica vale come ricontrollo delle citazioni: il report dice che i problemi vengono dal workflow.
 
 | Fase | Agenti | Lavoro |
 |---|---|---|

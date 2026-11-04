@@ -56,9 +56,9 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 ## Forma del codice
 
 - Funzioni con le arrow (`const nome = (args) => {}`), mai `function`, anche nelle callback. Fanno eccezione solo le API che vogliono `this`, con il motivo scritto accanto. Le arrow non sono hoistate: si definiscono prima dell'uso.
-- Nomi interi in camelCase, che dicono cos'è la cosa: `article`, `currentArticle`, `index`, `rows`. Niente lettere singole o abbreviazioni (`a`, `e`, `el`, `cur`, `out`): per eventi ed errori `event` ed `error`. Restano gli idiomi del framework, come `req`, `res` e `next` in Express. Attento a non riusare un nome dello scope esterno.
-- Niente `console.log` di debug lasciati nel codice. I log che servono davvero (l'avvio di un server, un errore) passano dal logger del progetto o da `console.warn` e `console.error`. `eslint-disable` solo per una riga, con il motivo accanto.
-- Il lint del progetto controlla queste regole e quelle della skill dello stack: un errore si corregge, non si spegne.
+- Nomi interi in camelCase, che dicono cos'è la cosa: `article`, `currentArticle`, `index`, `rows`. Niente lettere singole o abbreviazioni (`a`, `e`, `el`, `cur`, `out`): per eventi ed errori `event` ed `error`. Restano gli idiomi del framework, come `req`, `res` e `next` in Express e `tx` nelle transazioni di Prisma. Attento a non riusare un nome dello scope esterno.
+- Niente `console.log` di debug lasciati nel codice. I log che servono davvero passano dal logger del progetto; dove non c'è, l'avvio di un server usa `console.info` e i problemi `console.warn` e `console.error`. Negli script da terminale il log è l'output.
+- Dove il progetto ha il lint dello starter, controlla queste regole e quelle della skill dello stack; dove non c'è, le controlli tu. Un errore si corregge. Una regola si spegne solo per una riga, con il motivo accanto (`// eslint-disable-next-line regola -- motivo`), o per tutto il progetto nella config del lint del progetto, mai in quella dello starter.
 
 ## Modulare, ogni parte si può togliere
 
@@ -150,7 +150,7 @@ Punteggiatura normale: punto, virgola, due punti, parentesi e virgolette dritte 
 
 - Prima la causa, poi il fix: leggi tutto l'errore, riproducilo, guarda cosa è cambiato (`git log`, `git diff`).
 - Un'ipotesi alla volta, con la modifica più piccola che la prova. Se non regge, annullala prima di provarne un'altra.
-- Dopo tre fix che non funzionano ti fermi: il problema è l'impostazione. Parlane con Dido invece di provare il quarto.
+- Dopo tre fix che non funzionano ti fermi: il problema è l'approccio. Parlane con Dido invece di provare il quarto.
 - I log aggiunti per capire si tolgono prima di chiudere.
 
 ## Test
@@ -158,7 +158,7 @@ Punteggiatura normale: punto, virgola, due punti, parentesi e virgolette dritte 
 - Ogni comportamento nuovo e ogni bug fix hanno un test che senza la modifica fallisce. Per un bug, scrivi prima il test e guardalo fallire. Un test scritto dopo la modifica si prova togliendo la modifica: deve fallire, e per il motivo giusto (l'asserzione, non un import rotto).
 - Testa il comportamento dall'interfaccia pubblica (rotta HTTP, componente renderizzato, output della CLI), non gli interni. Si finge solo il confine (rete, CMS, auto-import del framework), mai un modulo interno, e un mock ha la forma completa della risposta vera.
 - Il valore atteso si scrive a mano, mai calcolato con il codice sotto test. Niente snapshot né soglie di coverage. Nei test asincroni si aspetta la condizione, non un tempo fisso.
-- Non modificare un test solo per farlo passare. Se il cambio di comportamento è voluto, dillo nella modifica. Un test non si salta e non passa grazie a un retry: `.only`, `.skip`, `.todo` e `retry` non restano.
+- Non modificare un test solo per farlo passare. Se il cambio di comportamento è voluto, dillo nella modifica. Un test non si salta e non passa grazie a un retry: `.only`, `.skip`, `.todo` e `retry` non restano, salvo uno `skipIf` legato all'ambiente, con il motivo accanto.
 - Se il progetto non ha un setup di test, dillo nel report; non aggiungere un framework di test senza che sia chiesto.
 
 ## Sicurezza in ogni modifica
@@ -209,7 +209,7 @@ Poi:
 | "Compila, quindi è fatto" | Eseguilo, e riporta cosa hai eseguito. |
 | "Dalla descrizione si capisce cosa fa, non serve leggerlo tutto" | Si decide solo su ciò che si è letto per intero. |
 | "Il subagente dice che passa" | Guarda il diff e rilancia la verifica. |
-| "Provo un altro fix" (dopo tre) | Fermati: è l'impostazione. Parlane con Dido. |
+| "Provo un altro fix" (dopo tre) | Fermati: è l'approccio. Parlane con Dido. |
 | "Le doc le aggiorno dopo" | Nella stessa modifica, o non succede mai. |
 | "Aggiorno anche la tabella nel README" | Se ripete il codice, toglila e metti il rimando alla fonte. |
 

@@ -9,7 +9,7 @@ Il metodo dei frontend Nuxt di Dido. **Skill richiesta:** dido-code-style, con i
 
 **Implementazione di riferimento:** il boilerplate Nuxt 4 di Dido (`DidoMarchet/starter-kit-nuxt-webapp` su GitHub). Un sito nuovo parte da lì, e lì si legge il codice di composable, plugin e configurazione. I fatti del boilerplate (cosa è già cablato, moduli, rendering, sistema SCSS) stanno nei suoi `docs/project-architecture.md` e `docs/scss-system.md`.
 
-Nei progetti nati dal boilerplate le regole che una macchina sa controllare le controlla il lint (`eslint.starter.mjs`, `stylelint.starter.mjs`), dopo ogni modifica e prima di ogni commit. Se il progetto dice una cosa diversa da questa skill, vale il progetto, e la differenza va segnalata nel report perché una delle due fonti è da correggere.
+Nei progetti nati dal boilerplate le regole che una macchina sa controllare le controlla il lint (`eslint.starter.mjs`, `stylelint.starter.mjs`), dopo ogni file che scrive Claude Code e prima di ogni commit. Se il progetto (il suo `CLAUDE.md` o le sue doc, non il codice) dice una cosa diversa da questa skill, vale il progetto, e la differenza va segnalata nel report perché una delle due fonti è da correggere.
 
 | Stai per toccare | Leggi |
 |---|---|
@@ -22,9 +22,9 @@ Nei progetti nati dal boilerplate le regole che una macchina sa controllare le c
 - **Componi con il design system.** Margini e padding con le classi utility, i gap con i token, la larghezza con le righe (`.row-*`). Riusa tipografia, bottoni e card che ci sono già, niente spaziature su misura.
 - **Token pragmatici.** I token sono variabili SCSS esposte come classi numerate, non un sistema formale di design token. Un valore usato una volta sola si scrive dov'è, sono token solo i valori ricorrenti.
 - **Valori disciplinati.** Numeri pieni o multipli di 5, anche nelle misure di layout, e font a multipli di 2 o 4. Se il progetto ha un Figma, i valori vengono da lì e non si inventano, ma si arrotondano: un valore che non è un token della scala né un multiplo di 5 diventa il più vicino dei due (67 → 65, 17 → 16). Le regole di questa skill valgono sopra il layout: una differenza dal frame dovuta a loro non è un errore.
-- **Dal Figma.** Prima di scrivere si legge il Figma con l'MCP (struttura, valori, screenshot del nodo giusto) e si misurano content box, gap e padding: niente a memoria.
+- **Dal Figma.** Se c'è un Figma, prima di scrivere lo si legge con l'MCP (struttura, valori, screenshot del nodo giusto) e si misurano content box, gap e padding: niente a memoria.
 - **Testi staccati dalle righe.** Un testo, un titolo o una CTA non stanno mai appoggiati a una riga visibile (righe della griglia di sfondo, divisori verticali): hanno un padding minimo dalla riga anche se il Figma li allinea lì, con un token del progetto applicato da una classe. Le immagini possono toccarla.
-- **Degrada, non cadere.** Un dato o una config che manca produce uno stato gestito (fallback, messaggio, sezione assente), mai una pagina in errore. In SSR una proprietà letta su un oggetto che può mancare fa fallire tutta la pagina, quindi il valore di sicurezza va dove leggi (`config?.chiave ?? default`).
+- **Degrada, non cadere.** Un dato o una config che manca produce uno stato gestito (fallback, messaggio, sezione assente), mai una pagina in errore. Fa eccezione il contenuto principale della pagina: se il CMS non risponde la pagina risponde 500, se il contenuto non c'è 404. In SSR una proprietà letta su un oggetto che può mancare fa fallire tutta la pagina, quindi il valore di sicurezza va dove leggi (`config?.chiave ?? default`).
 
 ## JS e Vue
 
@@ -83,16 +83,16 @@ Nei progetti nati dal boilerplate le regole che una macchina sa controllare le c
 
 ## Dati e terze parti
 
-- Il CMS si legge solo con `useGraphql()`, con query e fragment in `app/graphql/<cms>/`. Dentro lavorano `useAsyncData` di Nuxt e il client del CMS (`@datocms/cda-client`), che importano solo `useGraphql()` e le sorgenti lato server. Le chiamate REST passano da `useApiFetch()`. Pagine e componenti non parlano mai con il client del CMS o con quello HTTP.
+- Il CMS si legge solo con `useGraphql()`, con query e fragment in `app/graphql/<cms>/`. Dentro lavorano `useAsyncData` di Nuxt e `executeQuery` di `@datocms/cda-client`. Il client del CMS lo importano solo `useGraphql()` e le sorgenti lato server. Le chiamate REST passano da `useApiFetch()`. Pagine e componenti non parlano mai con il client del CMS o con quello HTTP.
 - Un errore del CMS non è una pagina che non esiste: la pagina risponde 500, e 404 solo quando il contenuto non c'è.
 - SEO e hreflang con `useSeo()` nella pagina. Con gli slug localizzati servono `generateSeoLocaleParams` e `setI18nParams`, altrimenti gli alternate dichiarano URL che non esistono.
 - `useLenis()` si inizializza una volta sola per l'app, nel layout o in `app.vue`. Ogni contenitore che scorre da solo (foglio di una modale, cassetto, menu a tendina, pannello dei filtri) ha lo stesso scorrimento fluido della pagina con un Lenis suo, nel ticker di GSAP. Il contenitore ha un figlio solo, perché Lenis ricalcola quanto si può scorrere quando cambia la misura del primo figlio. Lenis cerca `data-lenis-prevent` solo dentro il proprio contenitore, e gli eventi che arrivano da un'altra modale aperta sopra non lo devono muovere.
 - Una terza parte che serve a tutto il sito (analytics, error tracking, consenso) è un plugin. Una che serve a una pagina o a un componente (un form, un widget di prenotazione, un player) è un composable per l'effetto più un componente per il markup.
-- La libreria di una terza parte la importa solo il suo plugin o il suo composable, che senza la sua config non fa niente. Così si toglie cancellando quei file, la dipendenza e il punto in cui si usa. Se deve ricevere qualcosa dal sito, come gli errori di GraphQL per l'error tracking, è lei che si aggancia a un hook (quello che `useGraphql()` chiama sugli errori, `vue:error`).
+- La libreria di una terza parte la importa solo il suo plugin o il suo composable, che senza la sua config non fa niente. Così si toglie cancellando quei file, la dipendenza e il punto in cui si usa. Se deve ricevere qualcosa dal sito, come gli errori di GraphQL per l'error tracking, è lei che si aggancia a un hook (`graphql:error`, che `useGraphql()` chiama sugli errori, o `vue:error`).
 - Gli embed si vestono con il design system: niente CSS del servizio, le classi dei tuoi bottoni. Se il servizio rende in un `<iframe>` non si può vestire, quindi va verificato prima di prometterlo.
 - Prima di dire cosa fa una terza parte, misura quali domini contatta e quali cookie scrive.
-- Le sorgenti dinamiche lato server, come la sitemap, chiamano il servizio dal server senza passare dall'app, paginano dove il servizio lo chiede e non rompono il build quando falliscono. Un modello con pagina di dettaglio entra nella sitemap interrogando ogni lingua.
-- Lo schema del CMS cambia solo con migration versionate, mai a mano sull'ambiente live.
+- Le sorgenti dinamiche lato server, come la sitemap, chiamano il servizio dal server con il suo client, senza `useGraphql()`, paginano dove il servizio lo chiede e non rompono il build quando falliscono. Un modello con pagina di dettaglio entra nella sitemap interrogando ogni lingua.
+- Lo schema del CMS cambia solo con migration versionate, provate su una sandbox: mai a mano, nemmeno sulla sandbox.
 
 ## Motion
 
@@ -146,4 +146,4 @@ Gli admin nati da `starterkit-backend-admin` (SPA, `ssr: false`) seguono questa 
 - **Stile**: Tailwind con i token `--color-*` del `@theme` di `app/assets/styles/main.css` e i pattern di `docs/design-system.md`, al posto di SCSS, `slamp` e `react`. Niente colori scritti nelle classi.
 - **Motion**: le transizioni di Tailwind con `motion-reduce`, come dice `docs/design-system.md`. Niente GSAP.
 - **Testi**: i18n solo se l'admin ha più lingue; in una lingua sola i testi stanno nel template.
-- **Uguali al sito**: forma del codice, `<script setup>`, ordine dei blocchi, file e cartelle in kebab-case, componente in una cartella, chiamate al backend solo con `useApi()` (`riferimento/chiamate-al-backend.md`).
+- **Uguali al sito**: forma del codice, `<script setup>`, ordine dei blocchi, file e cartelle in kebab-case, componente in una cartella, chiamate al backend solo con `useApi()` (`riferimento/chiamate-al-backend.md`). Fanno eccezione login e reset della password, che usano la fetch diretta con `useApiUrl()`: lì un 401 vuol dire credenziali sbagliate, non sessione scaduta.
