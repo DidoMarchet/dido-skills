@@ -145,7 +145,7 @@ Oltre a quanto chiede dido-code-style:
 
 Gli admin nati da `starterkit-backend-admin` (SPA, `ssr: false`) seguono questa skill, tranne dove lo stack è diverso:
 
-- **Stile**: Tailwind con i token del `@theme` di `app/assets/styles/main.css` e i pattern di `docs/design-system.md`, al posto di SCSS, `slamp` e `react`. I colori hanno nomi di ruolo (`--color-ink`, `--color-surface`), i font stanno nella scala `title-1…2`, `text-1…3`. Niente colori né dimensioni scritti nelle classi: il lint li segnala.
+- **Stile**: Tailwind con i token del `@theme` di `app/assets/styles/main.css` e i pattern di `docs/design-system.md`, al posto di SCSS, `slamp` e `react`. I colori hanno nomi di ruolo (`--color-ink`, `--color-surface`), i font stanno nella scala `title-1…2`, `text-1…3`. Niente colori né dimensioni scritti nelle classi; le dimensioni le segnala il lint.
 - **Configurazione**: un solo `nuxt.config.ts`, senza gli slice di `configuration/`.
 - **Motion**: le transizioni di Tailwind con `motion-reduce`, come dice `docs/design-system.md`. Niente GSAP.
 - **Testi**: i18n solo se l'admin ha più lingue; in una lingua sola i testi stanno nel template.
