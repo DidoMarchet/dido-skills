@@ -70,4 +70,4 @@ Le eccezioni che valgono per ogni stack stanno in `dido-code-style/riferimento/s
 ## Admin
 
 - La direzione è `docs/design-system.md` dell'admin, con i token `--color-*` di `main.css`: nessuno strumento propone palette, font o pattern nuovi.
-- Il motion resta quello di `docs/design-system.md`: transizioni CSS (Tailwind o `<Transition>`) con le `--ease-*` di `main.css`, le sue durate e `motion-reduce`. Niente GSAP, WAAPI, `@starting-style`, motion.dev, molle, curve nuove o keyframes con i valori del Figma.
+- Il motion resta quello di `docs/design-system.md`: transizioni CSS (Tailwind o `<Transition>`) con le `--ease-*` di `main.css` e le sue durate; il reduced motion lo annulla la regola di `main.css`. Niente GSAP, WAAPI, `@starting-style`, motion.dev, molle, curve nuove o keyframes con i valori del Figma.
