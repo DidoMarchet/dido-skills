@@ -61,7 +61,7 @@ Le eccezioni che valgono per ogni stack stanno in `dido-code-style/riferimento/s
 
 ## Vue, store, form
 
-- Da una guida di debug di Vue si prende la diagnosi, non il codice. La correzione usa `<script setup>`, gli stili del componente, GSAP, i dati dal setup con `useGraphql()` o `useApiFetch()`, e plugin, composable, `useState`, `useId()`, `<NuxtLink>` e l'auto-import di Nuxt al posto di `createApp`, `app.use`, router, `main.js` e `process.client`. Non aggiunge dipendenze e, nel sito, gira in SSR prima di dirla fatta.
+- Da una guida di debug di Vue si prende la diagnosi, non il codice. La correzione usa `<script setup>`, gli stili del componente, GSAP (nell'admin le transizioni della sezione Admin), i dati dal setup con `useGraphql()` o `useApiFetch()` (nell'admin `useApi()`), e plugin, composable, `useState`, `useId()`, `<NuxtLink>` e l'auto-import di Nuxt al posto di `createApp`, `app.use`, router, `main.js` e `process.client`. Non aggiunge dipendenze e, nel sito, gira in SSR prima di dirla fatta.
 - Un errore catturato con `onErrorCaptured` continua a salire, quindi niente `return false`: l'error tracking lo deve vedere. Un mismatch di idratazione si corregge, non si zittisce con `data-allow-mismatch`.
 - Gli store si scrivono in forma setup con arrow function, in `app/stores/`, senza `mapState`, plugin con opzioni proprie o `console.log` in `$onAction`. Lo stato di autenticazione sta solo in memoria: niente token né utente nello storage del browser. Lo storage si usa solo nel client, dentro try/catch.
 - Lo stile dei form resta quello del progetto (SCSS nel sito): niente temi Tailwind, Regenesis o `formkit theme`. Gli input Pro solo su richiesta, con la chiave da una variabile d'ambiente in tutti e tre i file env.

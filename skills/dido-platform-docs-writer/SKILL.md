@@ -36,6 +36,8 @@ documento esistente si toglie, anche se è ancora giusta, e al suo posto va il r
   dovrebbe esserci. Se durante la lettura emergono problemi (secret fuori dai file env, servizi senza
   healthcheck, script che puntano a host non definiti da nessuna parte) annotali in coda al
   documento sotto "Punti da verificare" e vai avanti: il manuale non diventa una review.
+  Prima controlla commenti, decisioni e limiti noti: una scelta documentata (per esempio un
+  container senza healthcheck per scelta) non è un punto da verificare.
 - **Modifiche minime** (un comando da correggere, un rimando da aggiornare): falle e basta,
   il workflow completo qui non serve.
 

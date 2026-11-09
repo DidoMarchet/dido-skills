@@ -17,7 +17,7 @@ Prima di seguire una skill che non è `dido-*` (Prisma, Postgres, Docker, Redocl
 - La rotta dichiara endpoint e middleware, senza logica.
 - Il controller valida l'input in cima, chiama il service e costruisce la risposta. Non tocca il database.
 - Il service ha la logica di business e lancia gli errori di dominio. Non conosce la richiesta HTTP né la validazione, e non scrive la risposta.
-- L'app si costruisce senza aprire la porta e il listen sta in un altro file, così i test importano l'app senza avviare il server.
+- L'app si costruisce senza aprire la porta e il listen sta in un altro file, così i test costruiscono l'app senza avviare il server di produzione.
 - Un modulo di dominio è una cartella con rotte, schemi, controller e service, e si aggancia all'app con una riga, il mount delle sue rotte. Gli altri moduli lo usano dal suo service, e i servizi condivisi (mail, storage, audit) dal loro punto d'ingresso.
 
 ## Contratto dell'API
@@ -100,7 +100,7 @@ Prima di seguire una skill che non è `dido-*` (Prisma, Postgres, Docker, Redocl
 
 ## Test
 
-- Test end-to-end contro l'app costruita senza listen, con i path completi (`/v1/...`) e un database reale, meglio un container usa e getta che quello di sviluppo. Nessuna mail parte davvero.
+- Test end-to-end contro l'app costruita e aperta dal test su una porta di loopback (`listenOnLoopback(buildApp())` nello starter, mai `request(buildApp())`: su macOS supertest può trovare la porta già presa), con i path completi (`/v1/...`) e un database reale, meglio un container usa e getta che quello di sviluppo. Nessuna mail parte davvero.
 - Un flusso che usa un servizio esterno ha anche un test con il servizio che non risponde (es. la mail che non parte dà 503).
 - Ogni file di test usa un prefisso univoco nei dati che crea, e alla fine cancella solo quelli.
 - Se i vincoli unique farebbero scontrare file di test in parallelo, i file girano in sequenza.

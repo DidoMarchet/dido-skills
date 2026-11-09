@@ -10,7 +10,7 @@ browser interattivo · `[M]` manuale/umana (credenziali, denaro, giudizio, strum
 
 **Sezioni:**
 
-1. GO Go-live, ambiente e migrazione `#lancio`
+1. GO Go-live, ambiente e migrazione `#lancio` (GO-07…GO-10 `#tutti`)
 2. TEC Tecnica e front-end
 3. PRF Performance
 4. ACC Accessibilità
@@ -31,7 +31,7 @@ browser interattivo · `[M]` manuale/umana (credenziali, denaro, giudizio, strum
 
 ---
 
-## 1. GO Go-live, ambiente e migrazione `#lancio`
+## 1. GO Go-live, ambiente e migrazione `#lancio` (GO-07…GO-10 `#tutti`)
 
 Sezione da eseguire **per prima** in caso di lancio o migrazione: qui stanno gli errori che
 annullano tutto il resto del lavoro.

@@ -24,7 +24,9 @@ Formato di ogni voce nel documento finale:
   volume, comando di avvio che punta a un file inesistente. Verifica: `docker compose ps`,
   `docker compose logs --tail=50 <servizio>`, `docker compose config`.
 - Il servizio parte prima della sua dipendenza → manca `depends_on` con `condition:
-  service_healthy`, o l'healthcheck non è definito. Si vede in `compose.yaml`.
+  service_healthy`, o l'healthcheck non è definito. Si vede in `compose.yaml`. Se il
+  progetto ha scelto di non averli (un commento o una decisione lo dice), la causa è
+  altrove: il servizio deve aspettare da solo, ritentando la connessione.
 - Comportamento diverso fra la macchina di sviluppo e il server → un file di override viene
   applicato dove non dovrebbe. Verifica con `docker compose config` e con `docker compose -f
   compose.yaml config`, e confronta l'output.

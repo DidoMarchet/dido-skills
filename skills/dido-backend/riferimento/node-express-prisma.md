@@ -43,7 +43,7 @@ app/node/
 └── prisma/                    # schema.prisma + migrations/
 ```
 
-`buildApp()` è separato da `index.js`, così i test importano l'app senza avviare il listener.
+`buildApp()` è separato da `index.js`, così i test costruiscono l'app senza avviare il server di produzione.
 
 Ogni modulo si monta in `app.js` sul sub-router `api`, con una riga. Come si aggiunge un modulo è in `docs/ARCHITETTURA-NODE.md` §11 dello starter, e per toglierlo si fa lo stesso elenco al contrario.
 
@@ -111,7 +111,7 @@ Il gestore globale è `middleware/error-handler.js`, registrato per ultimo:
 
 ## Test
 
-- vitest e supertest in `app/node/tests/`, fuori da `src/`, contro `buildApp()`. Postgres reale, meglio un container usa e getta su un'altra porta, e SMTP irraggiungibile. La procedura è nell'`AGENTS.md` dello starter.
+- vitest e supertest in `app/node/tests/`, fuori da `src/`, con il server aperto da `listenOnLoopback(buildApp())` di `tests/setup.js`, mai `request(buildApp())`. Postgres reale, meglio un container usa e getta su un'altra porta, e SMTP irraggiungibile. La procedura è nell'`AGENTS.md` dello starter.
 - La CI (`.github/workflows/ci.yml`) ripete schema, lint, formato e test su un Postgres usa e getta a ogni push su `main` e a ogni pull request.
 - Ogni file di test usa il prefisso `test-<uuid>-` e in `afterAll` cancella solo ciò che corrisponde.
 - `fileParallelism: false`, perché i vincoli unique andrebbero in conflitto.
