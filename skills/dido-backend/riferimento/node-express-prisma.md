@@ -6,7 +6,7 @@ Come lo starter backend di Dido applica le linee guida di `SKILL.md`, e dove sta
 
 | Ambito | Strumento |
 |---|---|
-| Runtime | Node 22 (Alpine in Docker) |
+| Runtime | Node 24 (Alpine in Docker) |
 | Gestore pacchetti | npm (`package-lock.json`) |
 | Linguaggio | JavaScript puro, ESM (`"type": "module"`), niente TypeScript tranne `prisma.config.ts` |
 | HTTP | Express 5 |
@@ -111,7 +111,7 @@ Il gestore globale è `middleware/error-handler.js`, registrato per ultimo:
 
 ## Test
 
-- vitest e supertest in `app/node/tests/`, fuori da `src/`, contro `buildApp()`. Postgres reale, meglio un container usa e getta su un'altra porta, e SMTP irraggiungibile. La procedura è nel `CLAUDE.md` dello starter.
+- vitest e supertest in `app/node/tests/`, fuori da `src/`, contro `buildApp()`. Postgres reale, meglio un container usa e getta su un'altra porta, e SMTP irraggiungibile. La procedura è nell'`AGENTS.md` dello starter.
 - La CI (`.github/workflows/ci.yml`) ripete schema, lint, formato e test su un Postgres usa e getta a ogni push su `main` e a ogni pull request.
 - Ogni file di test usa il prefisso `test-<uuid>-` e in `afterAll` cancella solo ciò che corrisponde.
 - `fileParallelism: false`, perché i vincoli unique andrebbero in conflitto.
