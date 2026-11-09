@@ -155,6 +155,7 @@ Punteggiatura normale: punto, virgola, due punti, parentesi e virgolette dritte 
 
 ## Test
 
+- I test li scrive l'agente, nella stessa modifica: Dido non ne scrive a mano, quindi un test che manca non si lascia "da fare".
 - Ogni comportamento nuovo e ogni bug fix hanno un test che senza la modifica fallisce. Per un bug, scrivi prima il test e guardalo fallire. Un test scritto dopo la modifica si prova togliendo la modifica: deve fallire, e per il motivo giusto (l'asserzione, non un import rotto).
 - Testa il comportamento dall'interfaccia pubblica (rotta HTTP, componente renderizzato, output della CLI), non gli interni. Si finge solo il confine (rete, CMS, auto-import del framework), mai un modulo interno, e un mock ha la forma completa della risposta vera.
 - Il valore atteso si scrive a mano, mai calcolato con il codice sotto test. Niente snapshot né soglie di coverage. Nei test asincroni si aspetta la condizione, non un tempo fisso.

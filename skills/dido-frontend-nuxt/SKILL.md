@@ -135,7 +135,7 @@ Oltre a quanto chiede dido-code-style:
 
 - lint pulito, JS e CSS, sui file toccati;
 - la pagina toccata risponde 200 con zero errori in console e nel log, compresi i mismatch di idratazione;
-- test verdi sulle util toccate;
+- test verdi: util e composable toccati hanno sempre i loro test; un componente li ha quando contiene della logica (con `@nuxt/test-utils`); motion e aspetto si verificano con gli screenshot, non con i test;
 - ogni elemento della parte toccata confrontato con quelli simili del sito (carosello con carosello, schede con schede, link con link): stesso componente e stesso comportamento, compresi trascinamento, hover, pressione e transizioni;
 - l'interfaccia toccata guardata a 375, 768, 1024, 1440 e 1920 con le skill di design del progetto (impeccable, design-taste-frontend, mobile-native, dove ci sono): il contenuto si legge, è bilanciato e si usa bene. Non basta che non si rompa;
 - se hai toccato una terza parte, domini e cookie misurati;
