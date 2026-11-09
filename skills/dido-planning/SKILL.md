@@ -9,6 +9,8 @@ Il metodo con cui Dido porta avanti un lavoro di più passi: un piano scritto e 
 
 Una richiesta piccola (un fix, un ritocco, una pagina) non passa da qui: si fa e basta. Se non è chiaro se serve un piano, proponilo in chat in poche righe e lascia scegliere a Dido.
 
+Le skill di processo di altri (superpowers: brainstorming, writing-plans, executing-plans, subagent-driven-development) si possono usare per le loro tecniche, ma piano, cartelle, domande, commit e report restano quelli di questa skill, anche quando quelle dicono "sempre" (dido-code-style, `riferimento/skill-di-terzi.md`).
+
 ## Chi decide cosa
 
 - **Dido** decide il prodotto (cosa fa, per chi, le priorità), il design delle schermate e dei gesti, approva il piano, decide quando una milestone si apre e si chiude, e fa le prove sui dispositivi veri.
@@ -17,7 +19,7 @@ Una richiesta piccola (un fix, un ritocco, una pagina) non passa da qui: si fa e
 
 ## Dove stanno le cose
 
-Nel `docs/` del repo principale del progetto: quello che il suo `CLAUDE.md` indica, di solito l'app. Gli altri repo dello stesso progetto (backend, admin) tengono il loro stato in `docs/ROADMAP.md` e rimandano ai documenti del repo principale: una copia sola.
+Nel `docs/` del repo principale del progetto: quello che il suo `AGENTS.md` o `CLAUDE.md` indica, di solito l'app. Un piano che tocca più repo (app, backend, admin) sta lì, e negli altri repo i commit citano piano e passo: una copia sola.
 
 | File | Cosa |
 |---|---|
@@ -26,7 +28,7 @@ Nel `docs/` del repo principale del progetto: quello che il suo `CLAUDE.md` indi
 | `docs/design/<nome>.html` | il design da far approvare prima di costruire |
 | `docs/decisions/NNNN-<titolo>.md` | una decisione tecnica non banale. Se il repo ha già un registro delle decisioni (nel backend `docs/DECISIONI-ARCHITETTURA.md`), va lì, con il suo schema |
 | `docs/reports/<nome>.md` | il report di chiusura |
-| `docs/README.md`, sezione "Dove siamo" | lo stato, aggiornato a ogni passo: è la memoria tra le sessioni |
+| sezione "Dove siamo", in fondo al piano in corso | lo stato, aggiornato a ogni passo: è la memoria tra le sessioni |
 
 ## Il piano
 
@@ -34,7 +36,7 @@ Nel `docs/` del repo principale del progetto: quello che il suo `CLAUDE.md` indi
 # Piano <nome>: <cosa, in una riga>
 
 > Stato: **bozza, da approvare** (oppure **approvato da Dido il gg/mm/aaaa**, "<le sue parole>").
-> Riguarda <repo e parti>. Lo stato sta in "Dove siamo".
+> Riguarda <repo e parti>. Lo stato sta in "Dove siamo", in fondo a questo piano.
 
 ## Cosa si chiede e cosa si fa
 | Voce (dal charter o dalla richiesta) | Cosa si fa |
@@ -55,11 +57,13 @@ Nel `docs/` del repo principale del progetto: quello che il suo `CLAUDE.md` indi
 ## Dipendenze nuove  (o "nessuna")
 ## Cosa non si fa    (e dove andrà)
 ## Domande per Dido  (solo di prodotto, con la proposta; le risposte con la data)
+## Dove siamo        (a ogni passo: data, passo, commit, come è stato provato, cosa resta, scelte fatte senza chiedere; l'ultimo commit rivisto)
 ```
 
 - I passi sono piccoli e ognuno si verifica da solo. Uno che non si riesce a provare va diviso.
 - Una richiesta di Dido a metà piano che cambia il piano diventa un passo con la sua data, messo dove va fatto (8b, 9b.1, 9b.2…). Se c'è il charter, entra anche nel registro. Una richiesta piccola si fa e si scrive in "Dove siamo".
 - Ciò che resta fuori si scrive in "Cosa non si fa", così non torna a ogni sessione.
+- Niente si perde: ciò che emerge durante il lavoro (un problema fuori dal passo, una richiesta, un dubbio, un rinvio) entra subito nel piano, con la data: un passo nuovo, "Cosa non si fa" o "Domande per Dido". Mai solo in chat.
 
 ## Eseguire
 
@@ -68,11 +72,11 @@ Nel `docs/` del repo principale del progetto: quello che il suo `CLAUDE.md` indi
 - Un invariante del charter non si viola mai: se un passo sembra chiederlo, ci si ferma e si chiede.
 - Una scelta tecnica non banale va nel registro delle decisioni (vedi la tabella) nella stessa modifica: contesto, scelta, cosa è stato verificato, alternative scartate. Se cambia il charter, si aggiorna anche lui.
 - Ogni passo finisce verificato (dido-code-style, "Fatto vuol dire verificato") e con "Dove siamo" aggiornato: cosa è fatto, come è stato provato, cosa resta, le scelte fatte senza chiedere.
-- Un commit per passo (dido-code-style dice quando), con piano e passo nel messaggio, nella lingua del progetto: `M2 step 4: filtri della lista ordini`.
+- Un commit per passo (dido-code-style dice quando), con piano e passo nel messaggio, nella lingua del progetto: `M2 step 4: filtri della lista ordini`. Un agente che lavora da solo su un repo fa i suoi commit. Se sullo stesso repo lavorano più agenti, committa solo chi coordina, dopo aver guardato il diff e rilanciato le prove.
 
 ## Chiudere
 
-Prima del report, una revisione del codice indipendente sulle modifiche dal commit dell'ultima revisione, che "Dove siamo" segna. La fa un agente che non ha scritto il codice (un subagente, Codex), con il diff e senza le conclusioni di chi l'ha scritto. Solo Alta e Media (dido-code-style, Parte 2), ognuna corretta con un test che senza la correzione fallisce dove un test si può scrivere, altrimenti con la prova nel report. Poi il report:
+Prima del report si ripassa il piano voce per voce: ogni riga di "Cosa si chiede", ogni passo, ogni domanda e ogni cosa emersa ha un esito, e quello che non è fatto va in "Cosa resta aperto" con dove andrà. Poi una revisione del codice indipendente sulle modifiche dal commit dell'ultima revisione, che "Dove siamo" segna. La fa un agente che non ha scritto il codice (un subagente, Codex), con il diff e senza le conclusioni di chi l'ha scritto. Solo Alta e Media (dido-code-style, Parte 2), ognuna corretta con un test che senza la correzione fallisce dove un test si può scrivere, altrimenti con la prova nel report. Poi il report:
 
 ```md
 # Report <nome>: <cosa>
@@ -94,4 +98,4 @@ La milestone la chiude Dido. Fino ad allora il piano resta in corso. Le parti ch
 
 ## Riprendere
 
-A inizio sessione si leggono lo stato ("Dove siamo" nel repo principale, `docs/ROADMAP.md` negli altri), il piano in corso e le ultime decisioni, prima di toccare il codice. Ciò che è segnato come fatto non si rifà: si riapre solo con un difetto riprodotto e, in una parte chiusa, con l'ok di Dido.
+A inizio sessione si leggono il piano in corso con il suo "Dove siamo" e le ultime decisioni, prima di toccare il codice. Ciò che è segnato come fatto non si rifà: si riapre solo con un difetto riprodotto e, in una parte chiusa, con l'ok di Dido.

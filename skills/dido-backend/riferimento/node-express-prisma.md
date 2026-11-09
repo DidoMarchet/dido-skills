@@ -1,6 +1,6 @@
 # Starter Node: Express, Prisma, PostgreSQL
 
-Come lo starter backend di Dido applica le linee guida di `SKILL.md`, e dove sta ogni cosa. I progetti nati dallo starter hanno la stessa struttura. Se un progetto ha cambiato un dettaglio, vale il suo codice.
+Come lo starter backend di Dido applica le linee guida di `SKILL.md`, e dove sta ogni cosa. I progetti nati dallo starter hanno la stessa struttura. Se un progetto ha cambiato dove sta una cosa (file, nomi, helper), vale il suo codice; le regole di `SKILL.md` valgono comunque.
 
 ## Stack
 

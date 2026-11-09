@@ -36,7 +36,7 @@ Nei progetti nati dal boilerplate le regole che una macchina sa controllare le c
 ## Nomi
 
 - File e cartelle in kebab-case, sempre (`widget/media-text`). Nel template i tag restano PascalCase (`<WidgetMediaText>`), perché l'auto-import concatena il percorso.
-- Composable `useX`, util con un nome d'azione (`buildTrack`, `isLightHex`), plugin con il suffisso d'ambiente dove serve (`*.client.js`).
+- Composable `useX`, in un file kebab-case senza `use` (`composables/api-fetch.js` esporta `useApiFetch`); componenti in una cartella kebab-case con `index.vue`, anche nell'admin (`components/ui/button/index.vue` è `<UiButton>`); util con un nome d'azione (`buildTrack`, `isLightHex`), plugin con il suffisso d'ambiente dove serve (`*.client.js`).
 - Classi BEM: blocco `.componente`, `__elemento`, `--modificatore`. Le varianti si chiamano per sezione o brand, mai per colore (`--footer`, non `--dark`).
 - Una sola scala tipografica numerata (`.title-1…4`, `.text-1…3`), mai due nomenclature insieme.
 - Colori a scala per famiglia (`$black-1`, `$grey-2`), non semantici. Gli id solo quando servono (àncora, `aria-*`, JS), in kebab-case. Il maiuscolo si fa con `text-transform`, mai scritto nel testo.
