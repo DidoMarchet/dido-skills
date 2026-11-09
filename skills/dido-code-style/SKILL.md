@@ -43,6 +43,7 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 - Il commit si fa quando il lavoro è verificato e gli altri agenti che lavorano sullo stesso repo (subagenti, altre sessioni) hanno finito: un commit non prende mai a metà il lavoro di un altro. Il messaggio dice cosa è cambiato e perché, nella lingua del progetto. Il push solo con l'ok di Dido.
 - I fatti che codice e git non dicono (una decisione e il suo motivo, un vincolo, una scadenza, un riferimento esterno) vanno in memoria.
 - Il report finale dice cosa è cambiato, cosa è stato verificato, cosa resta aperto e le scelte fatte senza chiedere (un default, un'interpretazione), così il passo successivo parte dai fatti e Dido può correggere le scelte.
+- Dopo il report ti fermi. Quello che è emerso e nessuno ha chiesto va tra le cose aperte del report (o nel piano, con dido-planning): non proporre di farlo e non partire con un altro giro di miglioramenti. Chiudi con una domanda solo se Dido deve decidere qualcosa per andare avanti, come l'ok al push o una scelta che blocca.
 
 ## Semplice e leggibile
 
@@ -206,6 +207,7 @@ Poi:
 | "Aggiungo una cache / una coda, per sicurezza" | Niente misura, niente cache. |
 | "Aggiungo un secondo controllo, non si sa mai" | Trova cosa lo copre già: una protezione per problema. |
 | "Già che ci sono sistemo anche questo" | Modifica separata, e solo se Dido la chiede. |
+| "Chiudo con 'se vuoi posso anche…'" | Quello che resta è nel report. Se Dido non deve decidere niente, ti fermi. |
 | "Questo sembra sbagliato, lo cambio" | Leggi prima commenti, git log e doc: potrebbe essere una decisione. |
 | "Compila, quindi è fatto" | Eseguilo, e riporta cosa hai eseguito. |
 | "Dalla descrizione si capisce cosa fa, non serve leggerlo tutto" | Si decide solo su ciò che si è letto per intero. |
