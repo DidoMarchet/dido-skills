@@ -9,7 +9,7 @@ Il metodo dei frontend Nuxt di Dido. **Skill richiesta:** dido-code-style, con i
 
 **Implementazione di riferimento:** il boilerplate Nuxt 4 di Dido (`DidoMarchet/starter-kit-nuxt-webapp` su GitHub). Un sito nuovo parte da lì, e lì si legge il codice di composable, plugin e configurazione. I fatti del boilerplate (cosa è già cablato, moduli, rendering, sistema SCSS) stanno nei suoi `docs/project-architecture.md` e `docs/scss-system.md`.
 
-Nei progetti nati dal boilerplate le regole che una macchina sa controllare le controlla il lint (`eslint.starter.mjs`, `stylelint.starter.mjs`), dopo ogni file che scrive Claude Code e prima di ogni commit. Se il progetto (il suo `CLAUDE.md` o le sue doc, non il codice) dice una cosa diversa da questa skill, vale il progetto, e la differenza va segnalata nel report perché una delle due fonti è da correggere.
+Nei progetti nati dal boilerplate le regole che una macchina sa controllare le controlla il lint (`eslint.starter.mjs`, `stylelint.starter.mjs`), dopo ogni file che scrive Claude Code. Se il progetto (il suo `CLAUDE.md` o le sue doc, non il codice) dice una cosa diversa da questa skill, vale il progetto, e la differenza va segnalata nel report perché una delle due fonti è da correggere.
 
 | Stai per toccare | Leggi |
 |---|---|
