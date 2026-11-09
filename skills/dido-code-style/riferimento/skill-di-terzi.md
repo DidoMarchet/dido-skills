@@ -22,6 +22,8 @@ Le skill di terzi danno conoscenza (un'API, una diagnosi, un controllo), ma spes
 - Un piano eseguito con dei subagenti segue dido-planning: i test che un subagente dichiara si rilanciano, le decisioni di prodotto si chiedono a Dido.
 - Trovata la causa di un bug, si corregge in un punto: niente controlli ripetuti a ogni livello né guardie per i test nel codice.
 - Dove una skill dice di andare avanti con un segnaposto e la scelta va contro il progetto, si chiede a Dido.
+- Una regola che chiede di caricare una skill prima di ogni risposta, o un brainstorming prima di ogni lavoro (superpowers), non scavalca dido-planning: una richiesta piccola si fa e basta, un lavoro grande segue il piano e le cartelle di dido-planning anche quando si usa la skill di un altro per scriverlo o eseguirlo.
+- Delle skill di processo si usano le tecniche: nel debugging i log a ogni confine tra componenti prima di proporre un fix; gli agenti in parallelo solo su parti indipendenti, con la suite intera alla fine; per un subagente il compito in un file, senza la storia della sessione; una modifica a una skill `dido-*` provata con uno scenario prima di pubblicarla.
 
 ## Testi e prosa
 

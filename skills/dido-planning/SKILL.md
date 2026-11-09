@@ -49,6 +49,8 @@ Nel `docs/` del repo principale del progetto: quello che il suo `CLAUDE.md` indi
 4. **Prove** di chiusura.
 5. **Revisione del codice** indipendente, con le correzioni.
 6. **Chiusura**: report e "Dove siamo".
+## Interfacce tra i passi  (solo se un passo usa ciò che ne produce un altro: funzione, endpoint, campo, con i nomi esatti)
+## Casi che i test non coprono  (gli input e i guasti più probabili che nessun test dei passi prova, ognuno con il test da aggiungere al passo giusto)
 ## Misure            (solo se il lavoro ha un rischio di memoria, carico o tempi)
 ## Dipendenze nuove  (o "nessuna")
 ## Cosa non si fa    (e dove andrà)
