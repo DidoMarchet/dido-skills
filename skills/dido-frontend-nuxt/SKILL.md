@@ -116,6 +116,10 @@ Nei progetti nati dal boilerplate le regole che una macchina sa controllare le c
 - Un contenuto che compare al posto di un altro (schede, pannelli con `v-show`) entra in dissolvenza con il wrapper di dissolvenza, mai a scatto.
 - La superficie di una modale animata in entrata ha `will-change: transform`: se il browser toglie il suo livello a fine animazione, al primo ridisegno (il primo hover) testo e immagini sfarfallano.
 - In una galleria le immagini stanno tutte nel riquadro, una sopra l'altra e solo la corrente visibile: al cambio quella nuova è già caricata. Sempre con `NuxtImg`.
+- Una foto non si vede mai mentre arriva, né dopo il testo che le sta accanto:
+  - il suo riquadro ha un segnaposto, il fondo che le foto hanno nel Figma; una foto che arriva dopo la pagina ci compare sopra in dissolvenza quando è scaricata e decodificata, con una direttiva unica del progetto. Non su una foto fusa con il fondo (vedi sopra) né su una che ha un movimento suo;
+  - quello che compare dopo un'azione o allo scroll (una scheda, un pannello, una card che entra) aspetta le sue foto decodificate prima di muoversi, con un'attesa massima. Il browser decodifica una foto nascosta solo quando compare, e la disegna qualche fotogramma dopo il testo anche se è già scaricata;
+  - le foto che entrano nella cornice muovendosi (uno slider, un carosello che scorre da solo) si scaricano e si decodificano appena lui è in vista: lazy partirebbero a metà del passaggio, e la slide arriverebbe vuota.
 - `prefers-reduced-motion` sempre rispettato: niente scale o translate animati, al massimo una dissolvenza. Si legge quando l'animazione parte, perché può cambiare mentre si naviga.
 - Mai lo zoom delle immagini all'hover: al massimo un overlay o il testo.
 
@@ -138,6 +142,7 @@ Oltre a quanto chiede dido-code-style:
 - test verdi: util e composable toccati hanno sempre i loro test; un componente li ha quando contiene della logica (con `@nuxt/test-utils`); motion e aspetto si verificano con gli screenshot, non con i test;
 - ogni elemento della parte toccata confrontato con quelli simili del sito (carosello con carosello, schede con schede, link con link): stesso componente e stesso comportamento, compresi trascinamento, hover, pressione e transizioni;
 - l'interfaccia toccata guardata a 375, 768, 1024, 1440 e 1920 con le skill di design del progetto (impeccable, design-taste-frontend, mobile-native, dove ci sono): il contenuto si legge, è bilanciato e si usa bene. Non basta che non si rompa;
+- dove un'azione mostra delle foto (schede, pannelli, hover, slider), i fotogrammi veri dello schermo con la rete lenta e la CPU rallentata (4×): nessuna foto arriva dopo il resto o vuota. In locale le foto arrivano subito e il difetto non si vede;
 - se hai toccato una terza parte, domini e cookie misurati;
 - con una terza parte nuova, la pagina risponde 200 anche senza la sua variabile d'ambiente.
 
