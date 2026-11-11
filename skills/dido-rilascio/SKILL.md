@@ -1,6 +1,6 @@
 ---
 name: dido-rilascio
-description: Usare quando Dido scrive /dido-rilascio per chiudere un lavoro: perimetro, revisione indipendente, correzioni, prove complete, commit, push e controllo del deploy.
+description: "Usare quando Dido scrive /dido-rilascio per chiudere un lavoro: perimetro, revisione indipendente, correzioni, prove complete, commit, push e controllo del deploy."
 disable-model-invocation: true
 argument-hint: "[base del confronto, es. main]"
 ---
