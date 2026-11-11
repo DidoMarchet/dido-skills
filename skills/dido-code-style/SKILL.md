@@ -5,7 +5,7 @@ description: Usare ogni volta che si scrive, modifica, rifattorizza, corregge o 
 
 # Stile e convenzioni di codice di Dido
 
-Stai aiutando **Dido Marchet** a costruire applicazioni web. Segui queste convenzioni **alla lettera**: sono validate sui progetti di Dido in produzione e valgono per ogni stack. **Skill dello stack, richiesta quando lavori su quel codice:** dido-backend per i backend, dido-frontend-nuxt per i frontend Nuxt.
+Stai aiutando **Dido Marchet** a costruire applicazioni web. Queste convenzioni sono validate sui progetti di Dido in produzione e valgono per ogni stack. **Skill dello stack, richiesta quando lavori su quel codice:** dido-backend per i backend, dido-frontend-nuxt per i frontend Nuxt.
 
 | Compito | Cosa leggere |
 |---|---|
@@ -15,7 +15,15 @@ Stai aiutando **Dido Marchet** a costruire applicazioni web. Segui queste conven
 | Analizzare un repo, un modulo o una cartella | `analisi.md`, accanto a questo file |
 | Usare una skill che non è `dido-*` | `riferimento/skill-di-terzi.md`, accanto a questo file, e quello della skill dello stack |
 
-Quando il `CLAUDE.md` del progetto è più specifico, vale quello. Dove una skill di terzi dice altro, valgono le skill `dido-*` e le eccezioni dei file `skill-di-terzi.md`.
+Quando due cose si contraddicono, vale la prima di quest'ordine:
+
+1. ciò che serve perché il codice funzioni (linguaggio, framework, libreria);
+2. le indicazioni di Dido;
+3. il `CLAUDE.md` del progetto, quando è più specifico;
+4. le skill `dido-*`, con le eccezioni dei file `skill-di-terzi.md`;
+5. le skill di terzi e il codice che c'è.
+
+Quando una regola non si applica per il punto 1 o 2, il motivo va scritto accanto al codice e nel report.
 
 ---
 
@@ -41,6 +49,7 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 - **Un fatto, un posto.** Le doc dicono ciò che il codice non dice: decisioni e perché, procedure (con i comandi e gli URL che servono), il ruolo di ogni servizio e modulo. Per il resto rimandano alla fonte: le variabili stanno in `.env.example`, con un commento sopra quelle il cui nome non basta, e gli endpoint nella spec OpenAPI. Una tabella, un elenco o un diagramma che riporta ciò che un file già definisce è una copia, e ogni copia è un punto in cui la doc resta indietro.
 - Dopo la modifica cerca nel repo le parole chiave che hai toccato. Dove una doc copia ciò che hai cambiato, togli tutta la copia, non solo la riga che hai cambiato, e metti il rimando alla fonte invece di aggiornarla. Le procedure e le decisioni scritte nelle doc che non valgono più si correggono.
 - Il commit si fa quando il lavoro è verificato e gli altri agenti che lavorano sullo stesso repo (subagenti, altre sessioni) hanno finito: un commit non prende mai a metà il lavoro di un altro. Il messaggio dice cosa è cambiato e perché, nella lingua del progetto. Il push solo con l'ok di Dido.
+- Più sessioni sullo stesso repo lavorano ognuna nel suo worktree (`claude -w <nome>`). Al commit si aggiungono per nome solo i file del proprio lavoro (`git add percorso/file`).
 - I fatti che codice e git non dicono (una decisione e il suo motivo, un vincolo, una scadenza, un riferimento esterno) vanno in memoria.
 - Il report finale dice cosa è cambiato, cosa è stato verificato, cosa resta aperto e le scelte fatte senza chiedere (un default, un'interpretazione), così il passo successivo parte dai fatti e Dido può correggere le scelte.
 - Dopo il report ti fermi. Quello che è emerso e nessuno ha chiesto va tra le cose aperte del report (o nel piano, con dido-planning): non proporre di farlo e non partire con un altro giro di miglioramenti. Chiudi con una domanda solo se Dido deve decidere qualcosa per andare avanti, come l'ok al push o una scelta che blocca.
@@ -56,7 +65,7 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 
 ## Forma del codice
 
-- Funzioni con le arrow (`const nome = (args) => {}`), mai `function`, anche nelle callback. Fanno eccezione solo le API che vogliono `this`, con il motivo scritto accanto. Le arrow non sono hoistate: si definiscono prima dell'uso.
+- Funzioni con le arrow (`const nome = (args) => {}`) come predefinito, anche nelle callback. `function` quando il codice ne ha bisogno: la funzione usa `this` (un'API che la chiama con il suo contesto, un metodo di oggetto) oppure è un generatore (`function*`). Per questi casi niente `eslint-disable`: il lint dello starter li accetta. Le arrow non sono hoistate: si definiscono prima dell'uso.
 - I nomi che scrivi tu sono in inglese: variabili, funzioni, file, cartelle, classi, chiavi e api_key del CMS. Commenti, doc e commit seguono la lingua del progetto. I nomi che ci sono già restano come sono, in qualunque lingua.
 - Nomi interi in camelCase, che dicono cos'è la cosa: `article`, `currentArticle`, `index`, `rows`. Niente lettere singole o abbreviazioni (`a`, `e`, `el`, `cur`, `out`): per eventi ed errori `event` ed `error`. Restano gli idiomi del framework, come `req`, `res` e `next` in Express e `tx` nelle transazioni di Prisma. Attento a non riusare un nome dello scope esterno.
 - Niente `console.log` di debug lasciati nel codice. I log che servono davvero passano dal logger del progetto; dove non c'è, l'avvio di un server usa `console.info` e i problemi `console.warn` e `console.error`. Negli script da terminale il log è l'output.
@@ -121,7 +130,7 @@ Prematura è l'infrastruttura "per quando crescerà il traffico": cache, code, w
 - Un fix cambia le righe rotte, non il modulo. I refactor "già che ci sono" vanno in una modifica separata, e solo se Dido li chiede.
 - Non riformattare, rinominare o riordinare codice che non ti è stato chiesto di toccare.
 - Allineati al codice attorno: nomi, idiomi, struttura dei file, lingua e densità dei commenti.
-- Il codice che c'è già non è una regola. Dove va contro queste skill (copie, componenti doppi, un metodo diverso da quello scritto qui), valgono le skill e le indicazioni di Dido, anche se quel codice l'ha scritto qualcun altro. Segui loro e scrivi la differenza nel report.
+- Il codice che c'è già non è una regola: nell'ordine delle priorità (in cima a questa skill) viene dopo le skill. Dove va contro queste skill (copie, componenti doppi, un metodo diverso da quello scritto qui), segui le skill e le indicazioni di Dido, anche se quel codice l'ha scritto qualcun altro, e scrivi la differenza nel report.
 
 ## Commenti
 
@@ -162,6 +171,7 @@ Punteggiatura normale: punto, virgola, due punti, parentesi e virgolette dritte 
 - Testa il comportamento dall'interfaccia pubblica (rotta HTTP, componente renderizzato, output della CLI), non gli interni. Si finge solo il confine (rete, CMS, auto-import del framework), mai un modulo interno, e un mock ha la forma completa della risposta vera.
 - Il valore atteso si scrive a mano, mai calcolato con il codice sotto test. Niente snapshot né soglie di coverage. Nei test asincroni si aspetta la condizione, non un tempo fisso.
 - Non modificare un test solo per farlo passare. Se il cambio di comportamento è voluto, dillo nella modifica. Un test non si salta e non passa grazie a un retry: `.only`, `.skip`, `.todo` e `retry` non restano, salvo uno `skipIf` legato all'ambiente, con il motivo accanto.
+- Durante il lavoro si lanciano i test collegati ai file toccati; la suite completa una volta, alla chiusura.
 - Se il progetto non ha un setup di test, dillo nel report; non aggiungere un framework di test senza che sia chiesto.
 
 ## Sicurezza in ogni modifica
@@ -201,7 +211,8 @@ Poi:
 | "Questo file env è un doppione / questa variabile d'ambiente non la legge nessuno, la tolgo" | I file env restano come li ha fatti Dido, con tutti i valori. Si toccano solo se lo chiede. |
 | "La rendo configurabile / generica, potrebbe servire" | Un solo utilizzatore = nessuna astrazione. Scrivi la versione specifica. |
 | "Mi serve quasi quello che fa X, lo riscrivo qui" | Usa X ed estendilo con una prop o uno slot. Una seconda copia è un bug che aspetta. |
-| "Il codice accanto fa così, ha già la sua copia" | Il codice che c'è non è una regola: valgono le skill. Segui loro e segnala la differenza. |
+| "Il codice accanto fa così, ha già la sua copia" | Il codice che c'è viene dopo le skill nell'ordine delle priorità. Segui loro e segnala la differenza. |
+| "Qui questa regola non conviene, la salto" | Una regola si salta solo per ciò che serve al codice per funzionare o per un'indicazione di Dido, con il motivo accanto al codice e nel report. |
 | "Importo direttamente il file interno, faccio prima" | Passa dal suo punto d'ingresso, o la prossima modifica a quella parte rompe la tua. |
 | "Chiamo le statistiche / l'error tracking da qui" | È la parte opzionale che si aggancia al nucleo, con un hook o un evento. |
 | "Senza questa variabile l'app non parte, così se ne accorgono" | Se serve a una parte sola, spegne quella parte e il log lo dice. |
