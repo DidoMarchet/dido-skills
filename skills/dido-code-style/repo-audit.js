@@ -138,12 +138,12 @@ const VERDICTS = {
   required: ['verdicts'],
 }
 
-const contextBlock = (ctx) =>
+const contextBlock = (context) =>
   [
-    `Progetto: ${ctx.summary}`,
-    `Stack: ${ctx.stack}`,
+    `Progetto: ${context.summary}`,
+    `Stack: ${context.stack}`,
     'Scelte documentate e limiti noti, da NON segnalare come problemi:',
-    ...(ctx.knownChoices.length ? ctx.knownChoices.map((c) => `- ${c}`) : ['- nessuna']),
+    ...(context.knownChoices.length ? context.knownChoices.map((choice) => `- ${choice}`) : ['- nessuna']),
   ].join('\n')
 
 const contextPrompt = `Prepara l'analisi completa del repository nella directory corrente${SCOPE ? `, limitata a: ${SCOPE}` : ''}.
@@ -162,16 +162,16 @@ Il tuo compito è l'inventario, non l'analisi: leggi solo ciò che serve ai punt
 
 Percorsi relativi alla root del repo, come li stampa git ls-files. Sola lettura: non creare, modificare o cancellare file.`
 
-const analyze = (group, ctx, phase) =>
+const analyze = (group, context, phase) =>
   agent(
     `Sei uno degli analisti di un'analisi completa del repository nella directory corrente.
 
 ${RULES}
 
-${contextBlock(ctx)}
+${contextBlock(context)}
 
 I tuoi file — leggili TUTTI per intero, nessuno saltato o letto a metà:
-${group.files.map((f) => `- ${f}`).join('\n')}
+${group.files.map((file) => `- ${file}`).join('\n')}
 
 1. Applica a questi file tutta la checklist di "Analisi completa", tranne l'esecuzione di test, lint e build: se ne occupa un altro agente.
 2. Per i controlli che attraversano il repo (chi usa un export, helper già esistenti, per una doc il codice che descrive) cerca in tutto il repo.
@@ -183,16 +183,16 @@ filesRead: i file che hai letto per intero, con lo stesso percorso della lista. 
     { label: `analisi: ${group.name}`, phase, schema: ANALYSIS },
   )
 
-const runChecks = (ctx) =>
+const runChecks = (context) =>
   agent(
     `Esegui i controlli automatici del repository nella directory corrente, per un'analisi completa.
 
 ${RULES}
 
-${contextBlock(ctx)}
+${contextBlock(context)}
 
 Comandi individuati:
-${ctx.commands.length ? ctx.commands.map((c) => `- [${c.purpose}] ${c.command} (cwd: ${c.cwd}; prerequisiti: ${c.setup || 'nessuno'})`).join('\n') : '- nessuno: cercali tu in CLAUDE.md, doc, package.json, Makefile'}
+${context.commands.length ? context.commands.map((command) => `- [${command.purpose}] ${command.command} (cwd: ${command.cwd}; prerequisiti: ${command.setup || 'nessuno'})`).join('\n') : '- nessuno: cercali tu in CLAUDE.md, doc, package.json, Makefile'}
 
 1. Prima di lanciare, segui la procedura documentata dal progetto (DB isolato, SMTP finto, variabili d'ambiente).
 2. Lint e format solo in verifica: niente --fix o --write. Se lo script del progetto li contiene, lancia lo strumento direttamente senza quei flag.
@@ -212,37 +212,37 @@ const LENSES = [
   "Parti dall'impatto: in produzione cosa succede, a chi e quanto spesso? La gravità è quella giusta?",
 ]
 
-const verifyOne = (f, i, ctx) =>
+const verifyOne = (finding, lensIndex, context) =>
   agent(
     `Prova a SMENTIRE questo problema trovato dall'analisi del repository nella directory corrente.
 
 ${RULES}
 Usa i criteri di "Verifica: un problema è smentito quando" e le definizioni di "Gravità".
 
-${contextBlock(ctx)}
+${contextBlock(context)}
 
 Problema:
-${JSON.stringify(f, null, 2)}
+${JSON.stringify(finding, null, 2)}
 
-Leggi il codice citato e ciò che serve (chiamanti, test, doc, git log). ${LENSES[i]} Tutti i criteri valgono comunque.
+Leggi il codice citato e ciò che serve (chiamanti, test, doc, git log). ${LENSES[lensIndex]} Tutti i criteri valgono comunque.
 Se un criterio di smentita si applica, o resti in dubbio: refuted = true. Se il problema regge: refuted = false e severity = la gravità giusta secondo le definizioni.
 Non modificare il repo: se serve una prova, riproduci in una cartella temporanea fuori dal repo.`,
-    { label: `verifica ${i + 1}/3: ${f.file}:${f.line}`, phase: 'Verifica', schema: VERDICT },
+    { label: `verifica ${lensIndex + 1}/3: ${finding.file}:${finding.line}`, phase: 'Verifica', schema: VERDICT },
   )
 
 // I problemi Bassa (codice morto, overengineering, doc) si provano con un grep o una
 // lettura: uno scettico per gruppo basta, invece di uno per problema.
-const verifyMinor = (findings, ctx, label) =>
+const verifyMinor = (findings, context, label) =>
   agent(
     `Prova a SMENTIRE, uno per uno, questi problemi di gravità Bassa trovati dall'analisi del repository nella directory corrente.
 
 ${RULES}
 Usa i criteri di "Verifica: un problema è smentito quando" e le definizioni di "Gravità".
 
-${contextBlock(ctx)}
+${contextBlock(context)}
 
 Problemi (index = posizione):
-${findings.map((f, i) => `[${i}] ${JSON.stringify(f)}`).join('\n')}
+${findings.map((finding, index) => `[${index}] ${JSON.stringify(finding)}`).join('\n')}
 
 Per ciascuno leggi il codice citato e ciò che serve. Se un criterio di smentita si applica, o resti in dubbio: refuted = true. Se regge: refuted = false e severity = la gravità giusta. Un verdetto per ogni index.
 Non modificare il repo: se serve una prova, riproduci in una cartella temporanea fuori dal repo.`,
@@ -252,50 +252,50 @@ Non modificare il repo: se serve una prova, riproduci in una cartella temporanea
 // Confermato con la maggioranza dei verdetti previsti; gravità = la mediana delle
 // conferme (con due conferme, la più bassa). Verdetti mancanti → "non verificato",
 // mai scartato in silenzio.
-const judge = (f, votes, planned) => {
+const judge = (finding, votes, planned) => {
   const needed = Math.floor(planned / 2) + 1
-  const confirmations = votes.filter((v) => !v.refuted)
-  const refutations = votes.filter((v) => v.refuted)
+  const confirmations = votes.filter((vote) => !vote.refuted)
+  const refutations = votes.filter((vote) => vote.refuted)
   if (confirmations.length >= needed) {
-    const ranks = confirmations.map((v) => SEVERITIES.indexOf(v.severity)).sort((a, b) => a - b)
+    const ranks = confirmations.map((vote) => SEVERITIES.indexOf(vote.severity)).sort((first, second) => first - second)
     return {
-      ...f,
+      ...finding,
       status: 'confermato',
       severity: SEVERITIES[ranks[Math.floor(ranks.length / 2)]],
-      reasons: confirmations.map((v) => v.reason),
+      reasons: confirmations.map((vote) => vote.reason),
     }
   }
-  if (refutations.length >= needed) return { ...f, status: 'smentito', reasons: refutations.map((v) => v.reason) }
-  return { ...f, status: 'non verificato', reasons: [`${votes.length} verdetti su ${planned}`] }
+  if (refutations.length >= needed) return { ...finding, status: 'smentito', reasons: refutations.map((vote) => vote.reason) }
+  return { ...finding, status: 'non verificato', reasons: [`${votes.length} verdetti su ${planned}`] }
 }
 
 // Alta/Media: due scettici, il terzo solo se i primi due non concordano su smentita o
 // gravità. L'esito è identico a tre verdetti sempre (quando concordano il terzo non
 // cambierebbe la maggioranza né la mediana), con un agente in meno.
-const verifyMajor = async (f, ctx) => {
-  const first = (await parallel([0, 1].map((i) => () => verifyOne(f, i, ctx)))).filter(Boolean)
+const verifyMajor = async (finding, context) => {
+  const first = (await parallel([0, 1].map((lensIndex) => () => verifyOne(finding, lensIndex, context)))).filter(Boolean)
   const agree =
     first.length === 2 &&
     first[0].refuted === first[1].refuted &&
     (first[0].refuted || first[0].severity === first[1].severity)
-  if (agree) return judge(f, first, 3)
-  const [third] = await parallel([() => verifyOne(f, 2, ctx)])
-  return judge(f, [...first, third].filter(Boolean), 3)
+  if (agree) return judge(finding, first, 3)
+  const [third] = await parallel([() => verifyOne(finding, 2, context)])
+  return judge(finding, [...first, third].filter(Boolean), 3)
 }
 
 // parallel() non rifiuta mai: un agente che fallisce diventa null, quindi ogni problema
 // esce da qui con uno stato, anche quando i suoi verificatori non rispondono.
-const verifyAll = async (findings, ctx, label) => {
-  const major = findings.filter((f) => f.severity !== 'Bassa')
-  const minor = findings.filter((f) => f.severity === 'Bassa')
+const verifyAll = async (findings, context, label) => {
+  const major = findings.filter((finding) => finding.severity !== 'Bassa')
+  const minor = findings.filter((finding) => finding.severity === 'Bassa')
   const [majorDone, minorDone] = await parallel([
-    () => parallel(major.map((f) => () => verifyMajor(f, ctx))),
+    () => parallel(major.map((finding) => () => verifyMajor(finding, context))),
     async () => {
       if (!minor.length) return []
-      const [res] = await parallel([() => verifyMinor(minor, ctx, label)])
-      return minor.map((f, i) => {
-        const v = res?.verdicts?.find((x) => x.index === i)
-        return judge(f, v ? [v] : [], 1)
+      const [minorResult] = await parallel([() => verifyMinor(minor, context, label)])
+      return minor.map((finding, index) => {
+        const verdict = minorResult?.verdicts?.find((candidate) => candidate.index === index)
+        return judge(finding, verdict ? [verdict] : [], 1)
       })
     },
   ])
@@ -304,82 +304,84 @@ const verifyAll = async (findings, ctx, label) => {
 
 // Contesto, test e conteggio dei file sono lavoro meccanico: impegno ridotto. Analisi e
 // verifica ereditano quello della sessione, perché lì serve il giudizio.
-const ctx = await agent(contextPrompt, { label: 'contesto', phase: 'Contesto', schema: CONTEXT, effort: 'medium' })
-if (!ctx) throw new Error('La fase Contesto non ha restituito risultati: analisi interrotta')
+const context = await agent(contextPrompt, { label: 'contesto', phase: 'Contesto', schema: CONTEXT, effort: 'medium' })
+if (!context) throw new Error('La fase Contesto non ha restituito risultati: analisi interrotta')
 
 const notes = []
-const tracked = [...new Set(ctx.trackedFiles)]
+const tracked = [...new Set(context.trackedFiles)]
 const trackedSet = new Set(tracked)
-const assigned = [...new Set(ctx.groups.flatMap((g) => g.files))]
+const assigned = [...new Set(context.groups.flatMap((group) => group.files))]
 const assignedSet = new Set(assigned)
-const excludedSet = new Set(ctx.excluded.flatMap((e) => e.files))
+const excludedSet = new Set(context.excluded.flatMap((exclusion) => exclusion.files))
 // Confronto fatto qui sugli elenchi, non affidato a un conteggio dell'agente.
-const unassigned = tracked.filter((f) => !assignedSet.has(f) && !excludedSet.has(f))
-log(`${ctx.stack} — ${tracked.length} file tracciati: ${assigned.length} da leggere in ${ctx.groups.length} gruppi, ${excludedSet.size} esclusi`)
+const unassigned = tracked.filter((file) => !assignedSet.has(file) && !excludedSet.has(file))
+log(`${context.stack} — ${tracked.length} file tracciati: ${assigned.length} da leggere in ${context.groups.length} gruppi, ${excludedSet.size} esclusi`)
 
 const analyzeAndVerify = (groups, phase) =>
   pipeline(
     groups,
-    (group) => analyze(group, ctx, phase),
-    (res, group) =>
-      verifyAll(res?.findings ?? [], ctx, group.name).then((verified) => ({
+    (group) => analyze(group, context, phase),
+    (analysis, group) =>
+      verifyAll(analysis?.findings ?? [], context, group.name).then((verified) => ({
         group: group.name,
-        filesRead: res?.filesRead ?? [],
-        notes: res?.notes ?? '',
+        filesRead: analysis?.filesRead ?? [],
+        notes: analysis?.notes ?? '',
         verified,
       })),
   )
 
 const [checks, analyzed] = await parallel([
   async () => {
-    const res = await runChecks(ctx)
-    return res && { commands: res.commands, verified: await verifyAll(res.findings, ctx, 'test') }
+    const checkResult = await runChecks(context)
+    return checkResult && { commands: checkResult.commands, verified: await verifyAll(checkResult.findings, context, 'test') }
   },
-  () => analyzeAndVerify(ctx.groups, 'Analisi'),
+  () => analyzeAndVerify(context.groups, 'Analisi'),
 ])
 const results = (analyzed ?? []).filter(Boolean)
 if (!checks) notes.push('La fase Test non ha restituito risultati: test, lint e build non controllati')
 
 // Gli agenti a volte riportano "./x" o percorsi assoluti: si confronta sul suffisso.
-const readPaths = () => results.flatMap((r) => r.filesRead.map((p) => p.replace(/^\.\//, '')))
-const wasRead = (file, paths) => paths.some((p) => p === file || p.endsWith(`/${file}`))
+const readPaths = () => results.flatMap((result) => result.filesRead.map((path) => path.replace(/^\.\//, '')))
+const wasRead = (file, paths) => paths.some((path) => path === file || path.endsWith(`/${file}`))
 
 const firstRead = readPaths()
-const secondRound = [...assigned.filter((f) => !wasRead(f, firstRead)), ...unassigned]
+const secondRound = [...assigned.filter((file) => !wasRead(file, firstRead)), ...unassigned]
 if (secondRound.length) {
   log(`Secondo giro su ${secondRound.length} file non letti o non assegnati`)
   const chunks = []
-  for (let i = 0; i < secondRound.length; i += 25) {
-    chunks.push({ name: `recupero ${chunks.length + 1}`, files: secondRound.slice(i, i + 25) })
+  for (let start = 0; start < secondRound.length; start += 25) {
+    chunks.push({ name: `recupero ${chunks.length + 1}`, files: secondRound.slice(start, start + 25) })
   }
   results.push(...(await analyzeAndVerify(chunks, 'Completezza')).filter(Boolean))
 }
 
 const finalRead = readPaths()
-const unread = [...assigned, ...unassigned].filter((f) => !wasRead(f, finalRead))
+const unread = [...assigned, ...unassigned].filter((file) => !wasRead(file, finalRead))
 
-const all = [...results.flatMap((r) => r.verified), ...(checks?.verified ?? [])]
-const bySeverity = (a, b) =>
-  SEVERITIES.indexOf(a.severity) - SEVERITIES.indexOf(b.severity) || a.file.localeCompare(b.file) || a.line - b.line
-const confirmed = all.filter((f) => f.status === 'confermato').sort(bySeverity)
-const unverified = all.filter((f) => f.status === 'non verificato').sort(bySeverity)
-const refuted = all.filter((f) => f.status === 'smentito')
+const all = [...results.flatMap((result) => result.verified), ...(checks?.verified ?? [])]
+const bySeverity = (first, second) =>
+  SEVERITIES.indexOf(first.severity) - SEVERITIES.indexOf(second.severity) ||
+  first.file.localeCompare(second.file) ||
+  first.line - second.line
+const confirmed = all.filter((finding) => finding.status === 'confermato').sort(bySeverity)
+const unverified = all.filter((finding) => finding.status === 'non verificato').sort(bySeverity)
+const refuted = all.filter((finding) => finding.status === 'smentito')
 log(`Confermati ${confirmed.length}, smentiti ${refuted.length}, non verificati ${unverified.length}`)
 
 return {
   scope: SCOPE ?? 'intero repository',
-  stack: ctx.stack,
-  summary: ctx.summary,
+  stack: context.stack,
+  summary: context.summary,
   coverage: {
     tracked: tracked.length,
-    analyzed: tracked.filter((f) => wasRead(f, finalRead)).length,
-    excluded: ctx.excluded.map((e) => ({ reason: e.reason, files: e.files.length })),
-    docsAdded: assigned.filter((f) => !trackedSet.has(f)),
+    analyzed: tracked.filter((file) => wasRead(file, finalRead)).length,
+    excluded: context.excluded.map((exclusion) => ({ reason: exclusion.reason, files: exclusion.files.length })),
+    docsAdded: assigned.filter((file) => !trackedSet.has(file)),
     unread,
   },
   commands: checks?.commands ?? [],
   confirmed,
   unverified,
   refuted: refuted.map(({ severity, file, line, title, reasons }) => ({ severity, file, line, title, reasons })),
-  notes: [...notes, ...results.filter((r) => r.notes).map((r) => `${r.group}: ${r.notes}`)],
+  notes: [...notes, ...results.filter((result) => result.notes).map((result) => `${result.group}: ${result.notes}`)],
 }

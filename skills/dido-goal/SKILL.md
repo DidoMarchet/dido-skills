@@ -67,11 +67,11 @@ Chiedi solo quando la scelta:
 - non si annulla o tocca altri: dati, produzione, push, pubblicazioni, cancellazioni, parti chiuse;
 - se è sbagliata, butta via buona parte del lavoro.
 
-Il resto lo scegli tu, con il default più ragionevole e reversibile, e lo scrivi nel report tra le scelte fatte senza chiedere. Una domanda sola, con la tua proposta, e intanto vai avanti con ciò che non dipende dalla risposta. Ciò che le regole del progetto affidano già a te, come il commit a lavoro verificato, non si chiede: si fa.
+Il resto lo scegli tu, con il default più ragionevole e reversibile, e lo scrivi nel report tra le scelte fatte senza chiedere. Una domanda sola, con la tua proposta, e intanto vai avanti con ciò che non dipende dalla risposta. Ciò che le regole del progetto affidano già a te non si chiede: si fa.
 
 ## 6. Perimetro
 
-- Dentro: ciò che serve al risultato e ciò che le regole del progetto chiedono insieme alla modifica o per chiuderla, come i test, le doc di ciò che hai cambiato e il commit dove le regole lo prevedono.
+- Dentro: ciò che serve al risultato e ciò che le regole del progetto chiedono insieme alla modifica o per chiuderla, come i test e le doc di ciò che hai cambiato.
 - Fuori: tutto il resto, anche se lo miglioreresti. Un bug vicino, un refactor utile, un'idea di prodotto vanno in una riga tra le cose aperte del report: non si fanno e non si propongono.
 - Un problema grave che vedi nel codice che leggi (sicurezza, dati persi, una parte che può bloccare le altre) si segnala sempre, con la gravità, anche se è fuori perimetro. Segnalarlo non vuol dire correggerlo.
 - Se per arrivare al risultato il perimetro deve crescere (il fix tocca un modulo condiviso), dillo prima di farlo; se è grande o rischioso, chiedi.

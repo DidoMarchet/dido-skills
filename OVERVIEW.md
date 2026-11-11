@@ -61,7 +61,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - **Si prova solo ciò che cambia**: lint dei file toccati, test collegati, la pagina o l'endpoint toccato. Suite completa e build una volta, alla chiusura, o quando si tocca codice condiviso.
 - **Fatto vuol dire eseguito**. Il resoconto di un subagente non è una prova. Si decide solo su ciò che si è letto per intero.
 - **Report** lungo quanto il lavoro: cosa è cambiato, cosa è stato verificato, cosa resta, le scelte fatte senza chiedere. Per un fix bastano tre righe. Poi ci si ferma, senza "se vuoi posso anche…".
-- **Commit** a lavoro verificato e quando gli altri agenti sullo stesso repo hanno finito, con i soli propri file aggiunti per nome. Più sessioni: un worktree ciascuna. Push solo con l'ok di chi lavora con te.
+- **Commit** solo quando chi lavora con te lo chiede, a parole o con `/dido-rilascio`, e quando gli altri agenti sullo stesso repo hanno finito, con i soli propri file aggiunti per nome. Fino ad allora il report dice che il lavoro è da committare. Più sessioni: un worktree ciascuna. Push solo con l'ok di chi lavora con te.
 
 **Revisioni e analisi**
 
@@ -110,7 +110,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - Prima del piano si chiede solo ciò che cambia il risultato, in un messaggio, con una proposta per domanda.
 - Chi lavora con te decide il prodotto e il design; l'agente le scelte tecniche, scritte nel piano.
 - Il design viene prima del codice: un'interfaccia nuova si approva in `docs/design/`.
-- Passi piccoli, ognuno verificato e con un commit (`M2 step 4: …`).
+- Passi piccoli, ognuno verificato; un commit per passo (`M2 step 4: …`) se chi lavora con te ha chiesto i commit.
 - Niente si perde: quello che emerge entra nel piano con la data (un passo nuovo, "Cosa non si fa", "Domande aperte"), mai solo in chat.
 - "Dove siamo", in fondo al piano, è la memoria tra una sessione e l'altra.
 - Le decisioni tecniche vanno in `docs/decisions/`, il report di chiusura in `docs/reports/`.
@@ -122,7 +122,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - Analisi, architettura, implementazione, debugging e analisi di prodotto hanno ognuna il suo criterio di fine. Il criterio è quello scritto, né più severo né più largo; quando è vero, una verifica, il report e ci si ferma.
 - Ciò che è fatto non si rifà: verifiche, ricerche e decisioni si riaprono solo con un elemento nuovo. Controllarlo costa poco: git log, le misure, il codice che realizza la decisione.
 - Dopo un tentativo che lascia l'errore identico, prima i fatti e poi un'altra modifica. Dopo tre tentativi falliti ci si ferma, ma non prima, se resta un'ipotesi che si prova con poco.
-- Si chiede solo per il prodotto, per ciò che non si annulla e per le scelte che, sbagliate, butterebbero il lavoro. Ciò che le regole del progetto affidano all'agente, come il commit, si fa.
+- Si chiede solo per il prodotto, per ciò che non si annulla e per le scelte che, sbagliate, butterebbero il lavoro. Ciò che le regole del progetto affidano all'agente si fa.
 - I problemi gravi visti si segnalano sempre. Il resto fuori perimetro va in una riga tra le cose aperte, senza farlo né proporlo.
 
 ## dido-rilascio: chiudere un lavoro
