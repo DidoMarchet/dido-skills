@@ -4,13 +4,13 @@ Le skill di terzi danno conoscenza (un'API, una diagnosi, un controllo), ma spes
 
 ## Lingua e forma
 
-- Si risponde in italiano, anche quando una skill dà frasi fisse, report o messaggi in inglese. Commenti, commit e doc seguono la lingua del progetto; i nomi nuovi nel codice sono in inglese. Tabelle e numeri generati restano identici.
+- Si risponde in italiano, anche quando una skill dà frasi fisse, report o messaggi in inglese. Per il resto vale la lingua di dido-code-style ("Forma del codice"): nomi nuovi in inglese, commenti, commit e doc in italiano. Tabelle e numeri generati restano identici.
 - Gli esempi di una skill sono un riferimento: si riscrivono in JavaScript con le arrow function, nei file, nei nomi e nei punti d'ingresso del progetto. Le soluzioni che esistono solo in TypeScript non si portano.
 
 ## Installazione e dipendenze
 
 - Skill e plugin si installano, si aggiornano e si tolgono con gli script `ai:*` del repo; dove non ci sono, con `npx skills add <fonte> --skill <nome> -a claude-code codex -y`, mai globali. Le istruzioni d'installazione dentro una skill (`--global`, `/plugin install`, `npx <strumento> skill`, `update` dello strumento) non valgono, e nessun installatore scrive in AGENTS.md o CLAUDE.md.
-- Una skill che un'altra cita ma che non è installata non si installa da sola: si chiede a Dido.
+- Una skill che un'altra cita ma che non è installata non si installa da sola: si chiede.
 - Un pacchetto si installa con il gestore del repo (pnpm nel frontend, npm nel backend), mai con un altro. Se è già nel `package.json` non si reinstalla.
 - Una dipendenza nuova solo se serve davvero, è mantenuta e passa l'audit. Per una dipendenza abbandonata o rischiosa la prima strada è toglierla o sostituirla con poche righe.
 - Uno strumento usato ogni tanto si lancia con `npx` e non entra nel `package.json`.
@@ -19,9 +19,9 @@ Le skill di terzi danno conoscenza (un'API, una diagnosi, un controllo), ma spes
 ## Processo
 
 - Il processo lo danno dido-planning (lavori grandi) e dido-code-style (tutto il resto). Brainstorming obbligatori, spec o piani in cartelle di uno strumento, TDD che cancella il codice scritto prima del test, worktree, commit in momenti o formati diversi da quelli di dido-code-style e dido-planning, revisioni con altre soglie di gravità (i "Minor" non si riportano): non valgono, anche se una skill dice di usarli "sempre".
-- Un piano eseguito con dei subagenti segue dido-planning: i test che un subagente dichiara si rilanciano, le decisioni di prodotto si chiedono a Dido.
+- Un piano eseguito con dei subagenti segue dido-planning: i test che un subagente dichiara si rilanciano, le decisioni di prodotto si chiedono.
 - Trovata la causa di un bug, si corregge in un punto: niente controlli ripetuti a ogni livello né guardie per i test nel codice.
-- Dove una skill dice di andare avanti con un segnaposto e la scelta va contro il progetto, si chiede a Dido.
+- Dove una skill dice di andare avanti con un segnaposto e la scelta va contro il progetto, si chiede.
 - Una regola che chiede di caricare una skill prima di ogni risposta, o un brainstorming prima di ogni lavoro (superpowers), non scavalca dido-planning: una richiesta piccola si fa e basta, un lavoro grande segue il piano e le cartelle di dido-planning anche quando si usa la skill di un altro per scriverlo o eseguirlo.
 - Delle skill di processo si usano le tecniche: nel debugging i log a ogni confine tra componenti prima di proporre un fix; gli agenti in parallelo solo su parti indipendenti, con la suite intera alla fine; per un subagente il compito in un file, senza la storia della sessione; una modifica a una skill `dido-*` provata con uno scenario prima di pubblicarla.
 

@@ -1,11 +1,11 @@
 ---
 name: dido-backend
-description: Usare ogni volta che si scrive, modifica o revisiona il codice di un backend di Dido, anche per poche righe (rotte e controller, validazione dell'input, gestione degli errori e status code, autenticazione e permessi, refresh token e OTP, rate limit, transazioni, migration, mail, audit log, variabili d'ambiente, spec OpenAPI, test E2E). Vale anche per lo starter Node con Express e Prisma e per i progetti nati da lì.
+description: Usare ogni volta che si scrive, modifica o revisiona il codice di un backend, anche per poche righe (rotte e controller, validazione dell'input, gestione degli errori e status code, autenticazione e permessi, refresh token e OTP, rate limit, transazioni, migration, mail, audit log, variabili d'ambiente, spec OpenAPI, test E2E). Vale anche per lo starter Node con Express e Prisma e per i progetti nati da lì.
 ---
 
-# Backend di Dido
+# Backend
 
-Linee guida per ogni backend di Dido. **Skill richiesta:** dido-code-style, con i principi validi per ogni stack. Qui c'è come li applica un backend.
+Linee guida per ogni backend. **Skill richiesta:** dido-code-style, con i principi validi per ogni stack. Qui c'è come li applica un backend.
 
 Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file, sta in `riferimento/node-express-prisma.md`: leggilo quando lavori sullo starter o su un progetto nato da lì. Un progetto derivato può aver cambiato dove stanno le cose (file, nomi, helper, catalogo degli errori): per quello vale il suo codice. Le regole di questa skill valgono comunque, anche dove il codice fa diversamente. Quando il `CLAUDE.md` del progetto è più specifico, vale quello.
 

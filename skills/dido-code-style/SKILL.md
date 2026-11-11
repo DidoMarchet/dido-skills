@@ -1,11 +1,11 @@
 ---
 name: dido-code-style
-description: Usare ogni volta che si scrive, modifica, rifattorizza, corregge o revisiona codice in un progetto di Dido, anche per poche righe e su qualunque stack (backend, frontend, script, configurazione, infrastruttura), e quando Dido chiede di analizzare o controllare un repo, un modulo o una cartella ("analizza il repo", "controlla che sia tutto ok", "trova bug").
+description: Usare ogni volta che si scrive, modifica, rifattorizza, corregge o revisiona codice, anche per poche righe e su qualunque stack (backend, frontend, script, configurazione, infrastruttura), e quando si chiede di analizzare o controllare un repo, un modulo o una cartella ("analizza il repo", "controlla che sia tutto ok", "trova bug").
 ---
 
-# Stile e convenzioni di codice di Dido
+# Stile e convenzioni di codice
 
-Stai aiutando **Dido Marchet** a costruire applicazioni web. Queste convenzioni sono validate sui progetti di Dido in produzione e valgono per ogni stack. **Skill dello stack, richiesta quando lavori su quel codice:** dido-backend per i backend, dido-frontend-nuxt per i frontend Nuxt.
+Queste convenzioni sono validate su progetti in produzione e valgono per ogni stack e per chiunque ci lavori. **Skill dello stack, richiesta quando lavori su quel codice:** dido-backend per i backend, dido-frontend-nuxt per i frontend Nuxt.
 
 | Compito | Cosa leggere |
 |---|---|
@@ -18,7 +18,7 @@ Stai aiutando **Dido Marchet** a costruire applicazioni web. Queste convenzioni 
 Quando due cose si contraddicono, vale la prima di quest'ordine:
 
 1. ciò che serve perché il codice funzioni (linguaggio, framework, libreria);
-2. le indicazioni di Dido;
+2. le indicazioni di chi lavora con te;
 3. il `CLAUDE.md` del progetto, quando è più specifico;
 4. le skill `dido-*`, con le eccezioni dei file `skill-di-terzi.md`;
 5. le skill di terzi e il codice che c'è.
@@ -41,18 +41,18 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 - La documentazione di una libreria si legge per la versione installata (dal lockfile), non per l'ultima uscita.
 - Se il progetto ha gemelli derivati dallo stesso starter, guarda come hanno risolto lo stesso problema e segui la stessa convenzione.
 - Se qualcosa non è chiaro o contraddice le doc, chiedi: non tirare a indovinare e non scavalcare in silenzio una decisione presa.
-- **Le parti chiuse non si toccano senza il consenso di Dido.** Quando Dido chiude una parte finita, il progetto la elenca in `docs/parti-chiuse.md`, richiamato dal `CLAUDE.md`. Lì non si cambia niente senza il suo ok dato in quel momento: né aspetto, né comportamento, né refactor, né allineamenti alle skill. Quello che è finito resta, così non si rifà e un'altra sessione non lo smonta. L'unica eccezione è una modifica strutturale a un componente generale (widget, composable, token) che la parte chiusa usa: la parte chiusa resta uguale nell'aspetto e nel comportamento, lo verifichi guardandola, e il report dice quale parte chiusa hai toccato e come l'hai provata. Se la modifica cambierebbe ciò che si vede o come funziona, prima chiedi.
+- **Le parti chiuse non si toccano senza consenso.** Quando una parte finita viene chiusa, il progetto la elenca in `docs/parti-chiuse.md`, richiamato dal `CLAUDE.md`. Lì non si cambia niente senza il suo ok dato in quel momento: né aspetto, né comportamento, né refactor, né allineamenti alle skill. Quello che è finito resta, così non si rifà e un'altra sessione non lo smonta. L'unica eccezione è una modifica strutturale a un componente generale (widget, composable, token) che la parte chiusa usa: la parte chiusa resta uguale nell'aspetto e nel comportamento, lo verifichi guardandola, e il report dice quale parte chiusa hai toccato e come l'hai provata. Se la modifica cambierebbe ciò che si vede o come funziona, prima chiedi.
 
 **Durante e dopo**
 
 - Una decisione non ovvia va in un commento sul perché nel codice e, se cambia il modo in cui si lavora sul progetto, nel `CLAUDE.md` / nelle doc — nella stessa modifica, non dopo.
 - **Un fatto, un posto.** Le doc dicono ciò che il codice non dice: decisioni e perché, procedure (con i comandi e gli URL che servono), il ruolo di ogni servizio e modulo. Per il resto rimandano alla fonte: le variabili stanno in `.env.example`, con un commento sopra quelle il cui nome non basta, e gli endpoint nella spec OpenAPI. Una tabella, un elenco o un diagramma che riporta ciò che un file già definisce è una copia, e ogni copia è un punto in cui la doc resta indietro.
 - Dopo la modifica cerca nel repo le parole chiave che hai toccato. Dove una doc copia ciò che hai cambiato, togli tutta la copia, non solo la riga che hai cambiato, e metti il rimando alla fonte invece di aggiornarla. Le procedure e le decisioni scritte nelle doc che non valgono più si correggono.
-- Il commit si fa quando il lavoro è verificato e gli altri agenti che lavorano sullo stesso repo (subagenti, altre sessioni) hanno finito: un commit non prende mai a metà il lavoro di un altro. Il messaggio dice cosa è cambiato e perché, nella lingua del progetto. Il push solo con l'ok di Dido.
+- Il commit si fa quando il lavoro è verificato e gli altri agenti che lavorano sullo stesso repo (subagenti, altre sessioni) hanno finito: un commit non prende mai a metà il lavoro di un altro. Il messaggio dice cosa è cambiato e perché, in italiano. Il push solo con l'ok di chi lavora con te.
 - Più sessioni sullo stesso repo lavorano ognuna nel suo worktree (`claude -w <nome>`). Al commit si aggiungono per nome solo i file del proprio lavoro (`git add percorso/file`).
 - I fatti che codice e git non dicono (una decisione e il suo motivo, un vincolo, una scadenza, un riferimento esterno) vanno in memoria.
-- Il report finale dice cosa è cambiato, cosa è stato verificato, cosa resta aperto e le scelte fatte senza chiedere (un default, un'interpretazione), così il passo successivo parte dai fatti e Dido può correggere le scelte.
-- Dopo il report ti fermi. Quello che è emerso e nessuno ha chiesto va tra le cose aperte del report (o nel piano, con dido-planning): non proporre di farlo e non partire con un altro giro di miglioramenti. Chiudi con una domanda solo se Dido deve decidere qualcosa per andare avanti, come l'ok al push o una scelta che blocca.
+- Il report finale dice cosa è cambiato, cosa è stato verificato, cosa resta aperto e le scelte fatte senza chiedere (un default, un'interpretazione), così il passo successivo parte dai fatti e chi legge può correggere le scelte. È lungo quanto il lavoro: per un fix o un ritocco bastano tre righe (cosa è cambiato, come l'hai verificato, cosa resta).
+- Dopo il report ti fermi. Quello che è emerso e nessuno ha chiesto va tra le cose aperte del report (o nel piano, con dido-planning): non proporre di farlo e non partire con un altro giro di miglioramenti. Chiudi con una domanda solo se c'è da decidere qualcosa per andare avanti, come l'ok al push o una scelta che blocca.
 
 ## Semplice e leggibile
 
@@ -66,8 +66,8 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 ## Forma del codice
 
 - Funzioni con le arrow (`const nome = (args) => {}`) come predefinito, anche nelle callback. `function` quando il codice ne ha bisogno: la funzione usa `this` (un'API che la chiama con il suo contesto, un metodo di oggetto) oppure è un generatore (`function*`). Per questi casi niente `eslint-disable`: il lint dello starter li accetta. Le arrow non sono hoistate: si definiscono prima dell'uso.
-- I nomi che scrivi tu sono in inglese: variabili, funzioni, file, cartelle, classi, chiavi e api_key del CMS. Commenti, doc e commit seguono la lingua del progetto. I nomi che ci sono già restano come sono, in qualunque lingua.
-- Nomi interi in camelCase, che dicono cos'è la cosa: `article`, `currentArticle`, `index`, `rows`. Niente lettere singole o abbreviazioni (`a`, `e`, `el`, `cur`, `out`): per eventi ed errori `event` ed `error`. Restano gli idiomi del framework, come `req`, `res` e `next` in Express e `tx` nelle transazioni di Prisma. Attento a non riusare un nome dello scope esterno.
+- Lingua: il codice che scrivi è in inglese, i testi per le persone in italiano. In inglese ogni nome nuovo che un programma legge: variabili, funzioni, file, cartelle, classi, chiavi, campi e api_key di CMS e database, variabili d'ambiente. In italiano commenti, doc, commit, risposte e label che legge chi usa un pannello (CMS, admin). I nomi che ci sono già restano come sono, in qualunque lingua: non si traducono e non si rinominano.
+- Nomi interi in camelCase, che dicono cos'è la cosa: `article`, `currentArticle`, `index`, `rows`. Chiavi e campi di un servizio hanno il formato che vuole il servizio (le api_key di DatoCMS in snake_case). Niente lettere singole o abbreviazioni (`a`, `e`, `el`, `cur`, `out`): per eventi ed errori `event` ed `error`. Restano gli idiomi del framework, come `req`, `res` e `next` in Express e `tx` nelle transazioni di Prisma. Attento a non riusare un nome dello scope esterno.
 - Niente `console.log` di debug lasciati nel codice. I log che servono davvero passano dal logger del progetto; dove non c'è, l'avvio di un server usa `console.info` e i problemi `console.warn` e `console.error`. Negli script da terminale il log è l'output.
 - Dove il progetto ha il lint dello starter, controlla queste regole e quelle della skill dello stack; dove non c'è, le controlli tu. I problemi nuovi che il lint segnala si correggono, avvisi compresi: le regole sono avvisi finché il progetto non accende `lintStrict`, ma valgono uguale. Quelli che c'erano già restano, se non fanno parte della richiesta. Una regola si spegne solo per una riga, con il motivo accanto (`// eslint-disable-next-line regola -- motivo`), o per tutto il progetto nella config del lint del progetto, mai in quella dello starter.
 
@@ -109,14 +109,14 @@ Prematura è l'infrastruttura "per quando crescerà il traffico": cache, code, w
 ## Quando cambi qualcosa, togli il vecchio
 
 - Sostituisci X con Y → cancella X **nella stessa modifica**: codice, test, doc, spec dell'API, configurazione. I file env no: vedi "File env".
-- Niente shim di retrocompatibilità se Dido non li chiede: niente alias deprecati, niente re-export dei vecchi nomi, niente rinomine in `_unused`, niente marcatori `// removed X`, niente doppia lettura di campo vecchio e nuovo.
+- Niente shim di retrocompatibilità se non sono chiesti: niente alias deprecati, niente re-export dei vecchi nomi, niente rinomine in `_unused`, niente marcatori `// removed X`, niente doppia lettura di campo vecchio e nuovo.
 - Prima di dire "tolto ovunque": grep con i confini di parola (`grep -rn '\bnome\b' src/ tests/ docs/`), non un pattern stretto. Test e query/filtri sono dove si nascondono gli avanzi.
 
 ## File env
 
 - Ogni repo ha tre file env alla root, tutti nel repo: `.env.example`, `.env.local` (sviluppo) e `.env.production`. Niente altri file env fuori da git.
 - Contengono i valori veri, segreti compresi, perché i repo sono privati. `CHANGE_ME` solo dove il valore va generato o preso altrove.
-- Non si tolgono e non si accorpano, anche quando due sono uguali. Nessuna variabile e nessun valore si toglie, si svuota o diventa un segnaposto se Dido non lo chiede, anche quando il codice non lo legge più.
+- Non si tolgono e non si accorpano, anche quando due sono uguali. Nessuna variabile e nessun valore si toglie, si svuota o diventa un segnaposto se non è chiesto, anche quando il codice non lo legge più.
 - Una variabile nuova va in tutti e tre, con lo stesso nome.
 
 ## Una protezione per problema
@@ -127,10 +127,10 @@ Prematura è l'infrastruttura "per quando crescerà il traffico": cache, code, w
 
 ## Modifiche minime
 
-- Un fix cambia le righe rotte, non il modulo. I refactor "già che ci sono" vanno in una modifica separata, e solo se Dido li chiede.
+- Un fix cambia le righe rotte, non il modulo. I refactor "già che ci sono" vanno in una modifica separata, e solo se sono chiesti.
 - Non riformattare, rinominare o riordinare codice che non ti è stato chiesto di toccare.
-- Allineati al codice attorno: nomi, idiomi, struttura dei file, lingua e densità dei commenti.
-- Il codice che c'è già non è una regola: nell'ordine delle priorità (in cima a questa skill) viene dopo le skill. Dove va contro queste skill (copie, componenti doppi, un metodo diverso da quello scritto qui), segui le skill e le indicazioni di Dido, anche se quel codice l'ha scritto qualcun altro, e scrivi la differenza nel report.
+- Allineati al codice attorno: nomi, idiomi, struttura dei file, densità dei commenti.
+- Il codice che c'è già non è una regola: nell'ordine delle priorità (in cima a questa skill) viene dopo le skill. Dove va contro queste skill (copie, componenti doppi, un metodo diverso da quello scritto qui), segui le skill e le indicazioni di chi lavora con te, anche se quel codice l'ha scritto qualcun altro, e scrivi la differenza nel report. I nomi che ci sono restano comunque ("Forma del codice").
 
 ## Commenti
 
@@ -161,12 +161,12 @@ Punteggiatura normale: punto, virgola, due punti, parentesi e virgolette dritte 
 
 - Prima la causa, poi il fix: leggi tutto l'errore, riproducilo, guarda cosa è cambiato (`git log`, `git diff`).
 - Un'ipotesi alla volta, con la modifica più piccola che la prova. Se non regge, annullala prima di provarne un'altra.
-- Dopo tre fix che non funzionano ti fermi: il problema è l'approccio. Parlane con Dido invece di provare il quarto.
+- Dopo tre fix che non funzionano ti fermi: il problema è l'approccio. Parlane con chi lavora con te invece di provare il quarto.
 - I log aggiunti per capire si tolgono prima di chiudere.
 
 ## Test
 
-- I test li scrive l'agente, nella stessa modifica: Dido non ne scrive a mano, quindi un test che manca non si lascia "da fare".
+- I test li scrive l'agente, nella stessa modifica: nessuno li scrive a mano, quindi un test che manca non si lascia "da fare".
 - Ogni comportamento nuovo e ogni bug fix hanno un test che senza la modifica fallisce. Per un bug, scrivi prima il test e guardalo fallire. Un test scritto dopo la modifica si prova togliendo la modifica: deve fallire, e per il motivo giusto (l'asserzione, non un import rotto).
 - Testa il comportamento dall'interfaccia pubblica (rotta HTTP, componente renderizzato, output della CLI), non gli interni. Si finge solo il confine (rete, CMS, auto-import del framework), mai un modulo interno, e un mock ha la forma completa della risposta vera.
 - Il valore atteso si scrive a mano, mai calcolato con il codice sotto test. Niente snapshot né soglie di coverage. Nei test asincroni si aspetta la condizione, non un tempo fisso.
@@ -192,7 +192,7 @@ Poi:
 
 - Prima di aggiungere una protezione, controlla cosa copre già quel rischio (`CLAUDE.md` del progetto, commenti nel codice): "una protezione per problema" vale anche per la sicurezza.
 - Una falla introdotta dalla tua modifica si corregge nella stessa modifica. Una falla preesistente fuori dallo scope si segnala con scenario e gravità: non si lascia in silenzio e non si "sistema" con un refactor non richiesto.
-- Il report finale ha una riga sul controllo di sicurezza: cosa è stato controllato e cosa è emerso (o "nessun problema").
+- Quando la modifica tocca input, permessi, dati esposti, segreti o dipendenze, il report ha una riga sul controllo di sicurezza: cosa è stato controllato e cosa è emerso (o "nessun problema").
 
 ## Fatto vuol dire verificato
 
@@ -201,30 +201,30 @@ Poi:
 - Riporta in modo esplicito cosa è stato verificato e cosa no, e perché (es. "DB spento, test non eseguiti: ecco come lanciarli").
 - Il resoconto di un subagente non è una prova: guarda il diff e rilancia tu la verifica.
 - Una decisione (tenere, togliere, cambiare) si basa solo su ciò che hai letto per intero o eseguito. Quello che non hai letto lo dici ("non letto") e non diventa una raccomandazione.
-- Ogni analisi e ogni report dicono cosa hai letto per intero, cosa in parte e cosa no. Ogni affermazione porta la sua prova: il file e la riga, o il comando con il suo output. Quello che viene da un subagente si dice, e le citazioni su cui decidi si ricontrollano.
+- Ogni analisi e ogni report di un lavoro grande dicono cosa hai letto per intero, cosa in parte e cosa no. Ogni affermazione porta la sua prova: il file e la riga, o il comando con il suo output. Quello che viene da un subagente si dice, e le citazioni su cui decidi si ricontrollano.
 
 ## Campanelli d'allarme: fermati e correggi prima di andare avanti
 
 | Pensiero | Realtà |
 |---|---|
 | "Tengo la vecchia funzione / il campo / la variabile per compatibilità" | Nessuno l'ha chiesto. Cancellala in questa modifica, con test e doc. |
-| "Questo file env è un doppione / questa variabile d'ambiente non la legge nessuno, la tolgo" | I file env restano come li ha fatti Dido, con tutti i valori. Si toccano solo se lo chiede. |
+| "Questo file env è un doppione / questa variabile d'ambiente non la legge nessuno, la tolgo" | I file env restano come sono, con tutti i valori. Si toccano solo se lo chiede. |
 | "La rendo configurabile / generica, potrebbe servire" | Un solo utilizzatore = nessuna astrazione. Scrivi la versione specifica. |
 | "Mi serve quasi quello che fa X, lo riscrivo qui" | Usa X ed estendilo con una prop o uno slot. Una seconda copia è un bug che aspetta. |
 | "Il codice accanto fa così, ha già la sua copia" | Il codice che c'è viene dopo le skill nell'ordine delle priorità. Segui loro e segnala la differenza. |
-| "Qui questa regola non conviene, la salto" | Una regola si salta solo per ciò che serve al codice per funzionare o per un'indicazione di Dido, con il motivo accanto al codice e nel report. |
+| "Qui questa regola non conviene, la salto" | Una regola si salta solo per ciò che serve al codice per funzionare o per un'indicazione di chi lavora con te, con il motivo accanto al codice e nel report. |
 | "Importo direttamente il file interno, faccio prima" | Passa dal suo punto d'ingresso, o la prossima modifica a quella parte rompe la tua. |
 | "Chiamo le statistiche / l'error tracking da qui" | È la parte opzionale che si aggancia al nucleo, con un hook o un evento. |
 | "Senza questa variabile l'app non parte, così se ne accorgono" | Se serve a una parte sola, spegne quella parte e il log lo dice. |
 | "Aggiungo una cache / una coda, per sicurezza" | Niente misura, niente cache. |
 | "Aggiungo un secondo controllo, non si sa mai" | Trova cosa lo copre già: una protezione per problema. |
-| "Già che ci sono sistemo anche questo" | Modifica separata, e solo se Dido la chiede. |
-| "Chiudo con 'se vuoi posso anche…'" | Quello che resta è nel report. Se Dido non deve decidere niente, ti fermi. |
+| "Già che ci sono sistemo anche questo" | Modifica separata, e solo se è chiesta. |
+| "Chiudo con 'se vuoi posso anche…'" | Quello che resta è nel report. Se non c'è niente da decidere, ti fermi. |
 | "Questo sembra sbagliato, lo cambio" | Leggi prima commenti, git log e doc: potrebbe essere una decisione. |
 | "Compila, quindi è fatto" | Eseguilo, e riporta cosa hai eseguito. |
 | "Dalla descrizione si capisce cosa fa, non serve leggerlo tutto" | Si decide solo su ciò che si è letto per intero. |
 | "Il subagente dice che passa" | Guarda il diff e rilancia la verifica. |
-| "Provo un altro fix" (dopo tre) | Fermati: è l'approccio. Parlane con Dido. |
+| "Provo un altro fix" (dopo tre) | Fermati: è l'approccio. Parlane con chi lavora con te. |
 | "Le doc le aggiorno dopo" | Nella stessa modifica, o non succede mai. |
 | "Aggiorno anche la tabella nel README" | Se ripete il codice, toglila e metti il rimando alla fonte. |
 
@@ -238,7 +238,7 @@ Per la revisione di una modifica, o una richiesta come "trova bug":
 
 - Parti dal presupposto che il codice funzioni: l'onere della prova sta sul problema segnalato.
 - Riporta solo problemi di gravità Alta e Media (vedi "Gravità" sotto). Niente trovato → "ok" in una riga.
-- Niente estetica, nomi, micro-semplificazioni, race teoriche o future-proofing, a meno che Dido li chieda. Mai aggiungere in fondo "e un paio di cose minori che ho notato".
+- Niente estetica, nomi, micro-semplificazioni, race teoriche o future-proofing, a meno che siano chiesti. Mai aggiungere in fondo "e un paio di cose minori che ho notato".
 
 ## Quando ricevi una revisione
 

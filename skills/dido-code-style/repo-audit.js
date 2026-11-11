@@ -1,7 +1,7 @@
 export const meta = {
   name: 'repo-audit',
   description: 'Analisi completa di un repo secondo la skill dido-code-style: contesto, ogni file letto, test, verifica avversariale, copertura',
-  whenToUse: 'Quando Dido chiede di analizzare un repo, un modulo o una cartella con la skill dido-code-style',
+  whenToUse: 'Quando si chiede di analizzare un repo, un modulo o una cartella con la skill dido-code-style',
   phases: [
     { title: 'Contesto', detail: 'CLAUDE.md, doc, memoria, git log, stack, comandi, gruppi di file' },
     { title: 'Analisi', detail: 'un agente per gruppo, ogni file letto per intero' },

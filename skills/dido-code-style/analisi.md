@@ -1,6 +1,6 @@
 # Analisi completa ("analizza il repo")
 
-"Analizza il repo con la skill dido-code-style" (o un modulo, o una cartella) è la richiesta completa: Dido non elenca cosa controllare. Chiede esplicitamente ogni categoria della checklist qui sotto, quindi le restrizioni del progetto sugli audit per quelle categorie non valgono. L'estetica del codice resta fuori.
+"Analizza il repo con la skill dido-code-style" (o un modulo, o una cartella) è la richiesta completa: chi la fa non elenca cosa controllare. Chiede esplicitamente ogni categoria della checklist qui sotto, quindi le restrizioni del progetto sugli audit per quelle categorie non valgono. L'estetica del codice resta fuori.
 
 I rimandi alla Parte 1 e alla tabella "Gravità" sono a `SKILL.md`, accanto a questo file.
 
@@ -8,7 +8,7 @@ I rimandi alla Parte 1 e alla tabella "Gravità" sono a `SKILL.md`, accanto a qu
 
 Un'analisi dura decine di minuti e costa centinaia di migliaia di token anche per un modulo piccolo, milioni per un repo intero: un agente ogni ~3000 righe di codice, più uno per i test e i verificatori.
 
-1. Se Dido l'ha chiesta in modo esplicito ("analizza il repo con la skill dido-code-style"), quello è il consenso: avvisalo in una riga, con il numero di agenti, e lancia. Se la richiesta è generica ("controlla che sia tutto ok"), dagli prima la stima e aspetta il sì.
+1. Se è chiesta in modo esplicito ("analizza il repo con la skill dido-code-style"), quello è il consenso: avvisa in una riga, con il numero di agenti, e lancia. Se la richiesta è generica ("controlla che sia tutto ok"), dai prima la stima e aspetta il sì.
 2. Lancia lo script del workflow che sta accanto a questo file (`${CLAUDE_SKILL_DIR}` è la cartella di questa skill, la base directory mostrata quando la skill si carica):
    ```
    Workflow({
@@ -63,7 +63,7 @@ In italiano, in quest'ordine:
 
 1. **Intestazione**: repo o scope, data, stack.
 2. **Copertura**: file analizzati sul totale dei tracciati (pattern esclusi con il motivo), ogni comando con ✓ / ✗ / non eseguito (motivo e come lanciarlo), cosa non è stato controllato e perché.
-3. **Alta**, **Media**, **Bassa**: una voce per problema, scritta per Dido. In grassetto il link `[file:line](link)` e il problema in poche parole, poi due o tre frasi con cosa succede e a chi, la prova e il fix minimo. Lo stesso problema trovato due volte è una voce sola. Per esempio:
+3. **Alta**, **Media**, **Bassa**: una voce per problema. In grassetto il link `[file:line](link)` e il problema in poche parole, poi due o tre frasi con cosa succede e a chi, la prova e il fix minimo. Lo stesso problema trovato due volte è una voce sola. Per esempio:
 
    > **[orders.service.js:48](src/orders/orders.service.js#L48) Doppio clic, doppio ordine.** Due richieste ravvicinate creano due ordini, perché il controllo sul carrello già chiuso sta fuori dalla transazione. Riprodotto con due `POST /v1/orders` in parallelo. Fix: spostare il controllo dentro la transazione.
 
@@ -72,9 +72,9 @@ In italiano, in quest'ordine:
 
 Niente confermato: intestazione, "ok", copertura.
 
-L'analisi non modifica il codice. Dopo, correggi ciò che Dido sceglie seguendo la Parte 1.
+L'analisi non modifica il codice. Dopo, correggi ciò che viene scelto seguendo la Parte 1.
 
 ## Dopo il report
 
-- Un problema che Dido scarta si registra con il motivo dove l'analisi successiva lo leggerà: un commento sul perché accanto al codice se è locale, altrimenti il file dei limiti noti del progetto o le regole di revisione nel `CLAUDE.md` (crea `docs/LIMITI-NOTI.md` se il progetto non ha né l'uno né l'altro). La fase Contesto li legge, quindi non viene riproposto.
+- Un problema scartato si registra con il motivo dove l'analisi successiva lo leggerà: un commento sul perché accanto al codice se è locale, altrimenti il file dei limiti noti del progetto o le regole di revisione nel `CLAUDE.md` (crea `docs/LIMITI-NOTI.md` se il progetto non ha né l'uno né l'altro). La fase Contesto li legge, quindi non viene riproposto.
 - I fix seguono la Parte 1: prima il test di regressione, fix minimo, vecchio codice tolto, commit che dice cosa e perché.

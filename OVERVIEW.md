@@ -1,6 +1,6 @@
 # Cosa fanno le skill dido-*
 
-Il riassunto per chi entra in un progetto di Dido. Le regole vere stanno nelle skill, in `skills/`: se qui qualcosa non torna, vale la skill.
+Il riassunto per chi entra in un progetto nato da questi starter. Le regole vere stanno nelle skill, in `skills/`: se qui qualcosa non torna, vale la skill.
 
 ## Cosa ti può fermare
 
@@ -41,16 +41,16 @@ Nei progetti nati dallo starter Nuxt le regole che una macchina sa controllare l
 
 ## Nomi e lingua
 
-- I nomi nuovi sono in inglese: variabili, funzioni, file, cartelle, classi, chiavi, api_key nuove del CMS.
-- I nomi che ci sono già restano come sono, in qualunque lingua.
-- I nomi su DatoCMS (modelli, blocchi, campi, label, api_key) non si traducono e non si rinominano.
-- Commenti, doc e commit seguono la lingua del progetto. Le risposte di Claude sono in italiano.
+- Il codice che scrivi è in inglese, i testi per le persone in italiano.
+- In inglese ogni nome nuovo che un programma legge: variabili, funzioni, file, cartelle, classi, chiavi, campi e api_key di CMS e database, variabili d'ambiente.
+- In italiano commenti, doc, commit, risposte di Claude e label che legge chi usa un pannello (CMS, admin).
+- I nomi che ci sono già restano come sono, in qualunque lingua: non si traducono e non si rinominano.
 - Il lint non controlla la lingua dei nomi.
 
 ## dido-code-style: ogni progetto
 
 - **Prima di scrivere**: leggere `CLAUDE.md`, le doc, la storia git della zona e tutto il flusso coinvolto. Non riaprire decisioni già prese.
-- **Parti chiuse**: quelle elencate in `docs/parti-chiuse.md` non si toccano senza l'ok di Dido.
+- **Parti chiuse**: quelle elencate in `docs/parti-chiuse.md` non si toccano senza l'ok di chi le ha chiuse.
 - **Semplice**: il codice per il requisito di oggi. Niente astrazioni, opzioni o factory con un solo utilizzatore.
 - **Una cosa, un componente**: prima di scrivere si cerca chi lo fa già e lo si estende. Mai una seconda copia.
 - **Modulare**: ogni funzionalità ha la sua cartella e il suo nome; si usa un modulo dal suo punto d'ingresso. Le parti opzionali (statistiche, error tracking, widget) si agganciano al nucleo, mai il contrario. Se una manca, si spegne solo lei.
@@ -65,8 +65,8 @@ Nei progetti nati dallo starter Nuxt le regole che una macchina sa controllare l
 - **Bug**: prima la causa. Dopo tre fix falliti ci si ferma e se ne parla.
 - **Test**: li scrive l'agente, nella stessa modifica. Ogni fix ha un test che senza il fix fallisce. Si testa dall'interfaccia pubblica e si finge solo il confine.
 - **Sicurezza**: a ogni modifica, in proporzione: input, permessi, dati esposti, injection, segreti, rate limit, file, CORS e cookie, dipendenze.
-- **Fatto vuol dire verificato**: niente "funziona" senza averlo eseguito.
-- **Commit** a lavoro verificato, solo dei propri file. Push solo con l'ok di Dido.
+- **Fatto vuol dire verificato**: niente "funziona" senza averlo eseguito. Il report è lungo quanto il lavoro: per un fix bastano tre righe.
+- **Commit** a lavoro verificato, solo dei propri file. Push solo con l'ok di chi lavora con te.
 - **Revisioni**: solo problemi di gravità Alta e Media, niente estetica.
 - **"Analizza il repo"**: un workflow con più agenti che legge tutto e verifica ogni problema. Costa molto: si avvisa prima.
 
@@ -82,11 +82,11 @@ Nei progetti nati dallo starter Nuxt le regole che una macchina sa controllare l
 - **Configurazione**: `nuxt.config.ts` unisce gli slice di `configuration/`; si cambia lo slice.
 - **Dati**: il CMS solo con `useGraphql()`, query in `app/graphql/dato/`. Errore del CMS: 500; contenuto che non c'è: 404.
 - **Terze parti**: per tutto il sito un plugin, per una pagina un composable più un componente. Si tolgono cancellando i loro file.
-- **Motion**: tutto in GSAP, a componenti, con easing e durate solo dai token. Apertura e chiusura sono la stessa timeline. Solo `transform` e `opacity`. Reduced motion sempre rispettato. Lo scroll è solo Lenis.
+- **Motion** (dettagli in `riferimento/motion.md`, letto solo quando si tocca qualcosa che si muove): tutto in GSAP, a componenti, con easing e durate solo dai token. Apertura e chiusura sono la stessa timeline. Solo `transform` e `opacity`. Reduced motion sempre rispettato. Lo scroll è solo Lenis.
 - **Foto**: mai visibili mentre arrivano; segnaposto e dissolvenza. Sempre `NuxtImg` per le immagini del CMS.
 - **Accessibilità e SEO**: un `<h1>`, contrasto AA, `:focus-visible`, `alt` giusti, `useSeo()` in ogni pagina.
 - **Schema DatoCMS**: cambia solo con migration in JavaScript, provate su una sandbox.
-- **Verifica**: lint pulito, pagina 200 senza errori in console, test di util e composable, interfaccia guardata a 375, 768, 1024, 1440 e 1920.
+- **Verifica**, in proporzione: sempre lint pulito, pagina 200 senza errori in console e test di util e composable; per un ritocco uno screenshot mobile e uno desktop; per un'interfaccia nuova le larghezze 375, 768, 1024, 1440 e 1920.
 - **Admin** (SPA con Tailwind): token di `main.css`, niente GSAP, chiamate con `useApi()`.
 
 ## dido-backend: backend Node
@@ -106,11 +106,11 @@ Nei progetti nati dallo starter Nuxt le regole che una macchina sa controllare l
 
 ## dido-planning: lavori grandi
 
-- Un lavoro piccolo si fa e basta. Uno di più passi ha un piano in `docs/plans/`, che Dido approva.
+- Un lavoro piccolo si fa e basta. Uno di più passi ha un piano in `docs/plans/`, che chi lavora con te approva.
 - Passi piccoli, ognuno verificato e con un commit.
 - "Dove siamo", in fondo al piano, è la memoria tra una sessione e l'altra.
 - Le decisioni tecniche vanno in `docs/decisions/`, il report di chiusura in `docs/reports/`.
-- Dido decide il prodotto e il design; l'agente le scelte tecniche, scritte nel piano.
+- Chi lavora con te decide il prodotto e il design; l'agente le scelte tecniche, scritte nel piano.
 
 ## dido-rilascio: chiudere un lavoro
 
@@ -122,7 +122,7 @@ Si lancia a mano con `/dido-rilascio`.
 4. Correzione dei problemi Alti e Medi, ognuno con il suo test.
 5. Suite completa e build.
 6. Commit dei soli file del lavoro.
-7. Push, deploy e controllo della CI solo con l'ok di Dido.
+7. Push, deploy e controllo della CI solo con l'ok di chi lavora con te.
 
 ## Le altre skill dido-*
 
