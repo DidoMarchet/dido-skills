@@ -5,7 +5,7 @@ description: Usare ogni volta che si scrive, modifica, rifattorizza, corregge o 
 
 # Stile e convenzioni di codice
 
-Queste convenzioni sono validate su progetti in produzione e valgono per ogni stack e per chiunque ci lavori. **Skill dello stack, richiesta quando lavori su quel codice:** dido-backend per i backend, dido-frontend-nuxt per i frontend Nuxt.
+Queste convenzioni sono validate su progetti in produzione e valgono per ogni stack e per chiunque ci lavori. **Skill dello stack, richiesta quando lavori su quel codice:** dido-backend per i backend, dido-frontend-nuxt per i frontend. Con quali strumenti il progetto le applica sta in `docs/conventions.md` del progetto.
 
 | Compito | Cosa leggere |
 |---|---|
@@ -171,7 +171,7 @@ Punteggiatura normale: punto, virgola, due punti, parentesi e virgolette dritte 
 - Testa il comportamento dall'interfaccia pubblica (rotta HTTP, componente renderizzato, output della CLI), non gli interni. Si finge solo il confine (rete, CMS, auto-import del framework), mai un modulo interno, e un mock ha la forma completa della risposta vera.
 - Il valore atteso si scrive a mano, mai calcolato con il codice sotto test. Niente snapshot né soglie di coverage. Nei test asincroni si aspetta la condizione, non un tempo fisso.
 - Non modificare un test solo per farlo passare. Se il cambio di comportamento è voluto, dillo nella modifica. Un test non si salta e non passa grazie a un retry: `.only`, `.skip`, `.todo` e `retry` non restano, salvo uno `skipIf` legato all'ambiente, con il motivo accanto.
-- Durante il lavoro si lanciano i test collegati ai file toccati; la suite completa una volta, alla chiusura.
+- Durante il lavoro si lanciano i test collegati ai file toccati; la suite completa una volta, alla chiusura (vedi "Fatto vuol dire verificato").
 - Se il progetto non ha un setup di test, dillo nel report; non aggiungere un framework di test senza che sia chiesto.
 
 ## Sicurezza in ogni modifica
@@ -186,7 +186,7 @@ Ogni modifica passa un controllo di sicurezza prima di essere chiamata fatta, pr
 - **Abusi.** Rate limit su tutto ciò che si può forzare o usare per spam (login, OTP, reset password, registrazione, upload, form di contatto). Ogni protezione (contatore, blocco, limite) si guarda anche da chi la può far scattare: se un estraneo la fa scattare sull'account di un altro, è un lock-out. I token sono casuali, a scadenza e monouso. Le risposte di login e reset non rivelano se un account esiste.
 - **File.** Controlla tipo e dimensione, salva con nomi generati, nessun percorso controllato dall'utente, contenuti privati scaricabili solo dietro autenticazione.
 - **Trasporto e browser.** Allow-list CORS esplicita, cookie `HttpOnly` + `Secure` + il `SameSite` giusto, HTTPS in produzione.
-- **Dipendenze.** Una dipendenza nuova deve servire davvero (non sostituibile con poche righe di codice), essere mantenuta e libera da vulnerabilità critiche note (`npm audit` / `pnpm audit`).
+- **Dipendenze.** Una dipendenza nuova deve servire davvero (non sostituibile con poche righe di codice), essere mantenuta e libera da vulnerabilità critiche note (l'audit del gestore pacchetti).
 
 Poi:
 
@@ -196,7 +196,8 @@ Poi:
 
 ## Fatto vuol dire verificato
 
-- Non dire mai "fatto" o "funziona" senza averlo eseguito: test, lint e formattazione in sola verifica, build, il comando vero, l'endpoint vero. "Compila" non vuol dire "funziona".
+- Non dire mai "fatto" o "funziona" senza averlo eseguito: "compila" non vuol dire "funziona".
+- Si prova solo ciò che cambia: il lint dei file toccati, i test collegati, la pagina, il comando o l'endpoint toccato. Suite completa e build una volta, alla chiusura di un lavoro (`/dido-rilascio`) o quando la modifica tocca codice condiviso (configurazione, layout, componenti comuni, store, rotte, middleware). Un lavoro di pochi minuti non diventa un'ora di prove.
 - Dopo una modifica allo schema o al codice generato, rigenera prima di eseguire qualsiasi cosa.
 - Riporta in modo esplicito cosa è stato verificato e cosa no, e perché (es. "DB spento, test non eseguiti: ecco come lanciarli").
 - Il resoconto di un subagente non è una prova: guarda il diff e rilancia tu la verifica.
@@ -242,7 +243,7 @@ Per la revisione di una modifica, o una richiesta come "trova bug":
 
 ## Quando ricevi una revisione
 
-- Un commento (di un collega, di Codex, di un subagente, di una PR) si controlla sul codice prima di applicarlo.
+- Un commento (di un collega, di un altro agente, di un subagente, di una PR) si controlla sul codice prima di applicarlo.
 - Se per questo repo è sbagliato, rispondi con il motivo tecnico. Se chiede di "fare bene" una cosa, cerca chi la usa: se nessuno, proponi di toglierla.
 - Se un punto non è chiaro, chiedi prima di toccare gli altri.
 

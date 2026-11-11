@@ -1,6 +1,6 @@
-# Chiamate a un backend dello starter
+# Chiamate a un backend
 
-Come un frontend parla con un backend dello starter, cioè lo starter stesso e i progetti nati da lì. Endpoint e campi stanno nella spec OpenAPI del backend: qui c'è solo ciò che la spec non dice.
+Come un frontend parla con un backend che segue dido-backend. Endpoint e campi stanno nella spec OpenAPI del backend: qui c'è solo ciò che la spec non dice.
 
 ## URL e risposte
 

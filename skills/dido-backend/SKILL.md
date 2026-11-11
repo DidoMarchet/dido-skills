@@ -1,15 +1,15 @@
 ---
 name: dido-backend
-description: Usare ogni volta che si scrive, modifica o revisiona il codice di un backend, anche per poche righe (rotte e controller, validazione dell'input, gestione degli errori e status code, autenticazione e permessi, refresh token e OTP, rate limit, transazioni, migration, mail, audit log, variabili d'ambiente, spec OpenAPI, test E2E). Vale anche per lo starter Node con Express e Prisma e per i progetti nati da lì.
+description: Usare ogni volta che si scrive, modifica o revisiona il codice di un backend, anche per poche righe (rotte e controller, validazione dell'input, gestione degli errori e status code, autenticazione e permessi, refresh token e OTP, rate limit, transazioni, migration, mail, audit log, variabili d'ambiente, spec OpenAPI, test E2E).
 ---
 
 # Backend
 
 Linee guida per ogni backend. **Skill richiesta:** dido-code-style, con i principi validi per ogni stack. Qui c'è come li applica un backend.
 
-Come le applica lo starter Node (Express 5, Prisma, PostgreSQL), e in quale file, sta in `riferimento/node-express-prisma.md`: leggilo quando lavori sullo starter o su un progetto nato da lì. Un progetto derivato può aver cambiato dove stanno le cose (file, nomi, helper, catalogo degli errori): per quello vale il suo codice. Le regole di questa skill valgono comunque, anche dove il codice fa diversamente. Quando il `CLAUDE.md` del progetto è più specifico, vale quello.
+Con quali strumenti il progetto applica queste regole (linguaggio, framework, database, deploy) e in quale file sta ogni cosa è in `docs/conventions.md` del progetto: leggilo prima di scrivere codice. Un progetto può aver cambiato dove stanno le cose (file, nomi, helper, catalogo degli errori): per quello vale il suo codice. Le regole di questa skill valgono comunque, anche dove il codice fa diversamente. Quando le istruzioni del progetto sono più specifiche, valgono quelle.
 
-Prima di seguire una skill che non è `dido-*` (Prisma, Postgres, Docker, Redocly, Coolify) leggi `riferimento/skill-di-terzi.md`: dove dice altro, vale lui.
+Prima di seguire una skill che non è `dido-*` (database, ORM, container, deploy) leggi `riferimento/skill-di-terzi.md` e `docs/conventions.md` del progetto: dove dicono altro, valgono loro.
 
 ## Livelli e moduli
 
@@ -44,7 +44,7 @@ Prima di seguire una skill che non è `dido-*` (Prisma, Postgres, Docker, Redocl
 - Lo stesso conflitto tra transazioni può arrivare in forme diverse a seconda del driver, anche solo al commit. Il gestore le mappa tutte su 409, altrimenti un caso normale di concorrenza diventa un 500.
 - In produzione il 500 e gli errori del database hanno un messaggio generico. Dettaglio e stack vanno nei log del server, e il 500 lascia un evento nell'audit.
 - Il service lancia solo errori di dominio. Validazione ed errori del database salgono da soli fino al gestore, quindi niente try/catch nel controller per tradurli.
-- Gli errori si lanciano con il meccanismo del progetto. Nello starter è `new HttpError(404, "Utente non trovato")`. Un progetto derivato può avere un catalogo degli errori, con codici stabili e messaggi in un posto solo: se c'è, si usa il codice del catalogo. Prima di scriverne uno, guarda come lo fa il codice vicino.
+- Gli errori si lanciano con il meccanismo del progetto. Un progetto derivato può avere un catalogo degli errori, con codici stabili e messaggi in un posto solo: se c'è, si usa il codice del catalogo. Prima di scriverne uno, guarda come lo fa il codice vicino.
 - Le risposte d'errore dei parser del body hanno gli header CORS come le altre: il CORS si monta prima dei parser. Senza quegli header il browser mostra all'app un JSON malformato (400) o un body troppo grande (413) come un errore di rete, e l'app non vede lo status.
 
 ## Validazione
@@ -87,8 +87,8 @@ Prima di seguire una skill che non è `dido-*` (Prisma, Postgres, Docker, Redocl
 
 ## Configurazione e segreti
 
-- Ogni variabile d'ambiente ha lo stesso nome in tutti i file env (locale, produzione, esempio). Se mancano in produzione, bloccano l'avvio solo quelle che servono a tutta l'app (database, segreto dei token, CORS). Senza quelle di un servizio opzionale (SMTP, Redis, un'API di terzi) l'app parte, il servizio resta spento e il log lo dice.
-- I segreti di configurazione salvati nel database, come la password SMTP, sono cifrati. L'API dice solo se ci sono (`hasPassword: true`), mai il valore.
+- Ogni variabile d'ambiente ha lo stesso nome in tutti i file env (locale, produzione, esempio). Se mancano in produzione, bloccano l'avvio solo quelle che servono a tutta l'app (database, segreto dei token, CORS). Senza quelle di un servizio opzionale (mail, store condiviso, un'API di terzi) l'app parte, il servizio resta spento e il log lo dice.
+- I segreti di configurazione salvati nel database, come la password del server di posta, sono cifrati. L'API dice solo se ci sono (`hasPassword: true`), mai il valore.
 - La configurazione che cambia a runtime si risolve a ogni uso (database, poi env, poi default). Una cache la renderebbe vecchia negli altri processi.
 
 ## Audit log
@@ -100,7 +100,7 @@ Prima di seguire una skill che non è `dido-*` (Prisma, Postgres, Docker, Redocl
 
 ## Test
 
-- Test end-to-end contro l'app costruita e aperta dal test su una porta di loopback (`listenOnLoopback(buildApp())` nello starter, mai `request(buildApp())`: su macOS supertest può trovare la porta già presa), con i path completi (`/v1/...`) e un database reale, meglio un container usa e getta che quello di sviluppo. Nessuna mail parte davvero.
+- Test end-to-end contro l'app costruita e aperta dal test su una porta di loopback (non con un server finto in memoria, che può trovare la porta già presa), con i path completi (`/v1/...`) e un database reale, meglio un container usa e getta che quello di sviluppo. Nessuna mail parte davvero.
 - Un flusso che usa un servizio esterno ha anche un test con il servizio che non risponde (es. la mail che non parte dà 503).
 - Ogni file di test usa un prefisso univoco nei dati che crea, e alla fine cancella solo quelli.
 - Se i vincoli unique farebbero scontrare file di test in parallelo, i file girano in sequenza.

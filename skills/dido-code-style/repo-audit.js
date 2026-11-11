@@ -197,7 +197,7 @@ ${ctx.commands.length ? ctx.commands.map((c) => `- [${c.purpose}] ${c.command} (
 1. Prima di lanciare, segui la procedura documentata dal progetto (DB isolato, SMTP finto, variabili d'ambiente).
 2. Lint e format solo in verifica: niente --fix o --write. Se lo script del progetto li contiene, lancia lo strumento direttamente senza quei flag.
 3. Vietato ciò che è distruttivo o esce dal repo: reset o migrate dev del DB di sviluppo, cancellare dati, docker compose down -v, git commit o push, deploy, mail vere, modifiche ai file tracciati.
-4. Se manca un prerequisito (Docker spento, env mancante) non improvvisare: stato "non eseguito", con il motivo e il comando esatto per lanciarlo.
+4. Se manca un prerequisito (un servizio spento, env mancante) non improvvisare: stato "non eseguito", con il motivo e il comando esatto per lanciarlo.
 5. Alla fine rimuovi ciò che hai avviato tu (container, cartelle temporanee).
 6. Dove manca un test automatico basta una prova di funzionamento del punto d'ingresso principale (es. lanciare lo script una volta in un container usa-e-getta), non una batteria di test inventati.
 7. findings: un test che fallisce per un errore del codice (file e riga del codice o del test, output come prova); un errore di lint che indica un bug o codice morto; una vulnerabilità alta o critica in una dipendenza usata a runtime. Fallimenti dovuti all'ambiente e regole di stile vanno solo nel summary del comando.`,

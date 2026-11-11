@@ -22,7 +22,7 @@ Si passa al passo successivo solo quando la condizione è vera.
 2. **Revisione indipendente.** Avvia il subagente `revisore`. Il messaggio contiene solo:
    - la richiesta, parola per parola;
    - i criteri di chiusura;
-   - il Figma o il riferimento di design, se il lavoro tocca l'interfaccia;
+   - il riferimento di design, se il lavoro tocca l'interfaccia;
    - la base del confronto.
 
    Le tue conclusioni non ci vanno: il revisore giudica il diff.
@@ -38,7 +38,7 @@ Si passa al passo successivo solo quando la condizione è vera.
 
 6. **Commit**, quando dido-code-style dice che si può. `git add` per nome dei soli file di questo lavoro, messaggio in italiano, con piano e passo se c'è un piano.
 
-7. **Push e deploy solo con l'ok di chi lavora con te.** Chiedilo insieme al report. Dopo il push aspetta la CI su GitHub, dove c'è: il lavoro è chiuso quando è verde. Dopo il deploy guarda lo stato e prova sull'ambiente ciò che è cambiato:
+7. **Push e deploy solo con l'ok di chi lavora con te.** Chiedilo insieme al report. Dopo il push aspetta la CI, dove c'è: il lavoro è chiuso quando è verde. Dopo il deploy guarda lo stato e prova sull'ambiente ciò che è cambiato:
    - un'interfaccia: le pagine toccate, con screenshot da mobile e da desktop e la console del browser;
    - un'API: una chiamata vera.
 

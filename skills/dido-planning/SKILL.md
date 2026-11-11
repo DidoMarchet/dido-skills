@@ -9,13 +9,13 @@ Il metodo per portare avanti un lavoro di più passi: un piano scritto e approva
 
 Una richiesta piccola (un fix, un ritocco, una pagina) non passa da qui: si fa e basta. Se non è chiaro se serve un piano, proponilo in chat in poche righe e lascia scegliere.
 
-Le skill di processo di altri (superpowers: brainstorming, writing-plans, executing-plans, subagent-driven-development) si possono usare per le loro tecniche, ma piano, cartelle, domande, commit e report restano quelli di questa skill, anche quando quelle dicono "sempre" (dido-code-style, `riferimento/skill-di-terzi.md`).
+Le skill di processo di altri (brainstorming, scrittura ed esecuzione di piani, sviluppo con subagenti) si possono usare per le loro tecniche, ma piano, cartelle, domande, commit e report restano quelli di questa skill, anche quando quelle dicono "sempre" (dido-code-style, `riferimento/skill-di-terzi.md`).
 
 ## Chi decide cosa
 
 - **Chi lavora con te** decide il prodotto (cosa fa, per chi, le priorità), il design delle schermate e dei gesti, approva il piano, decide quando una milestone si apre e si chiude, e fa le prove sui dispositivi veri.
 - **L'agente** fa le scelte tecniche (schema, migration, librerie, decisioni) e le scrive nel piano, dentro questi paletti: semplicità, scalabilità, niente colli di bottiglia, niente risorse sprecate, niente overengineering. A chi lavora con te si chiedono le decisioni di prodotto e i consensi che le skill `dido-*` gli riservano (operazioni distruttive, produzione, parti chiuse).
-- Prima del piano si chiede solo ciò che manca e cambia il risultato, in un messaggio solo, con una proposta per ogni domanda. Se il piano è approvato senza risposta vale la proposta, e il piano la riporta. Con un Figma, il brief è il Figma.
+- Prima del piano si chiede solo ciò che manca e cambia il risultato, in un messaggio solo, con una proposta per ogni domanda. Se il piano è approvato senza risposta vale la proposta, e il piano la riporta. Con un design di riferimento, il brief è il design.
 
 ## Dove stanno le cose
 
@@ -45,7 +45,7 @@ Nel `docs/` del repo principale del progetto: quello che il suo `AGENTS.md` o `C
 
 ## Cosa c'è già
 ## Step
-1. **Design** delle schermate e dei gesti che il Figma non ha, da approvare prima di costruire (`docs/design/`). Senza un'interfaccia nuova, niente design.
+1. **Design** delle schermate e dei gesti che il design non ha, da approvare prima di costruire (`docs/design/`). Senza un'interfaccia nuova, niente design.
 2. **Decisione tecnica** (`docs/decisions/NNNN-<titolo>.md`), con le misure che servono a prenderla.
 3. Un passo per ogni pezzo che si verifica da solo (backend, app, una funzione).
 4. **Prove** di chiusura.
@@ -76,7 +76,7 @@ Nel `docs/` del repo principale del progetto: quello che il suo `AGENTS.md` o `C
 
 ## Chiudere
 
-Prima del report si ripassa il piano voce per voce: ogni riga di "Cosa si chiede", ogni passo, ogni domanda e ogni cosa emersa ha un esito, e quello che non è fatto va in "Cosa resta aperto" con dove andrà. Poi una revisione del codice indipendente sulle modifiche dal commit dell'ultima revisione, che "Dove siamo" segna. La fa un agente che non ha scritto il codice (un subagente, Codex), con il diff e senza le conclusioni di chi l'ha scritto. Solo Alta e Media (dido-code-style, Parte 2), ognuna corretta con un test che senza la correzione fallisce dove un test si può scrivere, altrimenti con la prova nel report. Poi il report:
+Prima del report si ripassa il piano voce per voce: ogni riga di "Cosa si chiede", ogni passo, ogni domanda e ogni cosa emersa ha un esito, e quello che non è fatto va in "Cosa resta aperto" con dove andrà. Poi una revisione del codice indipendente sulle modifiche dal commit dell'ultima revisione, che "Dove siamo" segna. La fa un agente che non ha scritto il codice (un subagente, un altro agente), con il diff e senza le conclusioni di chi l'ha scritto. Solo Alta e Media (dido-code-style, Parte 2), ognuna corretta con un test che senza la correzione fallisce dove un test si può scrivere, altrimenti con la prova nel report. Poi il report:
 
 ```md
 # Report <nome>: <cosa>
