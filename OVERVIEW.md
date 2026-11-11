@@ -85,7 +85,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - **Motion** (`riferimento/motion.md`, letto solo quando si tocca qualcosa che si muove): una libreria sola, a componenti, easing e durate dai token, apertura e chiusura nella stessa sequenza, solo `transform` e `opacity`, un solo sistema di scroll, reduced motion sempre rispettato.
 - **Foto**: mai visibili mentre arrivano, mai zoom all'hover.
 - **Accessibilità e SEO**: un `<h1>`, contrasto AA, `:focus-visible`, `alt` giusti, l'esito di un'azione annunciato spostando il focus.
-- **Verifica** in proporzione: sempre lint, pagina 200 senza errori in console e test toccati; per un ritocco uno screenshot mobile e uno desktop; per un'interfaccia nuova cinque larghezze e il confronto con gli elementi simili del sito.
+- **Verifica** in proporzione: sempre lint, pagina 200 senza errori in console e test toccati; per un ritocco uno screenshot mobile e uno desktop; per un'interfaccia nuova o cambiata (una sezione, un componente, un layout) cinque larghezze con le skill di design del progetto e il confronto con gli elementi simili del sito.
 
 ## dido-backend: backend
 
@@ -114,7 +114,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - Niente si perde: quello che emerge entra nel piano con la data (un passo nuovo, "Cosa non si fa", "Domande aperte"), mai solo in chat.
 - "Dove siamo", in fondo al piano, è la memoria tra una sessione e l'altra.
 - Le decisioni tecniche vanno in `docs/decisions/`, il report di chiusura in `docs/reports/`.
-- Alla chiusura: ripasso del piano voce per voce, revisione indipendente, report. La milestone la chiude chi lavora con te.
+- Alla chiusura: ripasso del piano voce per voce, revisione dell'agente `revisore` sul diff dall'ultima revisione, report. La milestone la chiude chi lavora con te.
 
 ## dido-goal: obiettivo e fine del lavoro
 
@@ -136,6 +136,7 @@ Si lancia a mano con `/dido-rilascio`.
 5. Suite completa e build, una volta.
 6. Commit dei soli file del lavoro.
 7. Push e deploy solo con l'ok di chi lavora con te. Il lavoro è chiuso quando la CI è verde e ciò che è cambiato è provato sull'ambiente.
+8. Report: cosa è cambiato, cosa è stato verificato e cosa no, cosa ha trovato la revisione, le scelte fatte senza chiedere, cosa resta aperto. Con un piano, anche "Dove siamo".
 
 ## Le altre skill dido-*
 
