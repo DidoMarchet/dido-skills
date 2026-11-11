@@ -116,6 +116,15 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - Le decisioni tecniche vanno in `docs/decisions/`, il report di chiusura in `docs/reports/`.
 - Alla chiusura: ripasso del piano voce per voce, revisione indipendente, report. La milestone la chiude chi lavora con te.
 
+## dido-goal: obiettivo e fine del lavoro
+
+- Un compito di più passi parte dall'obiettivo, in due o tre righe nel primo messaggio: cosa sarà vero alla fine, con quale prova, cosa resta fuori. Con un piano è il suo "Si chiude quando".
+- Analisi, architettura, implementazione, debugging e analisi di prodotto hanno ognuna il suo criterio di fine. Il criterio è quello scritto, né più severo né più largo; quando è vero, una verifica, il report e ci si ferma.
+- Ciò che è fatto non si rifà: verifiche, ricerche e decisioni si riaprono solo con un elemento nuovo. Controllarlo costa poco: git log, le misure, il codice che realizza la decisione.
+- Dopo un tentativo che lascia l'errore identico, prima i fatti e poi un'altra modifica. Dopo tre tentativi falliti ci si ferma, ma non prima, se resta un'ipotesi che si prova con poco.
+- Si chiede solo per il prodotto, per ciò che non si annulla e per le scelte che, sbagliate, butterebbero il lavoro. Ciò che le regole del progetto affidano all'agente, come il commit, si fa.
+- I problemi gravi visti si segnalano sempre. Il resto fuori perimetro va in una riga tra le cose aperte, senza farlo né proporlo.
+
 ## dido-rilascio: chiudere un lavoro
 
 Si lancia a mano con `/dido-rilascio`.

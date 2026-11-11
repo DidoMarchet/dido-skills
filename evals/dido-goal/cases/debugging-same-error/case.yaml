@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: debugging-same-error
+expected_outcome: |
+  La causa è che il report usa ancora toIsoDate di src/legacy/date.js tramite src/utils/index.js: le correzioni in src/date.js non girano. Il fix fa usare src/date.js al report, i test passano, la risposta spiega la causa.

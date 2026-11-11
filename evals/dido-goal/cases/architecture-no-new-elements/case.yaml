@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: architecture-no-new-elements
+expected_outcome: |
+  La risposta trova la decisione 0004, confronta le misure di novembre con le soglie di riapertura, controlla che dopo la decisione non sia cambiato niente di rilevante e conclude che si tiene l outbox, dicendo cosa la riaprirebbe, e segnala che il worker tiene aperta la transazione mentre invia le email. Breve, nessun file cambiato.
