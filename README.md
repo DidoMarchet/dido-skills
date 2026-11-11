@@ -9,6 +9,8 @@ npx skills add DidoMarchet/dido-skills --skill <name> -g   # every project (user
 npx skills update <name>                                    # pull the latest version
 ```
 
+What every `dido-*` skill and the starter lint do, in short (Italian): [OVERVIEW.md](OVERVIEW.md).
+
 A skill loads only when the task matches it. The writing rules that apply everywhere, chat replies included, are in [claude/CLAUDE.md](claude/CLAUDE.md). On a new machine, add them once to your user-level `CLAUDE.md`:
 
 ```bash
