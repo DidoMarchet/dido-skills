@@ -1,0 +1,7 @@
+{
+  "name": "dido-skills",
+  "private": true,
+  "scripts": {
+    "ai:update": "npx --yes skills update --project --yes"
+  }
+}

@@ -10,6 +10,8 @@ npx skills update <name>                                 # pull the latest versi
 
 What every `dido-*` skill does, in short (Italian): [OVERVIEW.md](OVERVIEW.md).
 
+The third-party skills used to work on this repo are in `skills-lock.json`. Update them with `npm run ai:update`.
+
 A skill loads only when the task matches it. The writing rules that apply everywhere, chat replies included, are in [claude/CLAUDE.md](claude/CLAUDE.md). On a new machine, add them once to your user-level `CLAUDE.md`:
 
 ```bash
