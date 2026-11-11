@@ -137,7 +137,7 @@ QA sito, avanzamento:
 [ ] 4. GATE 1: test della prova su ogni esito emesso (vedi "I due gate di onestà")
 [ ] 5. Voci [B]/[M]: non inventare l'esito, scrivi l'istruzione operativa per chi le farà
 [ ] 6. Report: tabella per sezione + piano di intervento prioritizzato
-[ ] 7. Checklist spuntata, generata dal report appena scritto (secondo file, vedi "Report")
+[ ] 7. Checklist spuntata, solo se chiesta: generata dal report appena scritto (vedi "Report")
 [ ] 8. GATE 2: prima di consegnare (vedi "I due gate di onestà")
 ```
 
@@ -221,9 +221,9 @@ Usa `assets/report-template.md`. Regole che valgono più del formato:
 - Il piano di intervento è **ordinato per severità, poi per rapporto impatto/sforzo**, e sta
   in una tabella sola: è l'unica pagina che verrà letta davvero.
 
-### La checklist spuntata (secondo file, sempre)
+### La checklist spuntata (solo su richiesta)
 
-Oltre al report consegna `checklist-esiti-{{sito}}.md`, con `assets/checklist-esiti.md`: le
+Se chi lavora con te la chiede, oltre al report consegna `checklist-esiti-{{sito}}.md`, con `assets/checklist-esiti.md`: le
 voci in perimetro raggruppate per sezione, casella spuntata **solo** dove l'esito è `OK`.
 
 Si compila **per ultimo, dal report già scritto**, riga per riga. È una vista, non una seconda

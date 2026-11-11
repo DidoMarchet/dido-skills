@@ -130,7 +130,7 @@ Si lancia a mano con `/dido-rilascio`.
 
 ## Le altre skill dido-*
 
-- **dido-checklist-sito-web**: collaudo di un sito (tecnica, performance, SEO e ricerca con AI, accessibilità, privacy, sicurezza). Una voce non verificata si scrive "NON VERIFICATO", mai spuntata. Consegna il report per il cliente e la checklist spuntata.
+- **dido-checklist-sito-web**: collaudo di un sito (tecnica, performance, SEO e ricerca con AI, accessibilità, privacy, sicurezza). Una voce non verificata si scrive "NON VERIFICATO", mai spuntata. Consegna il report per il cliente; la checklist spuntata solo su richiesta.
 - **dido-platform-docs-writer**: README e doc operative (avvio, deploy, variabili, guasti). Si scrive solo ciò che i file dimostrano; il resto è "NON DEDUCIBILE". Porte, versioni e variabili non si copiano: si rimanda al file.
 
 ## Le skill di altri

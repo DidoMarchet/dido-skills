@@ -83,4 +83,4 @@ sparsa: non collassare in range. -->
 | Perimetro | tag attivi {{…}}, {{N}} voci su {{M}} |
 | Promozioni da [M] ad automatiche | {{elenco ID}} |
 | Gate 1 | {{X}} voci riviste, {{Y}} declassate |
-| Vista sintetica | {{nome del file checklist spuntata}}, derivata da questo documento, che prevale in caso di divergenza |
+| Vista sintetica | {{nome del file checklist spuntata, se chiesta}}, derivata da questo documento, che prevale in caso di divergenza |

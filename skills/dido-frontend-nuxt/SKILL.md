@@ -65,7 +65,6 @@ Con quali strumenti il progetto applica queste regole (framework, sistema di sti
 ## Dati e terze parti
 
 - Il CMS si legge da un composable solo, e le API da un altro: pagine e componenti non parlano mai con un client HTTP o del CMS. Il client lo importano solo quei composable e le sorgenti lato server.
-- Un errore del CMS non è una pagina che non esiste: la pagina risponde 500, e 404 solo quando il contenuto non c'è.
 - SEO, canonical e hreflang da un composable solo, chiamato dalla pagina.
 - Una terza parte che serve a tutto il sito (analytics, error tracking, consenso) è un plugin. Una che serve a una pagina o a un componente (un form, un widget di prenotazione, un player) è un composable per l'effetto più un componente per il markup.
 - La libreria di una terza parte la importa solo il suo plugin o il suo composable, che senza la sua config non fa niente. Così si toglie cancellando quei file, la dipendenza e il punto in cui si usa. Se deve ricevere qualcosa dal sito (gli errori per l'error tracking), si aggancia a un hook.

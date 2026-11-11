@@ -4,9 +4,8 @@ AI skills for coding conventions and full repo analysis, writing documentation, 
 Install with the [skills CLI](https://github.com/vercel-labs/skills):
 
 ```bash
-npx skills add DidoMarchet/dido-skills --skill <name>      # current project
-npx skills add DidoMarchet/dido-skills --skill <name> -g   # every project (user level)
-npx skills update <name>                                    # pull the latest version
+npx skills add DidoMarchet/dido-skills --skill <name>   # current project, never with -g
+npx skills update <name>                                 # pull the latest version
 ```
 
 What every `dido-*` skill does, in short (Italian): [OVERVIEW.md](OVERVIEW.md).

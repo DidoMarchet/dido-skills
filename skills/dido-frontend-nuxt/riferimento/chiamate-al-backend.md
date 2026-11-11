@@ -33,7 +33,7 @@ Un account disattivato riceve 401 anche sul refresh e torna al login. Se il mess
 
   Tra le tab il refresh si mette in fila con i Web Locks (`navigator.locks.request`), perché il cookie è condiviso e la seconda tab deve partire con il cookie già ruotato.
 - L'access token sta solo in memoria, mai in `localStorage` o `sessionStorage`. Upload e download passano dalla stessa logica di token, refresh e nuovo tentativo.
-- Dopo un ricaricamento della pagina: prima il refresh per l'access token, poi la chiamata del profilo (nello starter `GET /v1/auth/me`). Un errore sul profilo diverso da 401 non slogga.
+- Dopo un ricaricamento della pagina: prima il refresh per l'access token, poi la chiamata del profilo. Un errore sul profilo diverso da 401 non slogga.
 - I ruoli per l'interfaccia vengono dal profilo o dal token appena arrivato da un refresh, mai da un token vecchio: il backend li legge dal database quando firma il token. A ogni richiesta il server ricontrolla comunque i ruoli attuali.
 - Il logout chiama l'endpoint di logout, che cancella il cookie dal server, poi azzera token e store.
 - Finiti i tentativi OTP il codice è bruciato: l'interfaccia riporta al login per riceverne uno nuovo, non fa riprovare lo stesso codice.

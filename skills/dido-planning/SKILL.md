@@ -76,7 +76,7 @@ Nel `docs/` del repo principale del progetto: quello che il suo `AGENTS.md` o `C
 
 ## Chiudere
 
-Prima del report si ripassa il piano voce per voce: ogni riga di "Cosa si chiede", ogni passo, ogni domanda e ogni cosa emersa ha un esito, e quello che non è fatto va in "Cosa resta aperto" con dove andrà. Poi una revisione del codice indipendente sulle modifiche dal commit dell'ultima revisione, che "Dove siamo" segna. La fa un agente che non ha scritto il codice (un subagente, un altro agente), con il diff e senza le conclusioni di chi l'ha scritto. Solo Alta e Media (dido-code-style, Parte 2), ognuna corretta con un test che senza la correzione fallisce dove un test si può scrivere, altrimenti con la prova nel report. Poi il report:
+Prima del report si ripassa il piano voce per voce: ogni riga di "Cosa si chiede", ogni passo, ogni domanda e ogni cosa emersa ha un esito, e quello che non è fatto va in "Cosa resta aperto" con dove andrà. Poi la revisione indipendente dell'agente `revisore`, con base il commit dell'ultima revisione che "Dove siamo" segna; dove il progetto non lo ha, un agente che non ha scritto il codice, con il diff e senza le tue conclusioni. I problemi Alti e Medi si correggono con un test, come dice dido-code-style ("Test"). Poi il report:
 
 ```md
 # Report <nome>: <cosa>
