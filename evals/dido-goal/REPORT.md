@@ -44,6 +44,7 @@ Si sovrappone a dido-code-style in quattro righe: tre fix poi stop, modifiche mi
 1. **Versione 1.** Due difetti. Il commit a lavoro verificato veniva chiesto invece di farlo ("dimmi tu se farlo"). Un obiettivo del brief veniva giudicato con un criterio più severo di quello scritto.
 2. **Versione 2.** Corretti tutti e due: il commit si fa dove le regole lo prevedono, il criterio è quello scritto.
 3. **Versione 3.** Nell'architettura la versione 1 era 4 volte più veloce, ma solo perché controllava le soglie della decisione senza leggere il codice. Così perdeva un difetto Medio che senza skill veniva trovato in 2 run su 2: il worker tiene aperta una transazione mentre invia le email, e un SMTP lento può bloccare gli ordini. Ora la skill chiede di leggere il codice che realizza la decisione e di segnalare sempre i problemi gravi visti. Il difetto viene trovato in 2 run su 2 e il tempo resta più basso.
+4. **Versione 4** (11/11 sera). Il commit si fa solo quando lo chiede chi lavora con te (decisione di chi usa le skill): tolti i due esempi sul commit. Rifatte solo le 8 sessioni con la skill: 56 asserzioni su 62 contro 57, nessun commit fatto da solo in 8 sessioni. La differenza è una sola asserzione da script (test lanciati 6 volte invece di 3 al massimo nella funzionalità), che la modifica non tocca.
 
 ## Limiti
 
