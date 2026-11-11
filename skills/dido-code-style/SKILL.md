@@ -66,8 +66,8 @@ Il codice non si scrive mai nel vuoto: ogni modifica parte da ciò che c'è già
 ## Forma del codice
 
 - Funzioni con le arrow (`const nome = (args) => {}`) come predefinito, anche nelle callback. `function` quando il codice ne ha bisogno: la funzione usa `this` (un'API che la chiama con il suo contesto, un metodo di oggetto) oppure è un generatore (`function*`). Per questi casi niente `eslint-disable`: il lint dello starter li accetta. Le arrow non sono hoistate: si definiscono prima dell'uso.
-- Lingua: il codice che scrivi è in inglese, i testi per le persone in italiano. In inglese ogni nome nuovo che un programma legge: variabili, funzioni, file, cartelle, classi, chiavi, campi e api_key di CMS e database, variabili d'ambiente. In italiano commenti, doc, commit, risposte e label che legge chi usa un pannello (CMS, admin). I nomi che ci sono già restano come sono, in qualunque lingua: non si traducono e non si rinominano.
-- Nomi interi in camelCase, che dicono cos'è la cosa: `article`, `currentArticle`, `index`, `rows`. Chiavi e campi di un servizio hanno il formato che vuole il servizio (le api_key di DatoCMS in snake_case). Niente lettere singole o abbreviazioni (`a`, `e`, `el`, `cur`, `out`): per eventi ed errori `event` ed `error`. Restano gli idiomi del framework, come `req`, `res` e `next` in Express e `tx` nelle transazioni di Prisma. Attento a non riusare un nome dello scope esterno.
+- Lingua: il codice è in inglese, i testi per le persone in italiano. In inglese ogni nome nuovo: variabili, funzioni, file, cartelle, classi, chiavi, campi, variabili d'ambiente. In italiano commenti, doc, commit e risposte. I nomi che ci sono già restano come sono, in qualunque lingua: non si traducono e non si rinominano.
+- Nomi interi in camelCase, che dicono cos'è la cosa: `article`, `currentArticle`, `index`, `rows`. Chiavi e campi di un servizio esterno hanno il formato che vuole il servizio. Niente lettere singole o abbreviazioni (`a`, `e`, `el`, `cur`, `out`): per eventi ed errori `event` ed `error`. Restano gli idiomi del framework che usi (`req`, `res`, `next`, `tx`). Attento a non riusare un nome dello scope esterno.
 - Niente `console.log` di debug lasciati nel codice. I log che servono davvero passano dal logger del progetto; dove non c'è, l'avvio di un server usa `console.info` e i problemi `console.warn` e `console.error`. Negli script da terminale il log è l'output.
 - Dove il progetto ha il lint dello starter, controlla queste regole e quelle della skill dello stack; dove non c'è, le controlli tu. I problemi nuovi che il lint segnala si correggono, avvisi compresi: le regole sono avvisi finché il progetto non accende `lintStrict`, ma valgono uguale. Quelli che c'erano già restano, se non fanno parte della richiesta. Una regola si spegne solo per una riga, con il motivo accanto (`// eslint-disable-next-line regola -- motivo`), o per tutto il progetto nella config del lint del progetto, mai in quella dello starter.
 
@@ -197,7 +197,7 @@ Poi:
 ## Fatto vuol dire verificato
 
 - Non dire mai "fatto" o "funziona" senza averlo eseguito: test, lint e formattazione in sola verifica, build, il comando vero, l'endpoint vero. "Compila" non vuol dire "funziona".
-- Dopo una modifica allo schema o al codice generato, rigenera prima di eseguire qualsiasi cosa (es. `npx prisma generate`).
+- Dopo una modifica allo schema o al codice generato, rigenera prima di eseguire qualsiasi cosa.
 - Riporta in modo esplicito cosa è stato verificato e cosa no, e perché (es. "DB spento, test non eseguiti: ecco come lanciarli").
 - Il resoconto di un subagente non è una prova: guarda il diff e rilancia tu la verifica.
 - Una decisione (tenere, togliere, cambiare) si basa solo su ciò che hai letto per intero o eseguito. Quello che non hai letto lo dici ("non letto") e non diventa una raccomandazione.

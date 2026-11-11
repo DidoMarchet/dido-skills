@@ -39,7 +39,6 @@ Le eccezioni che valgono per ogni stack stanno in `dido-code-style/riferimento/s
 - Player video e ricerca nel sito sono terze parti di pagina: composable più componente, vestiti con il design system, testi da i18n.
 - Anteprima delle bozze, click-to-edit, tempo reale e cache tag solo su richiesta. Il token delle bozze non arriva mai nel browser, e le pagine in bozza non passano da prerender o cache.
 - Le migration si scrivono in JavaScript (`migrations:new --js`). Gli importer scrivono sull'ambiente primario: solo con l'ok di chi lavora con te. `datocms.config.json` e la cartella delle migration stanno nella root del repo e in git.
-- I nomi nel CMS seguono la lingua di dido-code-style: api_key nuove in inglese e in snake_case, label in italiano, quelli che ci sono restano. Un hint c'è solo per un formato o un limite.
 - Un sito nuovo parte dallo starter Nuxt, mai da uno starter ufficiale del CMS. Il plugin dell'editor DatoCMS è un progetto a parte.
 
 ## Vue, store, form

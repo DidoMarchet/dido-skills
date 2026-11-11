@@ -42,8 +42,8 @@ Nei progetti nati dallo starter Nuxt le regole che una macchina sa controllare l
 ## Nomi e lingua
 
 - Il codice che scrivi è in inglese, i testi per le persone in italiano.
-- In inglese ogni nome nuovo che un programma legge: variabili, funzioni, file, cartelle, classi, chiavi, campi e api_key di CMS e database, variabili d'ambiente.
-- In italiano commenti, doc, commit, risposte di Claude e label che legge chi usa un pannello (CMS, admin).
+- In inglese ogni nome nuovo: variabili, funzioni, file, cartelle, classi, chiavi, campi, variabili d'ambiente.
+- In italiano commenti, doc, commit e risposte di Claude.
 - I nomi che ci sono già restano come sono, in qualunque lingua: non si traducono e non si rinominano.
 - Il lint non controlla la lingua dei nomi.
 
