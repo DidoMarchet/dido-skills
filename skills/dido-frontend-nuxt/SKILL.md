@@ -31,7 +31,7 @@ Nei progetti nati dal boilerplate le regole che una macchina sa controllare le c
 - Arrow function, nomi interi e niente `console.log`: "Forma del codice" in dido-code-style.
 - Sempre `<script setup>`, niente Options API. Il nome del componente lo dà Nuxt dal percorso (`components/widget/media-text/index.vue` è `WidgetMediaText`), quindi niente `defineOptions({ name })`.
 - Gli effetti su DOM, scroll e animazioni stanno in un composable (`app/composables/`, `useX`), che espone stato e azioni e non markup. La logica pura sta in `app/utils/`, con i suoi test. Query e chiamate stanno in cartelle dedicate, mai dentro i componenti.
-- Niente testo statico nei template: il brand viene dalla config (`siteName`), le label da i18n, i contenuti dal CMS.
+- Niente testo statico nei template: il brand viene dalla config (`siteName`), le label da i18n, i contenuti dal CMS. Fa eccezione la styleguide (`app/pages/styleguide.vue`), pagina di servizio per chi lavora al sito: testi nel template, senza traduzioni.
 
 ## Nomi
 

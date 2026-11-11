@@ -4,7 +4,7 @@ Le skill di terzi danno conoscenza (un'API, una diagnosi, un controllo), ma spes
 
 ## Lingua e forma
 
-- Si risponde in italiano, anche quando una skill dà frasi fisse, report o messaggi in inglese. Codice, commenti, commit e doc seguono la lingua del progetto. Tabelle e numeri generati restano identici.
+- Si risponde in italiano, anche quando una skill dà frasi fisse, report o messaggi in inglese. Commenti, commit e doc seguono la lingua del progetto; i nomi nel codice sono in inglese. Tabelle e numeri generati restano identici.
 - Gli esempi di una skill sono un riferimento: si riscrivono in JavaScript con le arrow function, nei file, nei nomi e nei punti d'ingresso del progetto. Le soluzioni che esistono solo in TypeScript non si portano.
 
 ## Installazione e dipendenze
