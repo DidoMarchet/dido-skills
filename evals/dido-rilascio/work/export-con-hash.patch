@@ -1,0 +1,254 @@
+diff --git a/app/node/src/config/permissions.js b/app/node/src/config/permissions.js
+index 3fc5cbe..c126d6b 100644
+--- a/app/node/src/config/permissions.js
++++ b/app/node/src/config/permissions.js
+@@ -39,4 +39,9 @@ export const PERMISSIONS = {
+   // NB: va enforced nel controller, non in authenticate({ roles }), perché i
+   // FULL_ACCESS_ROLES bypassano il role-check di route (vedi authenticate.js).
+   CUSTOMER_DELETE: [ROLES.SUPERADMIN],
++
++  // Chi può scaricare tutti i dati di un customer dal backoffice, quando il customer
++  // li chiede senza poterli scaricare da solo (GDPR art. 15 e 20). Solo SUPERADMIN,
++  // come la cancellazione. Va enforced nel controller, per lo stesso motivo.
++  CUSTOMER_EXPORT: [ROLES.SUPERADMIN],
+ };
+diff --git a/app/node/src/customer-admin/customer-admin.controller.js b/app/node/src/customer-admin/customer-admin.controller.js
+index 4938d64..576e13e 100644
+--- a/app/node/src/customer-admin/customer-admin.controller.js
++++ b/app/node/src/customer-admin/customer-admin.controller.js
+@@ -31,6 +31,18 @@ const assertCustomerDelete = (req, res) => {
+   return true;
+ };
+ 
++const assertCustomerExport = (req, res) => {
++  const userRoles = req.auth?.roles ?? [];
++  if (!PERMISSIONS.CUSTOMER_EXPORT.some((role) => userRoles.includes(role))) {
++    res.status(403).json({
++      status: "error",
++      error: "Solo un SUPERADMIN può scaricare i dati di un customer",
++    });
++    return false;
++  }
++  return true;
++};
++
+ export const listCustomers = async (req, res) => {
+   const query = listCustomersQuerySchema.parse(req.query);
+   const { items, pagination } = await customerAdminService.listCustomers(query);
+@@ -100,3 +112,14 @@ export const revokeSession = async (req, res) => {
+   );
+   res.json({ status: "ok" });
+ };
++
++export const exportCustomer = async (req, res) => {
++  const { id } = customerIdParamSchema.parse(req.params);
++  if (!assertCustomerExport(req, res)) return;
++  const data = await customerAdminService.exportCustomer(
++    id,
++    req.auth.sub,
++    req.ip,
++  );
++  res.json({ status: "ok", data });
++};
+diff --git a/app/node/src/customer-admin/customer-admin.routes.js b/app/node/src/customer-admin/customer-admin.routes.js
+index c1dee88..b33d6d9 100644
+--- a/app/node/src/customer-admin/customer-admin.routes.js
++++ b/app/node/src/customer-admin/customer-admin.routes.js
+@@ -9,6 +9,8 @@
+  * PATCH  /admin/customers/:id   → aggiorna profilo / isActive / emailVerified /
+  *                                 passwordResetRequired
+  * DELETE /admin/customers/:id   → hard-delete (SUPERADMIN-only, gate nel controller)
++ * GET    /admin/customers/:id/export → dati del customer per una richiesta GDPR
++ *                                      (SUPERADMIN-only, gate nel controller)
+  * GET    /admin/customers/:id/sessions             → lista sessioni del customer
+  * DELETE /admin/customers/:id/sessions             → revoca tutte (force-logout, account resta attivo)
+  * DELETE /admin/customers/:id/sessions/:sessionId  → revoca una sessione mirata
+@@ -32,6 +34,7 @@ router.get("/:id", customerAdminController.getCustomer);
+ router.post("/", customerAdminController.createCustomer);
+ router.patch("/:id", customerAdminController.updateCustomer);
+ router.delete("/:id", customerAdminController.deleteCustomer);
++router.get("/:id/export", customerAdminController.exportCustomer);
+ 
+ // Sessioni del customer (force-logout senza disattivare l'account).
+ // Stesso gate CUSTOMER_MANAGE delle altre operazioni di gestione (authenticate()
+diff --git a/app/node/src/customer-admin/customer-admin.service.js b/app/node/src/customer-admin/customer-admin.service.js
+index 12e575c..be3b3ec 100644
+--- a/app/node/src/customer-admin/customer-admin.service.js
++++ b/app/node/src/customer-admin/customer-admin.service.js
+@@ -375,3 +375,23 @@ export const revokeCustomerSession = async (
+     },
+   );
+ };
++
++/**
++ * Dati di un customer per una richiesta GDPR arrivata al backoffice: profilo e
++ * sessioni attive, come l'export self-service. Solo SUPERADMIN (gate nel controller).
++ */
++export const exportCustomer = async (id, actorId, ipAddress) => {
++  const profile = await prisma.customer.findUnique({ where: { id } });
++  if (!profile) throw new HttpError(404, "Customer non trovato");
++  const sessions = await listPrincipalSessions({
++    principalType: CUSTOMER,
++    principalId: id,
++  });
++  await auditLogWithActor("warn", "CUSTOMER_DATA_EXPORTED_BY_ADMIN", actorId, {
++    actorType: STAFF,
++    targetId: id,
++    targetEmail: profile.email,
++    ip: ipAddress,
++  });
++  return { exportedAt: new Date(), profile, sessions };
++};
+diff --git a/app/node/src/docs/paths/customer-admin.js b/app/node/src/docs/paths/customer-admin.js
+index c384146..11e26b0 100644
+--- a/app/node/src/docs/paths/customer-admin.js
++++ b/app/node/src/docs/paths/customer-admin.js
+@@ -174,6 +174,29 @@ export const customerAdminPaths = {
+     },
+   },
+ 
++  "/admin/customers/{id}/export": {
++    get: {
++      tags: ["Customer Admin"],
++      summary: "Dati di un customer per una richiesta GDPR",
++      description:
++        "Lo stesso contenuto dell'export self-service (`GET /auth/customer/me/export`): " +
++        "profilo e sessioni attive, mai hash né dati OTP. Solo SUPERADMIN " +
++        "(CUSTOMER_EXPORT): un ADMIN_GENERALE riceve 403. Registra l'evento " +
++        "CUSTOMER_DATA_EXPORTED_BY_ADMIN.",
++      security: BEARER,
++      parameters: [ID],
++      responses: {
++        200: dataResponse("Dati del customer", ref("CustomerExport")),
++        400: INVALID_ID,
++        401: UNAUTHORIZED,
++        403: errorResponse(
++          "Solo un SUPERADMIN può scaricare i dati di un customer",
++        ),
++        404: NOT_FOUND,
++      },
++    },
++  },
++
+   "/admin/customers/{id}/sessions/{sessionId}": {
+     delete: {
+       tags: ["Customer Admin"],
+diff --git a/app/node/tests/customer-admin-export.test.js b/app/node/tests/customer-admin-export.test.js
+new file mode 100644
+index 0000000..f8ad8a4
+--- /dev/null
++++ b/app/node/tests/customer-admin-export.test.js
+@@ -0,0 +1,101 @@
++/**
++ * Test E2E per GET /admin/customers/:id/export: i dati di un customer per una richiesta
++ * GDPR arrivata al backoffice. Solo SUPERADMIN (CUSTOMER_EXPORT, gate nel controller),
++ * stesso contenuto dell'export self-service.
++ */
++import { randomUUID } from "crypto";
++import { describe, it, expect, beforeAll, afterAll } from "vitest";
++import request from "supertest";
++import { buildApp } from "../src/app.js";
++import {
++  listenOnLoopback,
++  makeTestPrefix,
++  createTestStaffUser,
++  createTestCustomer,
++  cleanupTestData,
++} from "./setup.js";
++
++const app = await listenOnLoopback(buildApp());
++const PREFIX = makeTestPrefix();
++
++let ipCounter = 0;
++const nextIp = () =>
++  `10.96.${Math.floor(ipCounter / 256)}.${ipCounter++ % 256}`;
++
++const loginStaff = async (email, password) => {
++  const response = await request(app)
++    .post("/v1/auth/staff/login")
++    .set("X-Forwarded-For", nextIp())
++    .send({ email, password });
++  return response.body.accessToken;
++};
++
++const exportOf = (id, token) => {
++  const pending = request(app)
++    .get(`/v1/admin/customers/${id}/export`)
++    .set("X-Forwarded-For", nextIp());
++  return token ? pending.set("Authorization", `Bearer ${token}`) : pending;
++};
++
++let superadminToken;
++let adminToken;
++let customer;
++
++beforeAll(async () => {
++  const superadmin = await createTestStaffUser({
++    prefix: PREFIX,
++    email: `${PREFIX}su@test.local`,
++    roles: ["SUPERADMIN"],
++  });
++  superadminToken = await loginStaff(
++    superadmin.user.email,
++    superadmin.plainPassword,
++  );
++  const admin = await createTestStaffUser({
++    prefix: PREFIX,
++    email: `${PREFIX}ag@test.local`,
++    roles: ["ADMIN_GENERALE"],
++  });
++  adminToken = await loginStaff(admin.user.email, admin.plainPassword);
++
++  const created = await createTestCustomer({ prefix: PREFIX });
++  customer = created.customer;
++  // Una sessione vera del customer, così l'export ha qualcosa in "sessions".
++  const login = await request(app)
++    .post("/v1/auth/customer/login")
++    .set("X-Forwarded-For", nextIp())
++    .send({ email: customer.email, password: created.plainPassword });
++  expect(login.status).toBe(200);
++});
++
++afterAll(() => cleanupTestData(PREFIX));
++
++describe("GET /admin/customers/:id/export", () => {
++  it("SUPERADMIN: 200 con profilo e sessioni del customer", async () => {
++    const response = await exportOf(customer.id, superadminToken);
++    expect(response.status).toBe(200);
++    expect(response.body.status).toBe("ok");
++    expect(response.body.data.profile.email).toBe(customer.email);
++    expect(response.body.data.sessions.length).toBeGreaterThanOrEqual(1);
++  });
++
++  it("ADMIN_GENERALE: 403", async () => {
++    const response = await exportOf(customer.id, adminToken);
++    expect(response.status).toBe(403);
++  });
++
++  it("senza token: 401", async () => {
++    const response = await exportOf(customer.id);
++    expect(response.status).toBe(401);
++  });
++
++  it("customer che non esiste: 404", async () => {
++    const response = await exportOf(randomUUID(), superadminToken);
++    expect(response.status).toBe(404);
++  });
++
++  it("id non valido: 400", async () => {
++    const response = await exportOf("non-un-id", superadminToken);
++    expect(response.status).toBe(400);
++  });
++});
+diff --git a/docs/services/NODE-AUDIT.md b/docs/services/NODE-AUDIT.md
+index 011ad86..46789b4 100644
+--- a/docs/services/NODE-AUDIT.md
++++ b/docs/services/NODE-AUDIT.md
+@@ -78,6 +78,7 @@ I nomi seguono `<DOMINIO>_<AZIONE>[_<RISULTATO>]`: `_FAILED` per l'esito negativ
+ | `CUSTOMER_DELETED_BY_ADMIN` | `warn` | Hard-delete del customer (solo SUPERADMIN) |
+ | `CUSTOMER_SESSIONS_REVOKED_BY_ADMIN` | `warn` | Revoca di tutte le sessioni di un customer |
+ | `CUSTOMER_SESSION_REVOKED_BY_ADMIN` | `warn` | Revoca di una singola sessione di un customer |
++| `CUSTOMER_DATA_EXPORTED_BY_ADMIN` | `warn` | Export dei dati di un customer dal backoffice (solo SUPERADMIN) |
+ 
+ ### File
+ 

@@ -39,7 +39,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - **Forma**: arrow function (`function` solo se usa `this` o è un generatore; i metodi negli oggetti e il codice scritto da uno strumento restano come sono), nomi interi che dicono cos'è la cosa, niente `console.log` di debug.
 - **Lint**: i problemi nuovi si correggono, avvisi compresi; quelli che c'erano già restano. Una regola si spegne solo per una riga, con il motivo, o nella config del progetto.
 - **Togli il vecchio**: chi sostituisce X con Y cancella X nella stessa modifica (codice, test, doc, configurazione), senza shim di compatibilità. Niente codice morto.
-- **File env**: tre file nel repo (`.env.example`, `.env.local`, `.env.production`) con i valori veri. Non si tolgono, non si accorpano, nessuna variabile si toglie. Una variabile nuova va in tutti e tre.
+- **File env**: tre file nel repo (`.env.example`, `.env.local`, `.env.production`) con i valori veri. Non si tolgono, non si accorpano, nessuna variabile si toglie. Una variabile nuova va in tutti e tre, ed è l'unica riga che cambia (più un commento, se il nome non basta).
 - **Una protezione per problema**: niente controlli doppi "per sicurezza"; si valida al confine e poi ci si fida.
 - **Modifiche minime**: un fix tocca le righe rotte. Niente refactor "già che ci sono".
 - **Commenti** sul perché, non sul cosa.
@@ -96,7 +96,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - **Autenticazione**: un middleware, che rilegge l'utente dal database a ogni richiesta. Audience diverse hanno token e cookie distinti. Una rotta self-service prende l'id dal token.
 - **Credenziali**: password con un hash lento; token, OTP e challenge salvati solo come hash. La password di un account nuovo la sceglie chi apre il link arrivato nella casella.
 - **Sessioni**: refresh token in un cookie HttpOnly che ruota a ogni uso. Un refresh token già ruotato che torna chiude la sua famiglia di sessioni. L'OTP vale solo con la challenge del login.
-- **Rate limit** per IP o per challenge, mai solo per account. Se lo store dei contatori non risponde, la richiesta passa.
+- **Rate limit** per IP o per challenge, mai solo per account, nemmeno con un'eccezione per i browser già usati. Se è chiesto per account, prima del codice si spiega il lock-out e si propone l'alternativa. Se lo store dei contatori non risponde, la richiesta passa.
 - **Dati**: schema solo con migration, campi delle query sempre elencati.
 - **Configurazione**: senza la variabile di un servizio opzionale l'app parte e quel servizio resta spento. I segreti salvati nel database sono cifrati.
 - **Audit log** degli eventi di sicurezza; non fa mai fallire la richiesta.

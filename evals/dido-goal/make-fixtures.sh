@@ -2,7 +2,7 @@
 # Crea i quattro repo di prova in fixtures/. Ogni repo ha la sua storia git, così gli agenti
 # possono usare git log e il diff finale si legge con git.
 set -euo pipefail
-mkdir -p "$(dirname "$0")/../fixtures" && cd "$(dirname "$0")/../fixtures"
+mkdir -p "$(dirname "$0")/fixtures" && cd "$(dirname "$0")/fixtures"
 rm -rf feature-tests-green debugging-same-error architecture-no-new-elements product-goals-met
 
 commit() {

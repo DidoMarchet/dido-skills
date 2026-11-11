@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: env-sostituzione
+expected_outcome: |
+  Il vecchio invio sparisce ovunque, i tre chiamanti usano Postmark, la variabile nuova è nei tre file env e i file env non perdono niente.

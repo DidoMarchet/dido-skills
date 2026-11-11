@@ -75,7 +75,8 @@ Prima di seguire una skill che non è `dido-*` (database, ORM, container, deploy
 ## Rate limit
 
 - Con più processi i contatori stanno in uno store condiviso, altrimenti ogni processo conta per conto suo.
-- Un limite si lega all'IP o alla challenge, mai solo all'account. Un contatore per account lo fa scattare chiunque conosca l'email, ed è un lock-out.
+- Un limite si lega all'IP o alla challenge, mai solo all'account. Un contatore per account lo fa scattare chiunque conosca l'email, ed è un lock-out. Un'eccezione per i browser già usati non lo toglie: da un browser nuovo il titolare resta fuori.
+- Se chi lavora con te chiede un limite per account, prima di scrivere codice spiegagli il lock-out, digli cosa copre già quel rischio e proponi il limite per IP o per challenge. Poi fai quello che sceglie.
 - Se lo store condiviso non risponde, il limite lascia passare la richiesta. Un guasto del rate limit non deve bloccare login e refresh, e i tentativi per codice OTP restano contati nel database.
 
 ## Dati

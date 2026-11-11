@@ -117,7 +117,7 @@ Prematura è l'infrastruttura "per quando crescerà il traffico": cache, code, w
 - Ogni repo ha tre file env alla root, tutti nel repo: `.env.example`, `.env.local` (sviluppo) e `.env.production`. Niente altri file env fuori da git.
 - Contengono i valori veri, segreti compresi, perché i repo sono privati. `CHANGE_ME` solo dove il valore va generato o preso altrove.
 - Non si tolgono e non si accorpano, anche quando due sono uguali. Nessuna variabile e nessun valore si toglie, si svuota o diventa un segnaposto se non è chiesto, anche quando il codice non lo legge più.
-- Una variabile nuova va in tutti e tre, con lo stesso nome.
+- Una variabile nuova va in tutti e tre, con lo stesso nome. La modifica è la sua riga, più un commento sopra se il nome non basta: il resto del file resta com'è, riga per riga, comprese le variabili che il codice non legge più e i loro commenti.
 
 ## Una protezione per problema
 

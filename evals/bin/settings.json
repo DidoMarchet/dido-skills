@@ -1,0 +1,24 @@
+{
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  },
+  "permissions": {
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(npm install:*)",
+      "Bash(npm i:*)",
+      "Bash(npm ci:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm i:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npm run prisma:generate:*)",
+      "Bash(npm run ai:update:*)",
+      "Bash(pnpm ai:update:*)",
+      "Bash(pnpm run ai:update:*)",
+      "Bash(docker compose:*)",
+      "Bash(make up-dev:*)",
+      "Bash(make down-dev:*)"
+    ]
+  }
+}

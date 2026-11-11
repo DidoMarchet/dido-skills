@@ -6,15 +6,15 @@ Un giro completo sono 16 sessioni con Opus, circa 10 $ e 5 minuti. Servono Claud
 
 ## Come si lancia
 
-Dalla cartella `evals/dido-goal/`:
+Gli script sono quelli comuni di `evals/bin` (come si usano: [../README.md](../README.md)); qui ci sono le fixture, i casi e i controlli da script (`checks.py`). Dalla cartella `evals/`:
 
-1. `bin/make-fixtures.sh`: crea i quattro repo di prova in `fixtures/`, ognuno con la sua storia git.
-2. `bin/launch.sh iteration-1`: 4 scenari, con e senza la skill, 2 run ciascuno, in parallelo. La skill provata è quella di `skills/dido-goal`. Senza skill, il collegamento in `~/.claude/skills` è bloccato con `--disallowedTools`; la descrizione resta comunque nell'elenco delle skill.
-3. `python3 bin/grade.py iteration-1 prepare`: controlla le asserzioni che si verificano da codice (test, diff, numero di esecuzioni, lunghezza) e scrive `iteration-1/blind/bundle.md`, senza indizi su quale run ha la skill.
+1. `bash dido-goal/make-fixtures.sh`: crea i quattro repo di prova in `dido-goal/fixtures/`, ognuno con la sua storia git.
+2. `bin/launch.sh ~/dido-evals/goal-1 both 2 dido-goal/feature-tests-green dido-goal/debugging-same-error dido-goal/architecture-no-new-elements dido-goal/product-goals-met`: 4 scenari, con e senza la skill, 2 run ciascuno, in parallelo. La skill provata è quella di `skills/dido-goal`. Senza skill, il collegamento in `~/.claude/skills` è bloccato con `--disallowedTools`; la descrizione resta comunque nell'elenco delle skill.
+3. `python3 bin/grade.py ~/dido-evals/goal-1 prepare`: controlla le asserzioni che si verificano da codice (test, diff, numero di esecuzioni, lunghezza) e scrive `blind/bundle.md`, senza indizi su quale run ha la skill.
 4. Un agente legge il pacchetto e giudica le altre asserzioni, con il prompt qui sotto.
-5. `python3 bin/grade.py iteration-1 merge`: scrive il `grading.json` di ogni run. Il benchmark si calcola con `scripts.aggregate_benchmark` di skill-creator.
+5. `python3 bin/grade.py ~/dido-evals/goal-1 merge`: scrive il `grading.json` di ogni run e `summary.md`, con le asserzioni passate e tempo e costo medi per caso e configurazione.
 
-Le cartelle `fixtures/` e `iteration-*/` sono ignorate da git.
+Fino alla versione 4 le sessioni giravano in `iteration-*/` qui dentro, ignorate da git, e potevano leggere l'`AGENTS.md` di dido-skills (Claude Code legge i `CLAUDE.md` delle cartelle sopra), in tutti e due i bracci. Ora girano in `~/dido-evals/`. Le cartelle `fixtures/` e `iteration-*/` sono ignorate da git.
 
 ## Il prompt del valutatore
 

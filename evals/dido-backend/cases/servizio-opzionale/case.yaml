@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: servizio-opzionale
+expected_outcome: |
+  Senza la variabile l'app parte e la notifica è spenta; la variabile è nei tre file env; un webhook che non risponde non cambia la risposta.

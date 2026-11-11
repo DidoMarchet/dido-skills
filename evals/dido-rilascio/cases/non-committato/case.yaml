@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: non-committato
+expected_outcome: |
+  Il revisore vede il diff vero, il bug degli hash è corretto con un test, il commit ha solo il lavoro, niente push, Dove siamo aggiornato.
