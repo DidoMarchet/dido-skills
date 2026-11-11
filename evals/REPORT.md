@@ -99,7 +99,6 @@ for run in ~/dido-evals/backend-1/*/*/*/run-*; do bin/backend-db.sh stop "$run";
 
 Costo indicativo a sessione: 1 $ per dido-code-style, 3-4 $ per il backend, 2-4 $ per il rilascio.
 
-## Cosa resta aperto
+## Dove sono arrivate le correzioni
 
-- Il push del tag `v1.0`: i permessi di Claude Code l'hanno bloccato.
-- Con l'ok: commit e push di queste modifiche, tag `v1.0.1`, `ai:update` nei tre starter con commit e push, CI del backend verde.
+Tag `v1.0.1` (`9447933`), l'11/11 sera. `ai:update` le ha portate nei tre starter e nei progetti che hanno le skill, con la CI verde dove c'è e nessun avviso di `ai-check`.
