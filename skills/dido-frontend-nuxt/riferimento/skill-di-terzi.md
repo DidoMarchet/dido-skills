@@ -56,7 +56,7 @@ Le eccezioni che valgono per ogni stack stanno in `dido-code-style/riferimento/s
 - Player video e ricerca nel sito sono terze parti di pagina: composable più componente, vestiti con il design system, testi da i18n. Prima di dire che un player non traccia si misurano domini e cookie.
 - Anteprima delle bozze, click-to-edit, tempo reale e cache tag solo su richiesta di Dido. Il token delle bozze non arriva mai nel browser, e le pagine in bozza non passano da prerender o cache.
 - Lo schema del CMS cambia solo con migration versionate in JavaScript (`migrations:new --js`), provate su una sandbox: niente modifiche dirette, nemmeno su una sandbox. Gli importer scrivono sull'ambiente primario: solo con l'ok di Dido. `datocms.config.json` e la cartella delle migration stanno nella root del repo e in git.
-- I nomi nel CMS (modelli, blocchi, fieldset e campi, label e api_key) restano come li ha scelti Dido, anche in inglese: non si traducono e non si rinominano. Le api_key nuove sono in inglese. Un hint c'è solo per un formato o un limite.
+- I nomi nel CMS (modelli, blocchi, fieldset e campi, label e api_key) restano come li ha scelti chi li ha dati, in qualunque lingua: non si traducono e non si rinominano. Le api_key nuove sono in inglese. Un hint c'è solo per un formato o un limite.
 - Un sito nuovo parte dallo starter di Dido, mai da uno starter ufficiale del CMS. Il plugin dell'editor DatoCMS è un progetto a parte.
 
 ## Vue, store, form
