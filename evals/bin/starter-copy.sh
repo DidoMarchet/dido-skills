@@ -21,6 +21,8 @@ git -C "$dest" remote remove origin
 
 (cd "$starter" && find . -maxdepth 3 -name node_modules -type d -not -path '*/node_modules/*') \
   | while read -r dir; do
+      # Solo dove la cartella c'è anche nella copia: quelle di build (.output) non sono in git.
+      [ -d "$(dirname "$dest/${dir#./}")" ] || continue
       ln -s "$starter/${dir#./}" "$dest/${dir#./}"
       echo "${dir#.}" >> "$dest/.git/info/exclude"
     done

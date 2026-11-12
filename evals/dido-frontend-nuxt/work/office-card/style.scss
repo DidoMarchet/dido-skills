@@ -1,0 +1,10 @@
+@use "~/assets/styles/scss/core" as *;
+
+.office-card {
+  padding: 40px;
+  border: 1px solid $black-1;
+}
+
+.office-card__title {
+  margin-bottom: 10px;
+}

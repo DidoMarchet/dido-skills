@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: componente-cambiato
+expected_outcome: |
+  Il numero di telefono è nella card, cliccabile, con i testi nelle lingue e il lint pulito. La verifica è quella di un componente cambiato: mobile e desktop, senza le cinque larghezze e senza le skill di design.
