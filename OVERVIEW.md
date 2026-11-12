@@ -75,7 +75,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - **Design system**: classi e token che ci sono. Token solo per i valori ricorrenti, una scala tipografica sola, colori a scala per famiglia. Font e spazi grandi fluidi tra mobile e desktop, margine laterale fluido.
 - **Componenti**: una cartella per componente, con il suo stile; i riusabili in un'area loro, che ricevono tutto da prop e slot. Un pattern esiste una volta sola. Classi BEM, varianti per sezione e mai per colore.
 - **Stesso elemento, stesso comportamento**: caroselli, schede, hover, dissolvenze uguali in tutto il sito.
-- **Hover** su ogni elemento cliccabile, solo dove il puntatore lo permette, con la stessa transizione e lo stesso stato alla pressione.
+- **Hover** su ogni elemento cliccabile, solo dove il puntatore lo permette, con la stessa transizione e lo stesso stato alla pressione col puntatore. Sul touch niente hover, neanche alla pressione: solo la stretta dei pulsanti pieni.
 - **Testi** dai dizionari delle lingue, divisi per area e sempre allineati; nessun testo scritto nei componenti. Ogni pagina è dichiarata nella config delle lingue, così entra nella sitemap.
 - **Degrada, non cadere**: un dato o una config che manca dà uno stato gestito. Solo il contenuto principale fa errore: fonte che non risponde 500, contenuto che non c'è 404.
 - **Dati**: il CMS e le API da un composable ciascuno, mai dai componenti. SEO, canonical e hreflang da un composable solo. Lo schema del CMS cambia solo con migration.

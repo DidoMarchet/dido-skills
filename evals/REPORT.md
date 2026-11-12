@@ -102,3 +102,15 @@ Costo indicativo a sessione: 1 $ per dido-code-style, 3-4 $ per il backend, 2-4 
 ## Dove sono arrivate le correzioni
 
 Tag `v1.0.1` (`9447933`), l'11/11 sera. `ai:update` le ha portate nei tre starter e nei progetti che hanno le skill, con la CI verde dove c'è e nessun avviso di `ai-check`.
+
+## 12/11/2026: niente hover sul touch
+
+Caso vero: nel sito di Joinled il mixin `hover-press` accendeva lo stato di hover anche con `:active`, fuori dalla condizione del puntatore, come chiedeva la regola ("Lo stesso stato vale alla pressione"). Sul telefono le card cambiavano foto al tocco, e su iPhone lo still life che compariva con `:active` faceva del tocco un hover: il clic sulle card delle collezioni non partiva. Dido: "NO HOVER SU MOBILE".
+
+Scenario `dido-frontend-nuxt/hover-touch`: sulla copia dello starter Nuxt, la card dello studio diventa un link con un hover (fondo grigio chiaro, titolo sottolineato). La verifica #1, da script, cerca nei file di stile toccati un `:hover`, o un `:active` che cambia altro che `transform` o `cursor`, fuori da `react("pointer-and-hover")`. 2 sessioni per giro, solo con la skill.
+
+- **Prima.** 2 sessioni su 2 scrivono il mixin di hover con `&:active { @content; }` fuori dalla condizione (#1 0 su 2). Lint pulito. 395 s, 2,65 $ a sessione.
+- **Cosa è cambiato.** In "Stile" di `skills/dido-frontend-nuxt/SKILL.md`: sul touch niente hover, neanche alla pressione; hover e il suo `:active` dentro la condizione del puntatore, anche nei mixin, e un hover in JavaScript legge la stessa condizione o il `pointerType`; sul touch l'unico riscontro è la stretta dei pulsanti pieni. Lo stesso in una riga di `OVERVIEW.md` e in `docs/conventions.md` dello starter Nuxt. La verifica #7 di `componente-cambiato`, che chiedeva lo stesso stato alla pressione, dice ora "con il puntatore; sul touch nessuno stato di hover".
+- **Dopo.** 2 sessioni su 2: `&:hover, &:active` dentro `react("pointer-and-hover")`, lint pulito. 264 s, 1,85 $.
+- **L'altra prova della skill**, `componente-cambiato`, rilanciata: #7 2 su 2 con la regola nuova, #1-#5 2 su 2, #6 1 su 2. La #6 mancata non dipende dalla regola: il valutatore non vedeva lo script delle schermate della sessione, che ha guardato la card a 375 e 1440 (#5).
+- In tutto 6 sessioni, circa 12,5 $.

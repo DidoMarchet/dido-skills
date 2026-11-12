@@ -3,6 +3,7 @@
 # nella pagina contatti (componente, stile e un'area delle lingue), già committata.
 # Uso: fixture.sh <caso> <repo> <with_skill|without_skill> <run>
 #   componente-cambiato: la richiesta aggiunge un elemento alla card che c'è.
+#   hover-touch: la richiesta dà alla card un hover, che sul touch non deve valere.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 BIN="$HERE/../bin"
@@ -13,7 +14,7 @@ commit="${NUXT_STARTER_COMMIT:-4967882}"
 bash "$BIN/starter-copy.sh" "$starter" "$commit" "$repo" "$config"
 
 case "$case_name" in
-  componente-cambiato)
+  componente-cambiato|hover-touch)
     work="$HERE/work/office-card"
     mkdir -p "$repo/app/components/contacts/office-card"
     cp "$work/index.vue" "$work/style.scss" "$repo/app/components/contacts/office-card/"

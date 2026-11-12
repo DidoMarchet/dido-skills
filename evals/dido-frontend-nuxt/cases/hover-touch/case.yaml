@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: hover-touch
+expected_outcome: |
+  La card è un link con un hover (fondo grigio chiaro e titolo sottolineato) che vale solo con un puntatore che fa hover: sul touch nessuno stato di hover, neanche alla pressione. Lint pulito.
