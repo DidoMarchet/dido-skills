@@ -82,13 +82,25 @@ Richiesta: passare l'invio delle email da Sendgrid a Postmark, con il token in `
 - Le copie dello starter hanno `node_modules` collegato, `scripts/ai-check.mjs` spento e il commit dello starter fissato (`ce067ee`). Le sessioni girano senza il "trust" della cartella, quindi ignorano le 4 regole `permissions.allow` del progetto: gli strumenti consentiti li dà `--allowedTools`.
 - Fino alla versione 4, le sessioni di dido-goal giravano dentro dido-skills e potevano leggerne l'`AGENTS.md`, in tutti e due i bracci. Ora tutte le sessioni girano in `~/dido-evals/`.
 
+## 12/11/2026: le prove E2E durante il lavoro
+
+Caso vero: in un'app installabile le prove E2E partivano solo dalla build, circa tre minuti a giro, e la doc del progetto diceva di lanciare così anche una prova sola. In un passo di lavoro le build inutili sono state otto. La regola diceva già "suite completa e build una volta, alla chiusura", ma non nominava le E2E.
+
+Scenario `dido-code-style/e2e-dev-server`: un'app di note con le E2E solo sulla build (un minuto, una riga in `.build-log` a ogni build) e un difetto su "Annulla" da correggere e provare con le E2E. 3 sessioni per giro, solo con la skill.
+
+- **Prima.** 3 sessioni su 3 correggono il difetto, ma fanno build durante il lavoro: 2, 1 e 2. Due lanciano la prova singola dalla build ("come previsto da `docs/dev-and-verify.md`"), poi tutta la suite sulla build. La terza prova sul dev server con una config temporanea fuori dal repo, ma alla fine rifà tutta la suite sulla build. Tempo 155-225 s.
+- **Cosa è cambiato.** In "Fatto vuol dire verificato" di `skills/dido-code-style/SKILL.md`: le E2E durante il lavoro sul dev server, solo quelle della modifica; se il progetto le lancia solo dalla build, si aggiunge il modo di lanciarle sul dev server; sulla build tutte alla chiusura, e durante il lavoro solo quelle di ciò che c'è solo lì. Un campanello d'allarme con la scusa vista nelle sessioni. Il passo 5 di `dido-rilascio` dice che le E2E complete girano sulla build. Lo stesso in `OVERVIEW.md`.
+- **Dopo.** 3 sessioni su 3: nessuna build, correzione giusta (prova nascosta sul dev server), la prova E2E nuova vista fallire prima e passare dopo, su Chromium e WebKit. Tutte aggiungono `npm run test:e2e:dev` al progetto, con la riga nella doc, e scrivono nel report che la suite sulla build va lanciata alla chiusura. Tempo 73-86 s, costo uguale (0,74 $ a sessione).
+- **Le altre prove delle due skill**, rilanciate con le regole nuove, 2 sessioni per caso: file env 6 su 6, rilascio di un lavoro non committato 10 su 10, rilascio di un lavoro già committato 5 su 5 (le due sessioni si fermano e dicono che il diff è vuoto). Il valutatore ha giudicato la #3 del lavoro non committato da prove indirette (il rapporto del revisore non è nel pacchetto); il test nascosto conferma che il difetto è stato trovato e corretto.
+- In tutto 12 sessioni, circa 15 $.
+
 ## Come rilanciare le prove di una skill
 
 Dalla cartella `evals/`. Le copie dello starter backend sono di `~/Desktop/Dido Git Test/starterkit-backend-platform-coolify`, o di `BACKEND_STARTER`.
 
 ```bash
 bash dido-code-style/make-fixtures.sh
-bin/launch.sh ~/dido-evals/code-style-1 with_skill 2 dido-code-style/env-sostituzione
+bin/launch.sh ~/dido-evals/code-style-1 with_skill 2 dido-code-style/env-sostituzione dido-code-style/e2e-dev-server
 bin/launch.sh ~/dido-evals/backend-1 with_skill 2 dido-backend/export-superadmin dido-backend/rate-limit-account dido-backend/servizio-opzionale
 bin/launch.sh ~/dido-evals/rilascio-1 with_skill 2 dido-rilascio/non-committato dido-rilascio/gia-committato
 python3 bin/grade.py ~/dido-evals/backend-1 prepare
@@ -105,7 +117,7 @@ Tag `v1.0.1` (`9447933`), l'11/11 sera. `ai:update` le ha portate nei tre starte
 
 ## 12/11/2026: niente hover sul touch
 
-Caso vero: nel sito di Joinled il mixin `hover-press` accendeva lo stato di hover anche con `:active`, fuori dalla condizione del puntatore, come chiedeva la regola ("Lo stesso stato vale alla pressione"). Sul telefono le card cambiavano foto al tocco, e su iPhone lo still life che compariva con `:active` faceva del tocco un hover: il clic sulle card delle collezioni non partiva. Dido: "NO HOVER SU MOBILE".
+Caso vero: in un sito il mixin `hover-press` accendeva lo stato di hover anche con `:active`, fuori dalla condizione del puntatore, come chiedeva la regola ("Lo stesso stato vale alla pressione"). Sul telefono le card cambiavano foto al tocco, e su iPhone lo still life che compariva con `:active` faceva del tocco un hover: il clic sulle card delle collezioni non partiva. Dido: "NO HOVER SU MOBILE".
 
 Scenario `dido-frontend-nuxt/hover-touch`: sulla copia dello starter Nuxt, la card dello studio diventa un link con un hover (fondo grigio chiaro, titolo sottolineato). La verifica #1, da script, cerca nei file di stile toccati un `:hover`, o un `:active` che cambia altro che `transform` o `cursor`, fuori da `react("pointer-and-hover")`. 2 sessioni per giro, solo con la skill.
 

@@ -198,6 +198,7 @@ Poi:
 
 - Non dire mai "fatto" o "funziona" senza averlo eseguito: "compila" non vuol dire "funziona".
 - Si prova solo ciò che cambia: il lint dei file toccati, i test collegati, la pagina, il comando o l'endpoint toccato. Suite completa e build una volta, alla chiusura di un lavoro (`/dido-rilascio`) o quando la modifica tocca codice condiviso (configurazione, layout, componenti comuni, store, rotte, middleware). Un lavoro di pochi minuti non diventa un'ora di prove.
+- Le prove end-to-end durante il lavoro girano sul dev server, senza build: solo quelle della modifica, su un browser e una misura dove il difetto si vede. Se il progetto le lancia solo dalla build, aggiungi al progetto il modo di lanciarle sul dev server (config, comando e una riga nella doc) e dillo nel report. Sulla build girano tutte e una volta, alla chiusura (`/dido-rilascio`, la fine di una milestone). Durante il lavoro, sulla build solo le prove di ciò che c'è solo lì (service worker, offline, pagine generate).
 - Dopo una modifica allo schema o al codice generato, rigenera prima di eseguire qualsiasi cosa.
 - Riporta in modo esplicito cosa è stato verificato e cosa no, e perché (es. "DB spento, test non eseguiti: ecco come lanciarli").
 - Il resoconto di un subagente non è una prova: guarda il diff e rilancia tu la verifica.
@@ -223,6 +224,7 @@ Poi:
 | "Chiudo con 'se vuoi posso anche…'" | Quello che resta è nel report. Se non c'è niente da decidere, ti fermi. |
 | "Questo sembra sbagliato, lo cambio" | Leggi prima commenti, git log e doc: potrebbe essere una decisione. |
 | "Compila, quindi è fatto" | Eseguilo, e riporta cosa hai eseguito. |
+| "Lancio le E2E dalla build, come dice la doc / alla fine tutta la suite sulla build, per sicurezza" | Le E2E della modifica girano sul dev server. Tutta la suite sulla build è della chiusura. |
 | "Dalla descrizione si capisce cosa fa, non serve leggerlo tutto" | Si decide solo su ciò che si è letto per intero. |
 | "Il subagente dice che passa" | Guarda il diff e rilancia la verifica. |
 | "Provo un altro fix" (dopo tre) | Fermati: è l'approccio. Parlane con chi lavora con te. |

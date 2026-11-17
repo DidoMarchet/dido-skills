@@ -58,7 +58,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 
 **Verifica e chiusura**
 
-- **Si prova solo ciò che cambia**: lint dei file toccati, test collegati, la pagina o l'endpoint toccato. Suite completa e build una volta, alla chiusura, o quando si tocca codice condiviso.
+- **Si prova solo ciò che cambia**: lint dei file toccati, test collegati, la pagina o l'endpoint toccato. Suite completa e build una volta, alla chiusura, o quando si tocca codice condiviso. Le prove end-to-end durante il lavoro sul dev server; sulla build tutte alla chiusura.
 - **Fatto vuol dire eseguito**. Il resoconto di un subagente non è una prova. Si decide solo su ciò che si è letto per intero.
 - **Report** lungo quanto il lavoro: cosa è cambiato, cosa è stato verificato, cosa resta, le scelte fatte senza chiedere. Per un fix bastano tre righe. Poi ci si ferma, senza "se vuoi posso anche…".
 - **Commit** solo quando chi lavora con te lo chiede, a parole o con `/dido-rilascio`, e quando gli altri agenti sullo stesso repo hanno finito, con i soli propri file aggiunti per nome. Fino ad allora il report dice che il lavoro è da committare. Più sessioni: un worktree ciascuna. Push solo con l'ok di chi lavora con te.
@@ -133,7 +133,7 @@ Si lancia a mano con `/dido-rilascio`.
 2. Revisione dell'agente `revisore`, che non ha scritto il codice e riceve solo la richiesta, i criteri e la base del confronto.
 3. Lint e test dei file toccati, mentre il revisore lavora.
 4. Correzione dei problemi Alti e Medi, ognuno con il suo test. Dopo una correzione Alta, un secondo giro di revisione.
-5. Suite completa e build, una volta.
+5. Suite completa, con le prove end-to-end sulla build, e build, una volta.
 6. Commit dei soli file del lavoro.
 7. Push e deploy solo con l'ok di chi lavora con te. Il lavoro è chiuso quando la CI è verde e ciò che è cambiato è provato sull'ambiente.
 8. Report: cosa è cambiato, cosa è stato verificato e cosa no, cosa ha trovato la revisione, le scelte fatte senza chiedere, cosa resta aperto. Con un piano, anche "Dove siamo".

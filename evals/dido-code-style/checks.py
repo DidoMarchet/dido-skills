@@ -1,6 +1,7 @@
 """Controlli da script delle asserzioni di dido-code-style."""
 import json
 import shlex
+import shutil
 import sys
 from pathlib import Path
 
@@ -12,7 +13,24 @@ HIDDEN = Path(__file__).resolve().parent / "hidden"
 # Indici (da 1) delle asserzioni di giudizio, per caso. Le altre si controllano qui.
 JUDGED = {
     "env-sostituzione": [],
+    "e2e-dev-server": [],
 }
+
+
+def undo_on_dev_server(run):
+    """La prova nascosta su "Annulla", sul dev server della sessione, copiata nel repo solo
+    per il tempo della prova."""
+    target = run.repo / ".hidden-check"
+    target.mkdir(exist_ok=True)
+    for name in ("undo-position.spec.js", "undo-position.config.mjs"):
+        shutil.copy(HIDDEN / name, target / name)
+    try:
+        port = int(run.env.get("DEV_PORT", "4310")) + 100
+        result = run.sh("npx playwright test -c .hidden-check/undo-position.config.mjs",
+                        env={"CHECK_PORT": str(port)}, timeout=300)
+        return result.returncode == 0, (result.stdout + result.stderr)[-400:]
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
 
 
 def check(case_name, index, run):
@@ -44,6 +62,25 @@ def check(case_name, index, run):
             mentions = run.sh("grep -rli postmark test/").stdout.split()
             return result.returncode == 0 and bool(mentions), f"npm test exit {result.returncode} ({summary}); test con postmark: {mentions}"
         if index == 6:
+            commits = run.new_commits()
+            return not commits and not run.pushed(), f"commit nuovi: {len(commits)}; push: {run.pushed()}"
+    if case_name == "e2e-dev-server":
+        if index == 1:
+            return undo_on_dev_server(run)
+        if index == 2:
+            log = run.repo / ".build-log"
+            builds = log.read_text().split() if log.exists() else []
+            return not builds, f"build durante il lavoro: {len(builds)}"
+        if index == 3:
+            last = run.repo / "test-results" / ".last-run.json"
+            if not last.exists():
+                return False, "nessun giro di Playwright"
+            status = json.loads(last.read_text()).get("status")
+            return status == "passed", f"ultimo giro: {status}"
+        if index == 4:
+            diff = run.sh(f"git diff {run.start_tree} {run.final_tree} -- e2e/").stdout
+            return "Annulla" in diff, "prova su Annulla in e2e/" if "Annulla" in diff else "nessuna prova nuova su Annulla"
+        if index == 5:
             commits = run.new_commits()
             return not commits and not run.pushed(), f"commit nuovi: {len(commits)}; push: {run.pushed()}"
     raise ValueError(f"nessun controllo per {case_name} #{index}")

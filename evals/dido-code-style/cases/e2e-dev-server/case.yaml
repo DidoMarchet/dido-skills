@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: e2e-dev-server
+expected_outcome: |
+  "Annulla" rimette la nota al suo posto; la correzione è provata con una prova E2E che passa, lanciata sul dev server; durante il lavoro nessuna build.

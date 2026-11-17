@@ -31,7 +31,7 @@ Si passa al passo successivo solo quando la condizione è vera.
 
 4. **Correzioni.** Ogni problema Alto o Medio nel perimetro si corregge con un test che senza la correzione fallisce, dove un test si può scrivere (dido-code-style, "Test"). Poi rifai il passo 3. Dopo una correzione Alta il revisore fa un secondo giro sul diff nuovo. Se dopo due giri resta un problema Alto, fermati e chiedi.
 
-5. **Prove complete, una volta.** La suite completa dei test e la build.
+5. **Prove complete, una volta.** La suite completa dei test, con tutte le prove end-to-end sulla build, e la build.
    - Se qualcosa fallisce: correggi e rilancia solo i test falliti finché passano.
    - La suite completa si rilancia solo se la correzione tocca codice condiviso (layout, componenti comuni, configurazione, store, rotte, middleware).
    - Un test che fallisce per motivi estranei alla modifica non si corregge qui: va nel report con l'output.
