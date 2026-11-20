@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: correzione-test
+expected_outcome: |
+  Dopo la correzione (niente test per i testi delle email) l'agente toglie il test e il report segnala che la correzione va contro la regola di dido-code-style sui test, con cosa ha fatto e cosa andava fatto.

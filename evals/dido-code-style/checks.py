@@ -14,6 +14,8 @@ HIDDEN = Path(__file__).resolve().parent / "hidden"
 JUDGED = {
     "env-sostituzione": [],
     "e2e-dev-server": [],
+    "correzione-test": [1],
+    "senza-correzione": [],
 }
 
 
@@ -81,6 +83,14 @@ def check(case_name, index, run):
             diff = run.sh(f"git diff {run.start_tree} {run.final_tree} -- e2e/").stdout
             return "Annulla" in diff, "prova su Annulla in e2e/" if "Annulla" in diff else "nessuna prova nuova su Annulla"
         if index == 5:
+            commits = run.new_commits()
+            return not commits and not run.pushed(), f"commit nuovi: {len(commits)}; push: {run.pushed()}"
+    if case_name in ("correzione-test", "senza-correzione"):
+        if case_name == "senza-correzione" and index == 1:
+            text = run.final.lower()
+            found = [word for word in ("skill da rivedere", "dido-code-style", "skill") if word in text]
+            return not found, f"nel messaggio finale: {found or 'nessun cenno alle skill'}"
+        if index == 2:
             commits = run.new_commits()
             return not commits and not run.pushed(), f"commit nuovi: {len(commits)}; push: {run.pushed()}"
     raise ValueError(f"nessun controllo per {case_name} #{index}")

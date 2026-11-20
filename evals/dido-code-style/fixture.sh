@@ -6,7 +6,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 case_name="$1"; repo="$2"; config="$3"; run="$4"
 case "$case_name" in
-  env-sostituzione) cp -R "$HERE/fixtures/shop-api" "$repo" ;;
+  env-sostituzione|correzione-test|senza-correzione) cp -R "$HERE/fixtures/shop-api" "$repo" ;;
   e2e-dev-server)
     cp -R "$HERE/fixtures/notes-web" "$repo"
     ln -s "$HERE/fixtures/e2e-modules/node_modules" "$repo/node_modules"

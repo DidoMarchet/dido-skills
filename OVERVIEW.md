@@ -61,6 +61,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - **Si prova solo ciò che cambia**: lint dei file toccati, test collegati, la pagina o l'endpoint toccato. Suite completa e build una volta, alla chiusura, o quando si tocca codice condiviso. Le prove end-to-end durante il lavoro sul dev server; sulla build tutte alla chiusura.
 - **Fatto vuol dire eseguito**. Il resoconto di un subagente non è una prova. Si decide solo su ciò che si è letto per intero.
 - **Report** lungo quanto il lavoro: cosa è cambiato, cosa è stato verificato, cosa resta, le scelte fatte senza chiedere. Per un fix bastano tre righe. Poi ci si ferma, senza "se vuoi posso anche…".
+- **Skill da rivedere**: una sezione del report solo quando chi lavora con te ha corretto l'agente su qualcosa che una skill `dido-*` dice diversamente o non dice, quando una regola andava contro la richiesta o un'altra regola, o quando non era chiaro come applicarla. Per ogni caso skill e regola, cosa ha fatto, cosa andava fatto. La skill la cambia chi lavora con te.
 - **Commit** solo quando chi lavora con te lo chiede, a parole o con `/dido-rilascio`, e quando gli altri agenti sullo stesso repo hanno finito, con i soli propri file aggiunti per nome. Fino ad allora il report dice che il lavoro è da committare. Più sessioni: un worktree ciascuna. Push solo con l'ok di chi lavora con te.
 
 **Revisioni e analisi**

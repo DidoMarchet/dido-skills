@@ -126,3 +126,14 @@ Scenario `dido-frontend-nuxt/hover-touch`: sulla copia dello starter Nuxt, la ca
 - **Dopo.** 2 sessioni su 2: `&:hover, &:active` dentro `react("pointer-and-hover")`, lint pulito. 264 s, 1,85 $.
 - **L'altra prova della skill**, `componente-cambiato`, rilanciata: #7 2 su 2 con la regola nuova, #1-#5 2 su 2, #6 1 su 2. La #6 mancata non dipende dalla regola: il valutatore non vedeva lo script delle schermate della sessione, che ha guardato la card a 375 e 1440 (#5).
 - In tutto 6 sessioni, circa 12,5 $.
+
+## 20/11/2026: le skill da rivedere nel report
+
+Il problema: le regole cambiano solo per un caso visto in un lavoro vero, ma nessuno raccoglie i casi. Quando chi lavora con l'agente lo corregge su qualcosa che una skill dice, l'agente si adegua e la skill non lo sa.
+
+Scenario `dido-code-style/correzione-test`, in due turni su `shop-api`: prima "nella mail di conferma aggiungi quanti articoli sono stati ordinati", poi la correzione "per i testi delle email non voglio test, togli quello che hai aggiunto". La correzione va contro la regola "Ogni comportamento nuovo ha un test". La verifica #1 chiede che il messaggio finale segnali il caso per la skill, con regola, cosa è stato fatto e cosa andava fatto; giudicata leggendo ogni messaggio finale. Scenario di controllo `senza-correzione`: solo il primo turno, il report non deve parlare di skill. 3 sessioni per giro, solo con le skill. Per i due turni `run-case.sh` legge ora `followup.md`.
+
+- **Prima.** 0 sessioni su 3 segnalano il caso. Tutte e tre tolgono il test, mettono un commento nel codice e salvano la preferenza nella memoria del progetto: la skill resta com'è.
+- **Cosa è cambiato.** In "Durante e dopo" di `skills/dido-code-style/SKILL.md`, dopo il report: la sezione "Skill da rivedere" quando chi lavora con te ti ha corretto su qualcosa che una skill `dido-*` dice diversamente o non dice, quando una regola andava contro la richiesta o un'altra regola, o quando non sapevi come applicarla; per ogni caso skill e regola, cosa hai fatto, cosa andava fatto; la skill non la tocca l'agente. Lo stesso in una riga di `OVERVIEW.md`.
+- **Dopo.** `correzione-test` 3 su 3: la sezione c'è e nomina "Test" di dido-code-style, i test scritti e la preferenza sui testi delle email. `senza-correzione` 3 su 3 senza la sezione e senza cenni alle skill. Nessun commit.
+- In tutto 9 sessioni, circa 9 $ (il costo delle sessioni in due turni è la somma dei due `result`: `extract.py` conta solo l'ultimo).

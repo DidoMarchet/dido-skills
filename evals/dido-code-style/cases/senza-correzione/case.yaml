@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: senza-correzione
+expected_outcome: |
+  Un lavoro senza correzioni né contrasti: il report non ha una sezione sulle skill da rivedere.

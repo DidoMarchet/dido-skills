@@ -9,7 +9,7 @@ Servono Claude Code, Node, Python 3, git e, per il backend, Docker con l'immagin
 | Cartella | Cosa |
 |---|---|
 | `bin/` | gli script comuni: una sessione, un'iterazione, metriche, valutazione, copie degli starter, Postgres per sessione |
-| `<skill>/cases/<caso>/` | `prompt.md` (la richiesta, dopo il blocco delle impostazioni), `graders/NN.md` (una verifica per file), `case.yaml` |
+| `<skill>/cases/<caso>/` | `prompt.md` (la richiesta, dopo il blocco delle impostazioni), `followup.md` se serve un secondo messaggio nella stessa sessione (per esempio una correzione), `graders/NN.md` (una verifica per file), `case.yaml` |
 | `<skill>/fixture.sh` | prepara il repo di una sessione: copia di una fixture o di uno starter a un commit fissato |
 | `<skill>/checks.py` | `JUDGED` (le verifiche da giudicare, per caso) e `check()`, che controlla le altre |
 | `<skill>/hidden/` | test nascosti: la sessione non li vede, la valutazione li copia nel repo e li toglie subito dopo |
