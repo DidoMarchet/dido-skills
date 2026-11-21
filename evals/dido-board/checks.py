@@ -48,7 +48,7 @@ def check(case_name, index, run):
         if index == 1:
             per_step = {key: [card for card in cards if card["title"].startswith(f"{key}:")] for key in STEPS}
             ok = len(cards) == len(STEPS) and all(
-                len(found) == 1 and found[0].get("status") == "Backlog" for found in per_step.values())
+                len(found) == 1 and found[0].get("status") == "Ready" for found in per_step.values())
             return ok, "; ".join(f"{card['title']} ({card.get('status')})" for card in cards) or "board vuota"
         if index == 2:
             problems = []

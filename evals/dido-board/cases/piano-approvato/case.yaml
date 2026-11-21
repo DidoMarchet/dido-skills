@@ -1,4 +1,4 @@
 schema_version: "1.1"
 name: piano-approvato
 expected_outcome: |
-  Il piano M1 diventa approvato e la board del Project collegato ha una card bozza per ognuno dei quattro step, in Backlog, con titolo "M1 step N: …", il testo dello step, i repo e il link al piano. Nessun comando gh fuori dallo script, nessun codice cambiato, nessun commit.
+  Il piano M1 diventa approvato e la board del Project collegato ha una card bozza per ognuno dei quattro step, in Ready perché il piano non ha domande aperte, con titolo "M1 step N: …", il testo dello step, i repo e il link al piano. Nessun comando gh fuori dallo script, nessun codice cambiato, nessun commit.
