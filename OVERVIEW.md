@@ -1,6 +1,6 @@
 # Cosa fanno le skill dido-*
 
-Il riassunto per chi entra in un progetto. Le skill sono linee guida di sviluppo e di mantenimento che valgono per ogni progetto e per chiunque ci lavori: non nominano strumenti. Le regole vere stanno nelle skill, in `skills/`: se qui qualcosa non torna, vale la skill.
+Il riassunto per chi entra in un progetto. Le skill sono linee guida di sviluppo e di mantenimento che valgono per ogni progetto e per chiunque ci lavori: non nominano strumenti, tranne dido-board, fatta per la board di un GitHub Project. Le regole vere stanno nelle skill, in `skills/`: se qui qualcosa non torna, vale la skill.
 
 **Con quali strumenti** un progetto applica le skill, e **cosa controlla il suo lint**, sta in `docs/conventions.md` del progetto. Lo porta `ai:update` dallo starter da cui il progetto è nato.
 
@@ -116,6 +116,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - "Dove siamo", in fondo al piano, è la memoria tra una sessione e l'altra.
 - Le decisioni tecniche vanno in `docs/decisions/`, il report di chiusura in `docs/reports/`.
 - Alla chiusura: ripasso del piano voce per voce, revisione dell'agente `revisore` sul diff dall'ultima revisione, report. La milestone la chiude chi lavora con te.
+- Se il progetto ha dido-board, la board del GitHub Project collegato segue il piano: una card per step.
 
 ## dido-goal: obiettivo e fine del lavoro
 
@@ -135,9 +136,17 @@ Si lancia a mano con `/dido-rilascio`.
 3. Lint e test dei file toccati, mentre il revisore lavora.
 4. Correzione dei problemi Alti e Medi, ognuno con il suo test. Dopo una correzione Alta, un secondo giro di revisione.
 5. Suite completa, con le prove end-to-end sulla build, e build, una volta.
-6. Commit dei soli file del lavoro.
+6. Commit dei soli file del lavoro. Con dido-board, gli step del commit passano in Done.
 7. Push e deploy solo con l'ok di chi lavora con te. Il lavoro è chiuso quando la CI è verde e ciò che è cambiato è provato sull'ambiente.
 8. Report: cosa è cambiato, cosa è stato verificato e cosa no, cosa ha trovato la revisione, le scelte fatte senza chiedere, cosa resta aperto. Con un piano, anche "Dove siamo".
+
+## dido-board: la board del piano
+
+- Sul GitHub Project collegato al repo, una card per step del piano: titolo come nei commit ("M5 step 3: …"), il testo dello step, i repo che tocca e il link al piano.
+- La card segue il lavoro: Backlog quando il piano è approvato, In progress quando lo step parte, In review quando è fatto e verificato, Done quando entra in un commit. Ready resta a chi lavora con te.
+- Il piano resta la fonte: dove la board non coincide, vale il piano.
+- Non ferma mai il lavoro: senza un Project collegato non fa niente, e se GitHub non risponde lo dice in una riga del report.
+- Serve gh con lo scope project (`gh auth refresh -s project`) e il repo collegato al Project (scheda Projects del repo, "Link a project").
 
 ## Le altre skill dido-*
 

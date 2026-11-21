@@ -1,4 +1,5 @@
 """Controlli da script delle asserzioni di dido-rilascio."""
+import json
 import re
 import shutil
 import sys
@@ -25,11 +26,19 @@ FULL_SUITE = re.compile(r"\b(npm (run )?test|vitest run|npx vitest)\b")
 JUDGED = {
     "non-committato": [2, 3, 10],
     "gia-committato": [1, 2, 3],
+    "con-board": [],
 }
 
 
 def committed_files(run):
     return set(run.sh(f"git diff --name-only {run.base} HEAD").stdout.split())
+
+
+def board_cards(run):
+    """Lo stato delle card sulla board finta di dido-board (con-board), per key dello step."""
+    state = run.path / "gh-state.json"
+    items = json.loads(state.read_text()).get("items", []) if state.exists() else []
+    return {item["title"].split(":")[0]: item.get("status") for item in items if not item.get("archived")}
 
 
 def check(case_name, index, run):
@@ -83,4 +92,15 @@ def check(case_name, index, run):
         if index == 5:
             return not run.pushed(), f"push: {run.pushed()}"
 
+    if case_name == "con-board":
+        cards = board_cards(run)
+        if index == 1:
+            step = cards.get("export-customer step 1")
+            return bool(run.new_commits()) and step == "Done", f"commit nuovi: {len(run.new_commits())}; step 1: {step}"
+        if index == 2:
+            step = cards.get("export-customer step 2")
+            return step is not None and step != "Done", f"step 2: {step}"
+        if index == 3:
+            commands = [command for command in run.metrics["bash_commands"] if re.search(r"(^|[;&|(]\s*)gh\s", command)]
+            return not commands, f"comandi gh: {commands or 'nessuno'}"
     raise ValueError(f"nessun controllo per {case_name} #{index}")

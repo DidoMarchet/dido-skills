@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: con-board
+expected_outcome: |
+  Come non-committato, con la board di dido-board: dopo il commit la card dello step 1 è in Done, quella dello step 2 (il rilascio, che aspetta l'ok per il push) no. La board passa solo dallo script della skill.

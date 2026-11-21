@@ -5,6 +5,7 @@
   "permissions": {
     "deny": [
       "Bash(git push:*)",
+      "Bash(gh:*)",
       "Bash(npm install:*)",
       "Bash(npm i:*)",
       "Bash(npm ci:*)",

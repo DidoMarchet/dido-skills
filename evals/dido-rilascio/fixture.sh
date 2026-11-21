@@ -5,7 +5,9 @@
 # Uso: fixture.sh <caso> <repo> <with_skill|without_skill> <run>
 #   non-committato: piano committato, lavoro e "Dove siamo" non committati, più
 #                   docs/LOCAL-DEVELOPMENT.md cambiato da un'altra sessione;
-#   gia-committato: il lavoro nell'ultimo commit di main, albero pulito, nessun piano.
+#   gia-committato: il lavoro nell'ultimo commit di main, albero pulito, nessun piano;
+#   con-board:      come non-committato, con la board di dido-board (il gh finto di
+#                   dido-board/fake-gh.mjs): lo step 1 in In review, lo step 2 in Backlog.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 BIN="$HERE/../bin"
@@ -33,7 +35,7 @@ git -C "$repo" add AGENTS.md
 git -C "$repo" -c user.name=Team -c user.email=team@example.com commit -q --amend --no-edit
 
 case "$case_name" in
-  non-committato)
+  non-committato|con-board)
     mkdir -p "$repo/docs/plans"
     cp "$HERE/work/plan-export-customer.md" "$repo/docs/plans/export-customer.md"
     git -C "$repo" add docs/plans/export-customer.md
@@ -44,6 +46,25 @@ case "$case_name" in
     # Il lavoro di un'altra sessione, non committato: non deve finire nel commit.
     printf '\n%s\n' "Mailpit risponde su http://localhost:8025 qualche secondo dopo \`make up-dev\`: se la pagina non si apre, riprova prima di cercare un errore." \
       >> "$repo/docs/LOCAL-DEVELOPMENT.md"
+    if [ "$case_name" = con-board ]; then
+      # La board come la lascia dido-board a passo 1 fatto. board.mjs trova il Project dal remote:
+      # origin punta a un repo che non esiste, e il push resta senza indirizzo.
+      git -C "$repo" remote add origin https://github.com/acme/customer-backend.git
+      git -C "$repo" remote set-url --push origin no-push
+      link="https://github.com/acme/customer-backend/blob/main/docs/plans/export-customer.md"
+      cat > "$run/gh-state.json" <<EOF
+{
+  "items": [
+    { "id": "PVTI_1", "draftId": "DI_1", "title": "export-customer step 1: Rotta, controller, service, spec, evento d'audit e test E2E", "body": "Rotta, controller, service, spec, evento d'audit e test E2E.\n\nRepo: backend\nPiano: $link", "status": "In review" },
+    { "id": "PVTI_2", "draftId": "DI_2", "title": "export-customer step 2: Rilascio", "body": "Rilascio.\n\nRepo: backend\nPiano: $link", "status": "Backlog" }
+  ],
+  "nextId": 3
+}
+EOF
+      chmod +x "$HERE/../dido-board/fake-gh.mjs"
+      printf 'DIDO_BOARD_GH=%s\nFAKE_GH_STATE=%s\nFAKE_GH_LOG=%s\nFAKE_GH_MODE=ok\n' \
+        "$HERE/../dido-board/fake-gh.mjs" "$run/gh-state.json" "$run/gh-calls.jsonl" >> "$run/session.env"
+    fi
     ;;
   gia-committato)
     git -C "$repo" apply "$HERE/work/export-con-hash.patch"

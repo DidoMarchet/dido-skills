@@ -36,7 +36,7 @@ Si passa al passo successivo solo quando la condizione è vera.
    - La suite completa si rilancia solo se la correzione tocca codice condiviso (layout, componenti comuni, configurazione, store, rotte, middleware).
    - Un test che fallisce per motivi estranei alla modifica non si corregge qui: va nel report con l'output.
 
-6. **Commit**, quando dido-code-style dice che si può. `git add` per nome dei soli file di questo lavoro, messaggio in italiano, con piano e passo se c'è un piano.
+6. **Commit**, quando dido-code-style dice che si può. `git add` per nome dei soli file di questo lavoro, messaggio in italiano, con piano e passo se c'è un piano. Se il progetto ha la skill dido-board, dopo il commit porta in Done gli step che ci sono entrati.
 
 7. **Push e deploy solo con l'ok di chi lavora con te.** Chiedilo insieme al report. Dopo il push aspetta la CI, dove c'è: il lavoro è chiuso quando è verde. Dopo il deploy guarda lo stato e prova sull'ambiente ciò che è cambiato:
    - un'interfaccia: le pagine toccate, con screenshot da mobile e da desktop e la console del browser;

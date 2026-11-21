@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: github-non-risponde
+expected_outcome: |
+  Lo step 1 del piano M1 è fatto e provato. gh non è autenticato: lo script della board risponde "non aggiornata" alla prima chiamata, la sessione non lo chiama più, non usa gh da sola, non chiede niente e lo dice in una riga del report. Nessun commit.
