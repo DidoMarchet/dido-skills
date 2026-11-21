@@ -116,7 +116,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - "Dove siamo", in fondo al piano, è la memoria tra una sessione e l'altra.
 - Le decisioni tecniche vanno in `docs/decisions/`, il report di chiusura in `docs/reports/`.
 - Alla chiusura: ripasso del piano voce per voce, revisione dell'agente `revisore` sul diff dall'ultima revisione, report. La milestone la chiude chi lavora con te.
-- Se il progetto ha dido-board, la board del GitHub Project collegato segue il piano: una card per step.
+- Se il progetto ha dido-board, la board del GitHub Project collegato segue il piano: una card per step e una per domanda aperta.
 
 ## dido-goal: obiettivo e fine del lavoro
 
@@ -142,8 +142,8 @@ Si lancia a mano con `/dido-rilascio`.
 
 ## dido-board: la board del piano
 
-- Sul GitHub Project collegato al repo, una card per step del piano: titolo come nei commit ("M5 step 3: …"), il testo dello step, i repo che tocca e il link al piano.
-- La card segue il lavoro: Backlog quando il piano è approvato, In progress quando lo step parte, In review quando è fatto e verificato, Done quando entra in un commit. Ready resta a chi lavora con te.
+- Sul GitHub Project collegato al repo, una card per step del piano: titolo come nei commit ("M5 step 3: …"), il testo dello step, i repo che tocca e il link al piano. Ogni domanda aperta ha la sua card ("M5 domanda 2: …"), in Backlog finché non ha risposta, poi in Done.
+- La card segue il lavoro: Ready quando lo step è deciso (piano approvato, nessuna domanda aperta, nessun ok che manca), Backlog finché aspetta una risposta, In progress quando parte, In review quando è fatto e verificato, Done quando entra in un commit. Così la board dice cosa è deciso e cosa no.
 - Il piano resta la fonte: dove la board non coincide, vale il piano.
 - Non ferma mai il lavoro: senza un Project collegato non fa niente, e se GitHub non risponde lo dice in una riga del report.
 - Serve gh con lo scope project (`gh auth refresh -s project`) e il repo collegato al Project (scheda Projects del repo, "Link a project").
