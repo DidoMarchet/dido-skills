@@ -7,8 +7,11 @@
 //   node board.mjs sync - <<'EOF' … EOF           crea o aggiorna le card (anche: sync <file>)
 //   node board.mjs move "M5 step 3" "In progress"
 //   node board.mjs archive "M5 step 3"
+//   node board.mjs close-milestone M5             chiude la milestone del piano (GitHub)
 //
-// sync legge un array JSON di { key, title, body, todo, priority, status }. Il titolo della card è
+// sync legge un array JSON di { key, title, body, todo, priority, status, type, assignee, milestone }.
+// type è il tipo (Task, Bug, Feature, Domanda), assignee chi prende la card se non è quello di
+// board.json, milestone la milestone se non è il piano della key. Il titolo della card è
 // title, da leggere per una persona; la key ("M5 step 3") sta nell'ultima riga del testo ("Step 3
 // del piano M5") e da lì sync, move e archive ritrovano la card. todo è un array di { text, done }:
 // su Infinity va nel campo checklist della cartella, su GitHub nel testo come lista con le caselle.
@@ -18,11 +21,16 @@
 // docs/plans/board.json (facoltativo; senza, la board è il GitHub Project):
 //   { "service": "github" | "infinity" | "none", "url": "<board di Infinity>",
 //     "columns": { "<stato della skill>": "<colonna della board>", "archive": "<colonna>" },
-//     "fields": { "<attributo>": "<valore>" }, "priority": "<attributo della priorità>" }
+//     "fields": { "<attributo>": "<valore>" }, "assignee": "<campo di fields con chi prende la card>",
+//     "priority": "<attributo della priorità>", "type": "<attributo del tipo>",
+//     "milestone": "<attributo della milestone>" }
 // Uno stato che non è in columns va nella colonna con il suo nome. archive senza colonna archivia
-// la card del Project; su Infinity, che non archivia, la porta nella colonna di Done. fields e
-// priority valgono su Infinity: i campi vanno sulle card nuove e su quelle dove sono vuoti, la
-// priorità è quella che sync riceve con la card. "none" vuol dire che il progetto non ha una board.
+// la card del Project; su Infinity, che non archivia, la porta nella colonna di Done. I campi di
+// fields vanno sulle card nuove e su quelle dove sono vuoti; la priorità, il tipo, la milestone e
+// chi prende la card sono quelli che sync riceve con la card. Su GitHub chi prende la card è
+// l'assegnatario della issue, gli altri campi sono campi del Project, tipo e milestone quelli della
+// issue; su Infinity type e milestone nominano un attributo etichetta, e senza non si scrivono.
+// "none" vuol dire che il progetto non ha una board.
 
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
@@ -91,8 +99,10 @@ const readConfig = () => {
   if (!isStringMap(columns)) notUpdated(`in ${configFile} "columns" va un oggetto { "<stato>": "<colonna>" }`)
   const fields = config.fields ?? {}
   if (!isStringMap(fields)) notUpdated(`in ${configFile} "fields" va un oggetto { "<attributo>": "<valore>" }`)
-  if (config.priority !== undefined && typeof config.priority !== 'string') {
-    notUpdated(`in ${configFile} "priority" va il nome dell'attributo della priorità`)
+  for (const name of ['priority', 'assignee', 'type', 'milestone']) {
+    if (config[name] !== undefined && typeof config[name] !== 'string') {
+      notUpdated(`in ${configFile} "${name}" va il nome di un attributo o di un campo`)
+    }
   }
   return { ...config, service, columns, fields, hasFile: true, root }
 }
@@ -124,9 +134,12 @@ const findCard = (cards, key) => {
     cards.find((card) => card.body.split('\n').some((candidate) => sameName(candidate, line))) ??
     // Le card scritte prima del 23/11/2026 hanno la key nel titolo ("M5 step 3: …"): la prima sync
     // con il testo le porta al titolo nuovo. Il ":" separa "M5 step 1" da "M5 step 10".
-    cards.find((card) => card.title === key || card.title.startsWith(`${key}:`))
+    cards.find((card) => card.keyInTitle !== false && (card.title === key || card.title.startsWith(`${key}:`)))
   )
 }
+
+// Il piano della key, che di base è anche la milestone: "M5 step 3" è del piano M5.
+const planOf = (key) => key.match(/^(.+) (?:step|domanda) \S+$/i)?.[1]
 
 const check = async () => {
   const context = await openBoard()
@@ -157,10 +170,12 @@ const readEntries = (source) => {
     todo === undefined ||
     (Array.isArray(todo) &&
       todo.every((item) => typeof item?.text === 'string' && item.text.trim() && [undefined, true, false].includes(item.done)))
-  const valid =
-    Array.isArray(entries) && entries.every((entry) => typeof entry?.key === 'string' && entry.key.trim() && isTodo(entry.todo))
-  if (!valid) {
-    finish('sync vuole un array JSON di { key, title, body, todo, status }, ognuno con la sua key; todo è un array di { text, done }')
+  const usage = 'sync vuole un array JSON di { key, title, body, todo, status, priority, type, assignee, milestone }, ognuno con la sua key'
+  const hasKeys = Array.isArray(entries) && entries.every((entry) => typeof entry?.key === 'string' && entry.key.trim())
+  if (!hasKeys || !entries.every((entry) => isTodo(entry.todo))) finish(`${usage}; todo è un array di { text, done }`)
+  const isText = (value) => value === undefined || (typeof value === 'string' && value.trim())
+  if (!entries.every((entry) => ['type', 'assignee', 'milestone'].every((name) => isText(entry[name])))) {
+    finish(`${usage}; type, assignee e milestone sono testi`)
   }
   return entries
 }
@@ -175,8 +190,20 @@ const sync = async (source) => {
   if (board.todoProblem && entries.some((entry) => entry.todo?.length)) say(board.todoProblem)
   for (const entry of entries) {
     const key = entry.key.trim()
-    const card = findCard(cards, key)
+    let card = findCard(cards, key)
     const hasText = ['title', 'body', 'todo'].some((field) => entry[field] !== undefined)
+    const changes = []
+    let recoveredStatus = null
+    // Una card che non è sulla board ma c'è ancora (GitHub: archiviata o tolta dal Project) torna.
+    if (!card && hasText && board.recoverCard) {
+      const recovered = await board.recoverCard(keyLine(key))
+      if (recovered) {
+        ;({ card } = recovered)
+        recoveredStatus = recovered.status
+        cards.push(card)
+        changes.push(...recovered.changes)
+      }
+    }
     // Solo key e stato servono a riallineare: una card nuova senza testo non direbbe niente.
     if (!card && !hasText) {
       counts.missing += 1
@@ -185,27 +212,39 @@ const sync = async (source) => {
     }
     const todo = (entry.todo ?? []).map((item) => ({ text: item.text.trim(), done: item.done === true }))
     const text = hasText ? { title: titleFor(board, key, entry.title), body: cardBody(board, key, entry.body ?? '', todo), todo } : null
-    const wantedStatus = entry.status ?? (card ? null : newCardStatus)
+    // Una card ritrovata senza colonna va dove dice chi l'ha ritrovata o dove va una nuova.
+    const wantedStatus = entry.status ?? (card?.column || (card && !changes.length) ? null : (recoveredStatus ?? newCardStatus))
     const { column, label, problem } = wantedStatus ? findColumn(context, wantedStatus) : {}
+    const properties = {
+      priority: entry.priority,
+      type: entry.type?.trim(),
+      assignee: entry.assignee?.trim(),
+      milestone: entry.milestone?.trim() ?? planOf(key),
+    }
     if (!card) {
-      const { card: created, notes } = await board.createCard({ ...text, column, priority: entry.priority })
+      const { card: created, notes } = await board.createCard({ ...text, column, ...properties })
       cards.push(created)
       counts.created += 1
       const details = [...notes, ...(problem ? [problem] : [])]
       say(`creata "${text.title}"${column ? ` in ${label}` : ''}${details.length ? ` (${details.join(', ')})` : ''}`)
       continue
     }
-    const changes = []
+    if (board.prepareCard) changes.push(...(await board.prepareCard(card)))
     const textChanged = text && (text.title !== card.title || !sameText(board.storedBody(text.body), card.body))
     const todoChanged = text && board.todoChanged(card, todo)
     if (textChanged || todoChanged) await board.editCard(card, text)
     if (textChanged) changes.push('testo aggiornato')
     if (todoChanged) changes.push('cose da fare aggiornate')
+    // La board che lega altro alla colonna (GitHub: la issue chiusa in Done) lo allinea sempre; la
+    // riga lo dice solo quando la colonna era già quella.
     if (column && !sameName(card.column ?? '', column)) {
       await board.moveCard(card, column)
+      await board.settleCard?.(card, column)
       changes.push(`ora in ${label}`)
+    } else if (column) {
+      changes.push(...((await board.settleCard?.(card, column)) ?? []))
     }
-    changes.push(...(await board.completeCard(card, { priority: entry.priority })))
+    changes.push(...(await board.completeCard(card, properties)))
     if (problem) changes.push(problem)
     if (changes.length) {
       counts.changed += 1
@@ -225,8 +264,14 @@ const move = async (key, status) => {
   if (problem) notUpdated(problem)
   const card = findCard(await context.board.loadCards(), key.trim())
   if (!card) finish(`manca la card di "${key.trim()}": creala con sync, poi ripeti move`)
-  if (sameName(card.column ?? '', column)) finish(`"${card.title}" è già in ${label}`)
+  // Una board che lega altro alla colonna (GitHub: la issue chiusa in Done) lo allinea anche qui.
+  const settle = async () => (await context.board.settleCard?.(card, column)) ?? []
+  if (sameName(card.column ?? '', column)) {
+    const settled = await settle()
+    finish(`"${card.title}" è già in ${label}${settled.length ? `: ${settled.join(', ')}` : ''}`)
+  }
   await context.board.moveCard(card, column)
+  await settle()
   say(`"${card.title}" ora è in ${label}`)
 }
 
@@ -245,9 +290,20 @@ const archive = async (key) => {
     say(`archiviata "${card.title}"`)
     return
   }
-  if (sameName(card.column ?? '', column)) finish(`archiviata "${card.title}": era già in ${column}`)
+  const settle = async () => (await board.settleCard?.(card, column, { archive: true })) ?? []
+  if (sameName(card.column ?? '', column)) {
+    const settled = await settle()
+    finish(`archiviata "${card.title}": era già in ${column}${settled.length ? `, ${settled.join(', ')}` : ''}`)
+  }
   await board.moveCard(card, column)
+  await settle()
   say(`archiviata "${card.title}": ora è in ${column}`)
+}
+
+const closeMilestone = async (plan) => {
+  if (!plan?.trim()) finish('close-milestone vuole il nome del piano: close-milestone M5')
+  const { board } = await openBoard()
+  say(await board.closeMilestone(plan.trim()))
 }
 
 const [command, ...args] = process.argv.slice(2)
@@ -256,10 +312,11 @@ const commands = {
   sync: () => sync(args[0]),
   move: () => move(args[0], args[1]),
   archive: () => archive(args[0]),
+  'close-milestone': () => closeMilestone(args[0]),
 }
 
 try {
-  if (!commands[command]) finish(`comando sconosciuto "${command ?? ''}": check, sync, move o archive`)
+  if (!commands[command]) finish(`comando sconosciuto "${command ?? ''}": check, sync, move, archive o close-milestone`)
   await commands[command]()
 } catch (error) {
   // Anche un errore dello script diventa una riga: la board non ferma mai il lavoro.

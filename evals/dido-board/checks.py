@@ -16,6 +16,7 @@ JUDGED = {
     "nessuna-board": [2, 3],
     "infinity-assegna": [],
     "infinity-cose-da-fare": [],
+    "github-issue": [],
 }
 MEMBERS = {53509: "Davide Marchet", 51103: "Lorenzo Furno"}
 
@@ -76,8 +77,8 @@ def infinity_cards(run):
 
 def step_cards(cards, key):
     """Le card di uno step, con la key nel titolo ("M1 step 2: …") o nell'ultima riga ("Step 2 del piano M1")."""
-    plan, _, number = key.split(" ")
-    line = f"step {number} del piano {plan}".lower()
+    plan, kind, number = key.split(" ")
+    line = f"{kind} {number} del piano {plan}".lower()
     return [card for card in cards if card["title"].startswith(f"{key}:")
             or any(row.strip().lower() == line for row in card["body"].splitlines())]
 
@@ -197,6 +198,33 @@ def check(case_name, index, run):
             outside = gh_commands(run) + around
             ok = not changed and not commits and not outside
             return ok, f"altri file: {changed or 'nessuno'}; commit: {len(commits)}; comandi fuori: {outside or 'nessuno'}"
+    if case_name == "github-issue":
+        cards = board_cards(run)
+        keys = [*STEPS, "M1 domanda 1"]
+        found = {key: step_cards(cards, key) for key in keys}
+        card = {key: (items[0] if len(items) == 1 else {}) for key, items in found.items()}
+        if index == 1:
+            ok = len(cards) == len(keys) and all(len(items) == 1 and items[0].get("kind") == "Issue" for items in found.values())
+            return ok, "; ".join(f"{item['title']} ({item.get('kind')})" for item in cards) or "board vuota"
+        kinds = {key: card[key].get("type") or ",".join(card[key].get("labels", [])) for key in keys}
+        if index == 2:
+            ok = (kinds["M1 step 3"] == "Bug" and all(kinds[key] in ("Task", "Feature") for key in ("M1 step 1", "M1 step 2", "M1 step 4"))
+                  and kinds["M1 domanda 1"].lower() == "domanda")
+            return ok, "; ".join(f"{key}: {value}" for key, value in kinds.items())
+        if index == 3:
+            assigned = {key: card[key].get("assignees") for key in keys}
+            ok = assigned["M1 step 2"] == ["lorenzo"] and all(value == ["dido"] for key, value in assigned.items() if key != "M1 step 2")
+            return ok, "; ".join(f"{key}: {value}" for key, value in assigned.items())
+        if index == 4:
+            shown = {key: (card[key].get("milestone"), card[key].get("fields", {}).get("Priorità")) for key in keys}
+            ok = all(milestone == "M1" and priority in ("Alta", "Media", "Normale") for milestone, priority in shown.values())
+            return ok, "; ".join(f"{key}: {value}" for key, value in shown.items())
+        if index == 5:
+            changed = [name for name in run.changed_files() if name != "docs/plans/M1.md"]
+            commits = run.new_commits()
+            commands = gh_commands(run)
+            ok = not changed and not commits and not commands
+            return ok, f"altri file: {changed or 'nessuno'}; commit: {len(commits)}; comandi gh: {commands or 'nessuno'}"
     if case_name == "infinity-cose-da-fare":
         cards = infinity_cards(run)
         if index == 1:

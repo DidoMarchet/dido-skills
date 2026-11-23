@@ -1,12 +1,12 @@
 ---
 name: dido-board
-description: Usare quando un piano di dido-planning viene approvato, cambia (step aggiunti, cambiati o tolti) o si riprende, quando una sua domanda si apre o ha risposta, quando uno step parte, è fatto o entra in un commit, e quando si parla della board, del GitHub Project, della board di Infinity o delle card degli step.
+description: Usare quando un piano di dido-planning viene approvato, cambia (step aggiunti, cambiati o tolti) o si riprende, quando una sua domanda si apre o ha risposta, quando uno step parte, è fatto o entra in un commit, quando la milestone si chiude, e quando si parla della board, del GitHub Project, della board di Infinity o delle card degli step.
 allowed-tools: Bash(node "${CLAUDE_SKILL_DIR}/board.mjs" *)
 ---
 
 # La board del piano
 
-La board del progetto segue il piano di dido-planning: una card per step e una per domanda aperta, che si spostano con il lavoro. Chi la guarda vede cosa è deciso e cosa no, cosa è in corso e cosa è fatto. Il piano resta la fonte: la card ne porta una copia da leggere sulla board, e dove non coincidono vale il piano. La board non ferma mai il lavoro.
+La board del progetto segue il piano di dido-planning: una card per step e una per domanda aperta, che si spostano con il lavoro. Chi la guarda vede cosa è deciso e cosa no, cosa è in corso e cosa è fatto, chi fa cosa e di che tipo è. Sul GitHub Project ogni card è una issue del repo, che si chiude quando arriva in Done. Il piano resta la fonte: la card ne porta una copia da leggere sulla board, e dove non coincidono vale il piano. La board non ferma mai il lavoro.
 
 Tutto passa da `board.mjs`, accanto a questo file. Risponde con righe che cominciano con `board:` ed esce sempre senza errore.
 
@@ -20,17 +20,24 @@ Di base la board è il GitHub Project collegato al repo. Se il repo ha `docs/pla
   "url": "https://app.startinfinity.com/b/<board>/<cartella>",
   "columns": { "Backlog": "Stopped", "Ready": "To-do", "In progress": "Doing", "In review": "Test", "Done": "Done", "archive": "Done" },
   "fields": { "Responsabile": "Davide Marchet", "Referente": "Lorenzo Furno", "Reparto": "Develop" },
-  "priority": "Priorità"
+  "assignee": "Responsabile",
+  "priority": "Priorità",
+  "type": "Tipo",
+  "milestone": "Milestone"
 }
 ```
 
 - `service`: `github`, `infinity` o `none` (il progetto non ha una board).
 - `url`: per Infinity, l'indirizzo della board aperta sulla cartella delle card, come nel browser.
 - `columns`: la colonna della board per ogni stato della skill, se ha un altro nome; `archive` è dove va una card archiviata. Una colonna che non è nell'elenco lo script non la tocca.
-- `fields`: per Infinity, i campi di ogni card: chi la prende, il referente, il reparto, con il nome dell'attributo della cartella. Una persona si scrive con il nome o l'email che ha nel workspace. Lo script li scrive sulle card nuove e su quelle dove sono vuoti.
-- `priority`: per Infinity, l'attributo della priorità. La priorità di ogni card la decidi tu (vedi "La card").
+- `fields`: i campi di ogni card: chi la prende, il referente, il reparto. Su Infinity con il nome dell'attributo della cartella, e una persona con il nome o l'email che ha nel workspace. Su GitHub con il nome del campo del Project, e chi prende la card con il suo login. Lo script li scrive sulle card nuove e su quelle dove sono vuoti.
+- `assignee`: quale campo di `fields` dice chi prende la card. Su GitHub diventa l'assegnatario della issue; uno step può darne un altro (vedi "La card").
+- `priority`: l'attributo della priorità su Infinity, il campo a scelta del Project su GitHub. La priorità di ogni card la decidi tu.
+- `type` e `milestone`: solo per Infinity, l'attributo etichetta del tipo e quello della milestone; senza, la card non li ha. Su GitHub il tipo è quello della issue e la milestone quella del repo, sempre.
 
-`check` dice board, colonne e campi della cartella, e se file e token funzionano. Il token di Infinity è la variabile `INFINITY_TOKEN`, nei tre file env del progetto come le altre: così arriva su ogni computer con il repo. Lo script la legge dall'ambiente o, se lì non c'è, da `.env.local`.
+Su GitHub lo script non crea campi del Project: Referente, Reparto e Priorità si aggiungono una volta a mano al Project, con lo stesso nome che hanno in `fields` e `priority`.
+
+`check` dice board, colonne, campi e, su GitHub, i tipi delle issue del repo, e se file e token funzionano. Il token di Infinity è la variabile `INFINITY_TOKEN`, nei tre file env del progetto come le altre: così arriva su ogni computer con il repo. Lo script la legge dall'ambiente o, se lì non c'è, da `.env.local`.
 
 Con la skill si usano sempre gli stati della tabella qui sotto: è lo script a portarli nella colonna giusta.
 
@@ -48,6 +55,7 @@ Con la skill si usano sempre gli stati della tabella qui sotto: è lo script a p
 | Uno step è fatto e verificato, con "Dove siamo" aggiornato | `move` in In review |
 | Uno step entra in un commit | `move` in Done |
 | Uno step finisce in "Cosa non si fa" | `archive` |
+| Chi lavora con te chiude la milestone del piano | `close-milestone <piano>` |
 
 Uno step è **deciso** quando il piano è approvato, nessuna domanda aperta lo riguarda e non aspetta l'ok di chi lavora con te: allora sta in Ready, anche se nell'ordine del piano viene dopo. In Backlog restano gli step che aspettano una risposta o un ok, e le domande aperte. L'ordine lo dà il piano, non la colonna.
 
@@ -57,6 +65,7 @@ Uno step è **deciso** quando il piano è approvato, nessuna domanda aperta lo r
 - `board: nessun Project collegato…`, in ogni altro caso: il repo non ha una board. Per il resto della sessione non usare più la skill, e non dirlo.
 - `board: non aggiornata: <motivo>`: la board non risponde o non si legge (GitHub, gh, Infinity, `docs/plans/board.json`). Per il resto della sessione non chiamare più lo script e scrivi il motivo in una riga del report. Non riprovare, non usare gh o l'API di Infinity da solo e non chiedere: il lavoro va avanti.
 - `board: manca la card di …`: fai `sync` di quello step con title, body e todo, poi ripeti `move` se lo stavi spostando.
+- `board: campi non scritti: …` o un problema tra parentesi accanto a una card (un login che non si può assegnare, un campo o un'etichetta che non c'è): le card si fanno lo stesso. Scrivi nel report, una volta, cosa manca e dove si aggiunge.
 - `board: la cartella … non ha un campo checklist`: le card si fanno lo stesso, senza le cose da fare. Scrivi nel report, una volta, che con un campo checklist nella cartella di Infinity le cose da fare si vedono sulla board. Non metterle nel testo della card.
 - Le altre righe dicono cosa è cambiato sulla board: non serve riportarle.
 
@@ -78,6 +87,9 @@ Una card per step, sottostep compresi (6b, 9b.1), con questi campi:
   Il link viene dal remote del repo che ha il piano: `https://github.com/<owner>/<repo>/blob/<branch principale>/docs/plans/<piano>.md`.
 - **todo**: le cose da fare dello step, una per voce: i suoi punti o, se non ne ha, le parti della sua frase. Ogni voce è `{ "text": "…", "done": true }`, con `done` vero per quelle che il piano dà per fatte ("Dove siamo"). Lo script le mette dove la board le mostra con le caselle da spuntare: su Infinity nel primo campo checklist della cartella (per esempio "Sub task"), su GitHub in fondo al testo.
 - **priority**: solo se `docs/plans/board.json` ha `priority`, ogni volta che mandi title e body. La decidi tu dal piano: `Alta` se altri step aspettano questo o ha una scadenza, `Normale` se si può fare quando c'è tempo, `Media` negli altri casi.
+- **type**: ogni volta che mandi title e body. Lo decidi tu dal piano: `Bug` se lo step corregge un difetto, `Feature` se aggiunge una funzione che chi usa il prodotto vede, `Task` per il resto (design, decisioni, prove, revisione, chiusura).
+- **assignee**: solo se lo step dice chi lo prende ("Chi: lorenzo"), con quel nome o login. Senza, la card va a chi dice `board.json`.
+- **milestone**: solo se lo step dice una milestone diversa dal suo piano. Senza, è il piano della key: `M5 step 3` sta nella milestone `M5`.
 - **status**: solo quando la tabella "Quando" lo dice. Uno step non ancora partito va solo tra Backlog e Ready, e solo per le ragioni della tabella: chi lavora con te può averlo spostato. Senza stato, una card nuova va in Backlog e una che c'è resta dov'è.
 
 Una card per ogni domanda aperta del piano (sezione "Domande aperte" o domande segnate in un'altra parte del piano), così si vede cosa aspetta una risposta:
@@ -87,6 +99,7 @@ Una card per ogni domanda aperta del piano (sezione "Domande aperte" o domande s
 - **body**: il testo della domanda, con la proposta se c'è, poi una riga `Step: <gli step che aspettano la risposta>` (o `Step: nessuno`) e le righe `Repo:` e `Piano:` come per uno step.
 - **todo**: come per uno step, se la risposta chiede più passi.
 - **priority**: come per uno step; `Alta` se uno step aspetta la risposta.
+- **type**: `Domanda`.
 - **status**: Backlog finché è aperta, Done quando ha risposta.
 
 ## I comandi
@@ -94,20 +107,25 @@ Una card per ogni domanda aperta del piano (sezione "Domande aperte" o domande s
 ```bash
 node "${CLAUDE_SKILL_DIR}/board.mjs" sync - <<'EOF'
 [
-  { "key": "M5 step 3", "title": "Bibbia completa nell'app", "body": "Cosa fa lo step e perché…\n\nRepo: backend, app\nPiano: https://github.com/acme/app/blob/main/docs/plans/M5.md", "todo": [{ "text": "import dei libri nel backend", "done": true }, { "text": "lettura nell'app", "done": false }], "priority": "Alta" },
+  { "key": "M5 step 3", "title": "Bibbia completa nell'app", "body": "Cosa fa lo step e perché…\n\nRepo: backend, app\nPiano: https://github.com/acme/app/blob/main/docs/plans/M5.md", "todo": [{ "text": "import dei libri nel backend", "done": true }, { "text": "lettura nell'app", "done": false }], "priority": "Alta", "type": "Feature", "assignee": "lorenzo" },
   { "key": "M5 step 4", "status": "Done" }
 ]
 EOF
 node "${CLAUDE_SKILL_DIR}/board.mjs" move "M5 step 3" "In progress"
 node "${CLAUDE_SKILL_DIR}/board.mjs" archive "M5 step 3"
+node "${CLAUDE_SKILL_DIR}/board.mjs" close-milestone M5
 node "${CLAUDE_SKILL_DIR}/board.mjs" check
 ```
 
-`sync` non crea doppioni: trova la card dalla key, cambia titolo, testo, cose da fare e priorità solo se sono diversi e la sposta solo se gli dai lo stato. title, body e todo vanno insieme: se ne mandi uno, la card prende quello che mandi e il resto resta vuoto; senza nessuno dei tre, una card che c'è tiene i suoi e una che manca non si crea. Le cose da fare sono una copia del piano: una spunta messa a mano sulla board la prossima `sync` la rimette come dice il piano. Le card scritte con la key nel titolo ("M5 step 3: …") si ritrovano lo stesso, e la prima `sync` con il testo le porta al titolo nuovo. Si può rilanciare quando serve. `check` dice a quale board è collegato il repo e la colonna di ogni stato. Su Infinity `archive` non cancella: porta la card nella colonna di `archive`.
+Su GitHub creare una card vuol dire tre chiamate, di circa due secondi l'una: la `sync` di un piano intero dura qualche minuto. Lanciala dandole fino a dieci minuti. Se si interrompe, rilanciala uguale: riparte senza doppioni.
+
+`sync` non crea doppioni: trova la card dalla key, cambia titolo, testo, cose da fare e priorità solo se sono diversi e la sposta solo se gli dai lo stato. title, body e todo vanno insieme: se ne mandi uno, la card prende quello che mandi e il resto resta vuoto; senza nessuno dei tre, una card che c'è tiene i suoi e una che manca non si crea. Le cose da fare sono una copia del piano: una spunta messa a mano sulla board la prossima `sync` la rimette come dice il piano. Le card scritte con la key nel titolo ("M5 step 3: …") si ritrovano lo stesso, e la prima `sync` con il testo le porta al titolo nuovo. Su GitHub le bozze del Project fatte prima delle issue diventano issue alla prima `sync`, nella stessa colonna. Si può rilanciare quando serve. `check` dice a quale board è collegato il repo e la colonna di ogni stato.
+
+Su GitHub `move` in Done chiude la issue, e in un'altra colonna la riapre; `archive` la chiude come non pianificata e la toglie dalla board, e lo step che torna nel piano riprende la stessa issue. Su Infinity `archive` non cancella: porta la card nella colonna di `archive`, e `close-milestone` non fa niente, perché lì la milestone è un'etichetta.
 
 ## Errori da evitare
 
-- Issue, label o card fatte a mano con gh o con l'API di Infinity: sulla board vanno solo le card di `board.mjs`, una per step e una per domanda aperta.
+- Issue, label, milestone o card fatte a mano con gh o con l'API di Infinity, anche per sistemare quello che lo script dice di non aver scritto: sulla board vanno solo le card di `board.mjs`, una per step e una per domanda aperta.
 - Card per le cose minute dentro uno step: sono le sue cose da fare, in todo. Le card sono gli step e le domande del piano.
 - Le cose da fare nel testo della card, con caselle come ☐, ☑ o "- [ ]": vanno in todo, e lo script le mette nel campo giusto.
 - La key, il numero dello step o il nome del piano nel titolo.

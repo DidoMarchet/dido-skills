@@ -77,10 +77,12 @@ const session = ({ state, origin = 'https://github.com/acme/notes-app.git', git 
   }
   const items = () => (existsSync(statePath) ? JSON.parse(readFileSync(statePath, 'utf8')).items ?? [] : [])
   const calls = () => (existsSync(logPath) ? readFileSync(logPath, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line)) : [])
-  const writes = () => calls().filter((call) => /Add|Edit|Set|Archive/.test(call.operation ?? ''))
-  // La card di uno step: dall'ultima riga del testo o, scritta prima del 23/11/2026, dal titolo.
+  // Le chiamate che scrivono: tutte tranne le letture.
+  const writes = () => calls().filter((call) => call.operation && !['BoardContext', 'BoardItems', 'BoardItem', 'BoardAssignable', 'BoardRepoIssues'].includes(call.operation))
+  // La card di uno step sul Project: dall'ultima riga del testo o, bozza scritta prima del 23/11/2026, dal titolo.
   const card = (key) =>
-    items().find((item) => !item.archived && (item.body.split('\n').includes(keyLine(key)) || item.title.startsWith(`${key}:`)))
+    items().find((item) => !item.archived && item.inProject !== false &&
+      (item.body.split('\n').includes(keyLine(key)) || (item.kind === 'DraftIssue' && item.title.startsWith(`${key}:`))))
   const readJsonLines = (path) =>
     existsSync(path) ? readFileSync(path, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line)) : []
   const infinity = {
@@ -109,7 +111,7 @@ const session = ({ state, origin = 'https://github.com/acme/notes-app.git', git 
   }
   infinity.card = (key) =>
     infinity.cards().find((item) => (item.html ?? '').includes(`<p>${keyLine(key)}</p>`) || item.title.startsWith(`${key}:`))
-  return { run, items, calls, writes, card, infinity }
+  return { run, items, calls, writes, card, infinity, statePath }
 }
 
 const syncPlan = (board, cards = plan) => board.run(['sync', '-'], { input: JSON.stringify(cards) })
@@ -160,10 +162,11 @@ test('se GitHub non risponde aspetta solo fino al timeout', () => {
   assert.ok(result.seconds < 4, `${result.seconds} secondi`)
 })
 
-test('check dice il Project, il link e gli stati', () => {
+test('check dice il Project, il link, gli stati, i campi e i tipi', () => {
   const result = session().run(['check'])
   assert.deepEqual(result.lines, [
     'board: collegato a "Writing App" (https://github.com/users/acme/projects/1), stati: Backlog, Ready, In progress, In review, Done',
+    'board: campi del Project: nessuno; tipi delle issue: Task, Bug, Feature',
   ])
 })
 
@@ -275,27 +278,37 @@ test('move verso uno stato che il Project non ha non scrive niente e dice quali 
   assert.equal(board.writes().length, writesBefore)
 })
 
-test('archive toglie la card, e lo step che torna nel piano ne ha una nuova', () => {
+test('archive chiude la issue come non pianificata e la toglie dalla board; lo step che torna nel piano riprende la stessa issue', () => {
   const board = session()
   syncPlan(board)
   assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "Backend, le note"'])
   assert.equal(board.card('M1 step 2'), undefined)
-  syncPlan(board, [plan[1]])
-  assert.equal(board.card('M1 step 2').status, 'Backlog')
-  assert.equal(board.items().length, 4)
+  const archived = board.items().find((item) => item.title === 'Backend, le note')
+  assert.deepEqual([archived.state, archived.stateReason, archived.archived], ['CLOSED', 'NOT_PLANNED', true])
+  assert.deepEqual(syncPlan(board, [plan[1]]).lines, [
+    'board: "Backend, le note": tornata sulla board, riaperta',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual([board.card('M1 step 2').state, board.card('M1 step 2').status], ['OPEN', 'Backlog'])
+  assert.equal(board.items().length, 3)
 })
 
-test('issue e pull request del Project non si toccano', () => {
-  const issue = { id: 'PVTI_99', type: 'Issue', title: 'M1 step 1: una issue', body: '', status: 'Done' }
-  const board = session({ state: { items: [issue], nextId: 100 } })
+test('le issue senza la riga di uno step e le pull request del Project non si toccano', () => {
+  const issue = {
+    id: 'PVTI_99', kind: 'Issue', contentId: 'I_99', number: 99, title: 'M1 step 1: una issue', body: 'Scritta a mano.', status: 'Done',
+    state: 'OPEN', assignees: [], labels: [], milestone: null, type: null, fields: {},
+  }
+  const pullRequest = { id: 'PVTI_98', kind: 'PullRequest', title: 'M1 step 1: la PR', body: '', status: 'In review' }
+  const board = session({ state: { items: [issue, pullRequest], nextId: 100 } })
   syncPlan(board)
   assert.deepEqual(board.items().find((item) => item.id === 'PVTI_99'), issue)
-  assert.equal(board.items().length, 4)
+  assert.deepEqual(board.items().find((item) => item.id === 'PVTI_98'), pullRequest)
+  assert.equal(board.items().length, 5)
 })
 
 test('legge tutte le pagine della board', () => {
   const items = Array.from({ length: 150 }, (_, index) => ({
-    id: `PVTI_${index + 1}`, draftId: `DI_${index + 1}`, title: `M9 step ${index + 1}: passo`, body: '', status: 'Backlog',
+    id: `PVTI_${index + 1}`, kind: 'DraftIssue', contentId: `DI_${index + 1}`, title: `M9 step ${index + 1}: passo`, body: '', status: 'Backlog',
   }))
   const board = session({ state: { items, nextId: 151 } })
   assert.deepEqual(board.run(['move', 'M9 step 150', 'Done']).lines, ['board: "M9 step 150: passo" ora è in Done'])
@@ -308,6 +321,8 @@ test('un comando sbagliato risponde con una riga, esce con 0 e non chiama gh', (
     [['sync', '-'], JSON.stringify([{ title: 'senza key' }]), /^board: sync vuole un array JSON/],
     [['sync', '-'], JSON.stringify([{ key: 'M1 step 1', todo: ['senza done'] }]), /^board: sync vuole un array JSON .*todo è un array di \{ text, done \}$/],
     [['sync', '-'], JSON.stringify([{ key: 'M1 step 1', todo: [{ text: 'x', done: 'sì' }] }]), /^board: sync vuole un array JSON/],
+    [['sync', '-'], JSON.stringify([{ key: 'M1 step 1', type: 3 }]), /^board: sync vuole un array JSON .*type, assignee e milestone sono testi$/],
+    [['close-milestone'], undefined, /^board: close-milestone vuole il nome del piano/],
     [['sync'], undefined, /^board: sync vuole le card su stdin/],
     [['move', 'M1 step 1'], undefined, /^board: move vuole la key e lo stato/],
     [['archive'], undefined, /^board: archive vuole la key/],
@@ -531,6 +546,7 @@ test('GitHub con docs/plans/board.json: columns cambia la colonna di uno stato e
   assert.deepEqual(board.run(['move', 'M1 step 1', 'In review']).lines, ['board: "Design" ora è in In review ("Done")'])
   assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "Backend, le note": ora è in Done'])
   assert.equal(board.card('M1 step 2').status, 'Done')
+  assert.deepEqual([board.card('M1 step 2').state, board.card('M1 step 2').stateReason], ['CLOSED', 'NOT_PLANNED'])
   assert.ok(board.calls().every((call) => call.operation !== 'BoardArchive'))
   assert.equal(board.infinity.calls().length, 0)
 })
@@ -727,17 +743,21 @@ test('la card di una domanda dice nell\'ultima riga di quale piano è', () => {
   assert.deepEqual(board.run(['move', 'M1 domanda 2', 'Done']).lines, ['board: "Le parole contano anche i numeri?" ora è in Done'])
 })
 
-test('le card con la key nel titolo, scritte prima, si ritrovano: move le sposta e sync con il testo dà il titolo nuovo', () => {
+test('le bozze con la key nel titolo, scritte prima, si ritrovano: move le sposta e sync le fa issue con il titolo nuovo', () => {
   const items = [
-    { id: 'PVTI_1', draftId: 'DI_1', title: 'M1 step 10: Chiusura', body: 'Testo vecchio.', status: 'Backlog' },
-    { id: 'PVTI_2', draftId: 'DI_2', title: 'M1 step 1: Design', body: 'Testo vecchio.', status: 'Backlog' },
+    { id: 'PVTI_1', kind: 'DraftIssue', contentId: 'DI_1', title: 'M1 step 10: Chiusura', body: 'Testo vecchio.', status: 'Backlog' },
+    { id: 'PVTI_2', kind: 'DraftIssue', contentId: 'DI_2', title: 'M1 step 1: Design', body: 'Testo vecchio.', status: 'Backlog' },
   ]
   const board = session({ state: { items, nextId: 3 } })
   assert.deepEqual(board.run(['move', 'M1 step 1', 'Ready']).lines, ['board: "M1 step 1: Design" ora è in Ready'])
   assert.deepEqual(syncPlan(board, [plan[0], plan[2]]).lines, [
-    'board: "Design": testo aggiornato',
-    'board: "Chiusura": testo aggiornato',
+    'board: "Design": ora è la issue #3, testo aggiornato',
+    'board: "Chiusura": ora è la issue #4, testo aggiornato',
     'board: 2 card: 0 create, 2 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual(board.items().map(({ kind, milestone }) => ({ kind, milestone })), [
+    { kind: 'Issue', milestone: 'M1' },
+    { kind: 'Issue', milestone: 'M1' },
   ])
   assert.deepEqual(board.items().map(({ title, status }) => ({ title, status })), [
     { title: 'Chiusura', status: 'Backlog' },
@@ -764,4 +784,273 @@ test('Infinity: in una cartella senza testo lungo la key resta nel titolo, e syn
     { name: 'schermate della lista piena', done: true },
     { name: 'la lista vuota', done: false },
   ])
+})
+
+// Le issue di GitHub: le stesse proprietà delle card di Infinity.
+
+// Un Project con i campi di bici.pro: priorità, reparto e referente.
+const projectFields = [
+  { id: 'PVTSSF_1', name: 'Status', dataType: 'SINGLE_SELECT', options: ['Backlog', 'Ready', 'In progress', 'In review', 'Done'].map((name, index) => ({ id: `OPT_${index}`, name })) },
+  { id: 'PVTSSF_priority', name: 'Priorità', dataType: 'SINGLE_SELECT', options: ['Alta', 'Media', 'Normale'].map((name) => ({ id: `OPT_${name}`, name })) },
+  { id: 'PVTSSF_department', name: 'Reparto', dataType: 'SINGLE_SELECT', options: ['Develop', 'Design'].map((name) => ({ id: `OPT_${name}`, name })) },
+  { id: 'PVTF_referent', name: 'Referente', dataType: 'TEXT' },
+]
+const githubConfig = {
+  service: 'github',
+  fields: { Responsabile: 'dido', Referente: 'Lorenzo Furno', Reparto: 'develop' },
+  assignee: 'Responsabile',
+  priority: 'Priorità',
+}
+const githubSession = (options = {}) => session({ config: githubConfig, state: { fields: projectFields }, ...options })
+
+test('GitHub: sync crea issue del repo, aggiunte al Project, nella milestone del piano', () => {
+  const board = session()
+  syncPlan(board)
+  const cards = board.items()
+  assert.deepEqual(cards.map(({ kind, inProject, state, milestone }) => ({ kind, inProject, state, milestone })),
+    Array(3).fill({ kind: 'Issue', inProject: true, state: 'OPEN', milestone: 'M1' }))
+  assert.deepEqual(cards.map((item) => item.number), [1, 2, 3])
+  // La milestone del piano si crea una volta sola.
+  assert.equal(board.calls().filter((call) => call.operation === 'RestMilestone').length, 1)
+  assert.ok(board.calls().every((call) => call.operation !== 'BoardAddDraft'))
+})
+
+test('GitHub: il tipo va nel tipo della issue, e un tipo che il repo non ha diventa una label creata una volta', () => {
+  const board = session()
+  const question = { key: 'M1 domanda 2', title: 'Le parole contano anche i numeri?', body: `Proposta: sì.\n\nStep: M1 step 1\n\nRepo: app\n${planLink}`, type: 'Domanda' }
+  syncPlan(board, [{ ...plan[0], type: 'Feature' }, { ...plan[1], type: 'bug' }, question])
+  assert.deepEqual([board.card('M1 step 1').type, board.card('M1 step 2').type], ['Feature', 'Bug'])
+  assert.deepEqual([board.card('M1 domanda 2').type, board.card('M1 domanda 2').labels], [null, ['Domanda']])
+  const writesBefore = board.writes().length
+  syncPlan(board, [{ ...plan[0], type: 'Feature' }, { ...plan[1], type: 'bug' }, question])
+  assert.equal(board.writes().length, writesBefore)
+  assert.deepEqual(syncPlan(board, [{ ...plan[0], type: 'Task' }]).lines, [
+    'board: "Design": tipo Task',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  assert.equal(board.calls().filter((call) => call.operation === 'BoardCreateLabel').length, 1)
+})
+
+test('GitHub: assegnatario, referente, reparto e priorità come su Infinity; la seconda sync non scrive', () => {
+  const board = githubSession()
+  const result = syncPlan(board, [{ ...plan[0], priority: 'Alta', status: 'Ready' }, { ...plan[1], priority: 'normale', assignee: 'lorenzo' }])
+  assert.deepEqual(result.lines, [
+    'board: creata "Design" in Ready (priorità Alta)',
+    'board: creata "Backend, le note" in Backlog (priorità Normale)',
+    'board: 2 card: 2 create, 0 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual(board.items().map(({ assignees, fields }) => ({ assignees, fields })), [
+    { assignees: ['dido'], fields: { Referente: 'Lorenzo Furno', Reparto: 'Develop', Priorità: 'Alta' } },
+    { assignees: ['lorenzo'], fields: { Referente: 'Lorenzo Furno', Reparto: 'Develop', Priorità: 'Normale' } },
+  ])
+  const writesBefore = board.writes().length
+  assert.deepEqual(syncPlan(board, [{ ...plan[0], priority: 'Alta' }, { ...plan[1], priority: 'normale', assignee: 'lorenzo' }]).lines,
+    ['board: 2 card: 0 create, 0 cambiate, 2 già allineate'])
+  assert.equal(board.writes().length, writesBefore)
+})
+
+test('GitHub: i campi scritti dalla persona restano, la priorità e l\'assegnatario del piano cambiano', () => {
+  const board = githubSession()
+  syncPlan(board, [{ ...plan[0], priority: 'Alta' }])
+  const state = JSON.parse(readFileSync(board.statePath, 'utf8'))
+  Object.assign(state.items[0], { assignees: ['lorenzo'], fields: { ...state.items[0].fields, Reparto: 'Design' } })
+  writeFileSync(board.statePath, JSON.stringify(state))
+  assert.deepEqual(syncPlan(board, [{ ...plan[0], priority: 'Media' }]).lines, [
+    'board: "Design": priorità Media',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual(board.card('M1 step 1').assignees, ['lorenzo'])
+  assert.equal(board.card('M1 step 1').fields.Reparto, 'Design')
+  assert.deepEqual(syncPlan(board, [{ ...plan[0], priority: 'Media', assignee: 'dido' }]).lines, [
+    'board: "Design": assegnata a dido',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+})
+
+test('GitHub: un login che non si può assegnare e un campo che il Project non ha non fermano la sync', () => {
+  const board = session({ config: { ...githubConfig, fields: { Responsabile: 'pippo', Referente: 'Lorenzo Furno' }, priority: undefined } })
+  const result = syncPlan(board, [plan[0]])
+  assert.deepEqual(result.lines, [
+    'board: campi non scritti: "pippo" non si può assegnare in acme/notes-app; il campo "Referente" non c\'è nel Project',
+    'board: creata "Design" in Backlog',
+    'board: 1 card: 1 create, 0 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual(board.card('M1 step 1').assignees, [])
+})
+
+test('GitHub: check dice i campi di board.json e quelli che non si scrivono', () => {
+  assert.deepEqual(githubSession().run(['check']).lines.slice(1), [
+    'board: campi: Responsabile → dido (assegnatario), Referente → Lorenzo Furno, Reparto → develop, priorità in Priorità; tipi delle issue: Task, Bug, Feature',
+  ])
+  const board = session({ config: githubConfig })
+  assert.deepEqual(board.run(['check']).lines.slice(1), [
+    'board: campi: Responsabile → dido (assegnatario), Referente → Lorenzo Furno, Reparto → develop, priorità in Priorità; non scritti: il campo "Referente" non c\'è nel Project; il campo "Reparto" non c\'è nel Project; la priorità "Priorità" non è un campo a scelta del Project; tipi delle issue: Task, Bug, Feature',
+  ])
+})
+
+test('GitHub: in Done la issue si chiude, tornando indietro si riapre', () => {
+  const board = session()
+  syncPlan(board)
+  assert.deepEqual(board.run(['move', 'M1 step 1', 'Done']).lines, ['board: "Design" ora è in Done'])
+  assert.deepEqual([board.card('M1 step 1').state, board.card('M1 step 1').stateReason], ['CLOSED', 'COMPLETED'])
+  board.run(['move', 'M1 step 1', 'In progress'])
+  assert.equal(board.card('M1 step 1').state, 'OPEN')
+  syncPlan(board, [{ key: 'M1 step 2', status: 'Done' }])
+  assert.equal(board.card('M1 step 2').state, 'CLOSED')
+})
+
+test('GitHub: una issue chiusa a mano resta chiusa con una sync senza stato', () => {
+  const board = session()
+  syncPlan(board)
+  const state = JSON.parse(readFileSync(board.statePath, 'utf8'))
+  Object.assign(state.items[0], { state: 'CLOSED', stateReason: 'COMPLETED' })
+  writeFileSync(board.statePath, JSON.stringify(state))
+  assert.deepEqual(syncPlan(board).lines, ['board: 3 card: 0 create, 0 cambiate, 3 già allineate'])
+  assert.equal(board.card('M1 step 1').state, 'CLOSED')
+})
+
+test('GitHub: le bozze con la riga dello step diventano issue alla prima sync, nella stessa colonna', () => {
+  const items = [{ id: 'PVTI_1', kind: 'DraftIssue', contentId: 'DI_1', title: 'Design', body: `${plan[0].body}\n\nStep 1 del piano M1`, status: 'In progress' }]
+  const board = session({ state: { items, nextId: 2 } })
+  assert.deepEqual(syncPlan(board, [{ ...plan[0], type: 'Task' }]).lines, [
+    'board: "Design": ora è la issue #2, tipo Task',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual(
+    (({ kind, status, milestone, type }) => ({ kind, status, milestone, type }))(board.card('M1 step 1')),
+    { kind: 'Issue', status: 'In progress', milestone: 'M1', type: 'Task' },
+  )
+  assert.equal(board.items().length, 1)
+})
+
+test('GitHub: una issue tolta dal Project si ritrova nel repo e torna sulla board, senza doppioni', () => {
+  const board = session()
+  syncPlan(board)
+  const state = JSON.parse(readFileSync(board.statePath, 'utf8'))
+  state.items[1].inProject = false
+  writeFileSync(board.statePath, JSON.stringify(state))
+  assert.deepEqual(syncPlan(board, [plan[1]]).lines, [
+    'board: "Backend, le note": tornata sulla board, ora in Backlog',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  assert.equal(board.items().length, 3)
+  assert.equal(board.card('M1 step 2').number, 2)
+})
+
+test('GitHub: la milestone che lo step dice vale sopra quella del piano', () => {
+  const board = session()
+  syncPlan(board, [{ ...plan[0], milestone: 'MVP' }])
+  assert.equal(board.card('M1 step 1').milestone, 'MVP')
+  assert.deepEqual(syncPlan(board, [{ ...plan[0], milestone: 'M1' }]).lines, [
+    'board: "Design": milestone M1',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+})
+
+test('GitHub: close-milestone chiude la milestone del piano, una volta', () => {
+  const board = session()
+  syncPlan(board)
+  assert.deepEqual(board.run(['close-milestone', 'M1']).lines, ['board: chiusa la milestone "M1"'])
+  assert.deepEqual(board.run(['close-milestone', 'M1']).lines, ['board: la milestone "M1" è già chiusa'])
+  assert.deepEqual(board.run(['close-milestone', 'M7']).lines, ['board: nessuna milestone "M7" nel repo'])
+})
+
+// Una cartella di Infinity con gli attributi del tipo e della milestone.
+const typedFolderState = () => {
+  const state = initialState()
+  // Gli id a mano: labelId darebbe lo stesso id a M1 e M2.
+  const labels = (names) => names.map((name) => ({ id: `lbl-attr-${name}`, name, color: '#92F3EC' }))
+  state.attributes.push(
+    { id: 'attr-type', object: 'attribute', name: 'Tipo', type: 'label', settings: { multiple: false, labels: labels(['Task', 'Bug', 'Feature', 'Domanda']) }, deleted: false },
+    { id: 'attr-milestone', object: 'attribute', name: 'Milestone', type: 'label', settings: { multiple: false, labels: labels(['M1', 'M2']) }, deleted: false },
+  )
+  state.folders[0].attribute_ids.push('attr-type', 'attr-milestone')
+  return { attributes: state.attributes, folders: state.folders }
+}
+const typedConfig = { ...assignedConfig, assignee: 'Responsabile', type: 'Tipo', milestone: 'Milestone' }
+
+test('Infinity: tipo, milestone e chi prende la card vanno nei loro attributi, se board.json li nomina', () => {
+  const board = infinitySession({ config: typedConfig, infinityState: typedFolderState() })
+  syncPlan(board, [{ ...plan[0], type: 'Feature' }, { ...plan[1], type: 'Bug', assignee: 'Lorenzo Furno', milestone: 'M2' }])
+  const raw = board.infinity.state().items.map((item) => Object.fromEntries(item.values.map((value) => [value.attribute_id, value.data])))
+  assert.deepEqual(raw.map((values) => [values['attr-type'], values['attr-milestone'], values[attributeIds.members]]), [
+    [['lbl-attr-Feature'], ['lbl-attr-M1'], [53509]],
+    [['lbl-attr-Bug'], ['lbl-attr-M2'], [51103]],
+  ])
+  const writesBefore = board.infinity.writes().length
+  syncPlan(board, [{ ...plan[0], type: 'Feature' }, { ...plan[1], type: 'Bug', assignee: 'Lorenzo Furno', milestone: 'M2' }])
+  assert.equal(board.infinity.writes().length, writesBefore)
+  assert.deepEqual(syncPlan(board, [{ ...plan[0], type: 'Task', assignee: 'Lorenzo Furno', milestone: 'M2' }]).lines, [
+    'board: "Design": tipo Task, milestone M2, assegnata a Lorenzo Furno',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+})
+
+test('Infinity: senza type e milestone in board.json le card restano come prima; un valore che non c\'è lo dice', () => {
+  const plain = infinitySession({ infinityState: typedFolderState() })
+  syncPlan(plain, [{ ...plan[0], type: 'Feature' }])
+  assert.deepEqual(plain.infinity.state().items[0].values.map((value) => value.attribute_id).filter((id) => id.startsWith('attr-')), [])
+  const board = infinitySession({ config: typedConfig, infinityState: typedFolderState() })
+  assert.deepEqual(syncPlan(board, [{ ...plan[0], type: 'Chore', milestone: 'M9' }]).lines, [
+    'board: creata "Design" in Backlog ("Stopped") (il tipo "Chore" non c\'è in Tipo (ci sono: Task, Bug, Feature, Domanda), la milestone "M9" non c\'è in Milestone (ci sono: M1, M2))',
+    'board: 1 card: 1 create, 0 cambiate, 0 già allineate',
+  ])
+})
+
+test('su Infinity close-milestone non scrive niente', () => {
+  const board = infinitySession({ config: typedConfig, infinityState: typedFolderState() })
+  assert.deepEqual(board.run(['close-milestone', 'M1']).lines, ['board: su Infinity la milestone è un\'etichetta: non si chiude'])
+  assert.equal(board.infinity.writes().length, 0)
+})
+
+test('GitHub: una issue chiusa come completata e tolta dal Project torna in Done, chiusa', () => {
+  const board = session()
+  syncPlan(board, [plan[0]])
+  board.run(['move', 'M1 step 1', 'Done'])
+  const state = JSON.parse(readFileSync(board.statePath, 'utf8'))
+  state.items[0].inProject = false
+  writeFileSync(board.statePath, JSON.stringify(state))
+  assert.deepEqual(syncPlan(board, [plan[0]]).lines, [
+    'board: "Design": tornata sulla board, ora in Done',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual([board.card('M1 step 1').status, board.card('M1 step 1').state], ['Done', 'CLOSED'])
+})
+
+test('GitHub: una bozza in Done convertita in issue si chiude, con sync o move nella stessa colonna', () => {
+  const items = [
+    { id: 'PVTI_1', kind: 'DraftIssue', contentId: 'DI_1', title: 'Design', body: `${plan[0].body}\n\nStep 1 del piano M1`, status: 'Done' },
+    { id: 'PVTI_2', kind: 'DraftIssue', contentId: 'DI_2', title: 'Backend, le note', body: `${plan[1].body}\n\nStep 2 del piano M1`, status: 'Done' },
+  ]
+  const board = session({ state: { items, nextId: 3 } })
+  assert.deepEqual(syncPlan(board, [{ key: 'M1 step 1', status: 'Done' }]).lines, [
+    'board: "Design": ora è la issue #3, issue chiusa',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual([board.card('M1 step 1').state, board.card('M1 step 1').stateReason], ['CLOSED', 'COMPLETED'])
+  syncPlan(board, [plan[1]])
+  assert.equal(board.card('M1 step 2').state, 'OPEN')
+  assert.deepEqual(board.run(['move', 'M1 step 2', 'Done']).lines, ['board: "Backend, le note" è già in Done: issue chiusa'])
+  assert.equal(board.card('M1 step 2').state, 'CLOSED')
+  assert.deepEqual(board.run(['move', 'M1 step 2', 'Done']).lines, ['board: "Backend, le note" è già in Done'])
+})
+
+test('GitHub: archive in una colonna dove la card è già chiude la issue come non pianificata', () => {
+  const board = session({ config: { service: 'github', columns: { archive: 'Done' } } })
+  syncPlan(board, [{ ...plan[0], status: 'Done' }])
+  const state = JSON.parse(readFileSync(board.statePath, 'utf8'))
+  Object.assign(state.items[0], { state: 'OPEN', stateReason: null })
+  writeFileSync(board.statePath, JSON.stringify(state))
+  assert.deepEqual(board.run(['archive', 'M1 step 1']).lines, ['board: archiviata "Design": era già in Done, issue chiusa'])
+  assert.deepEqual([board.card('M1 step 1').state, board.card('M1 step 1').stateReason], ['CLOSED', 'NOT_PLANNED'])
+})
+
+test('GitHub: la card archiviata che torna nel piano esce dall\'archivio con la sua mutation', () => {
+  const board = session()
+  syncPlan(board, [plan[0]])
+  board.run(['archive', 'M1 step 1'])
+  syncPlan(board, [plan[0]])
+  assert.ok(board.calls().some((call) => call.operation === 'BoardUnarchive'))
+  assert.ok(board.calls().filter((call) => call.operation === 'BoardAddItem').length === 1)
+  assert.deepEqual(syncPlan(board, [plan[0]]).lines, ['board: 1 card: 0 create, 0 cambiate, 1 già allineate'])
 })

@@ -116,6 +116,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 - "Dove siamo", in fondo al piano, è la memoria tra una sessione e l'altra.
 - Le decisioni tecniche vanno in `docs/decisions/`, il report di chiusura in `docs/reports/`.
 - Alla chiusura: ripasso del piano voce per voce, revisione dell'agente `revisore` sul diff dall'ultima revisione, report. La milestone la chiude chi lavora con te.
+- Uno step che prende una persona diversa dal solito lo dice nel suo testo: "Chi: <nome>".
 - Se il progetto ha dido-board, la board del progetto (GitHub Project o Infinity) segue il piano: una card per step e una per domanda aperta.
 
 ## dido-goal: obiettivo e fine del lavoro
@@ -144,10 +145,12 @@ Si lancia a mano con `/dido-rilascio`.
 
 - Sulla board del progetto, una card per step del piano: un titolo da persona, cosa fa lo step in una o due frasi, i repo che tocca, il link al piano e nell'ultima riga lo step ("Step 3 del piano M5"). Le cose da fare dello step, spuntate come dice il piano, vanno nel campo checklist della cartella su Infinity e in fondo al testo, con le caselle, su GitHub. Ogni domanda aperta ha la sua card, in Backlog finché non ha risposta, poi in Done.
 - La card segue il lavoro: Ready quando lo step è deciso (piano approvato, nessuna domanda aperta, nessun ok che manca), Backlog finché aspetta una risposta, In progress quando parte, In review quando è fatto e verificato, Done quando entra in un commit. Così la board dice cosa è deciso e cosa no.
+- Ogni card ha chi la prende (quello di `board.json` o quello che lo step dice con "Chi:"), il tipo (Bug, Feature, Task; Domanda per le domande), la priorità e la milestone, che è il piano.
+- Su GitHub ogni card è una issue del repo nel Project: assegnatario, tipo della issue, milestone del repo, e Priorità, Reparto e Referente come campi del Project. In Done la issue si chiude; uno step che esce dal piano la chiude come non pianificata. Quando chi lavora con te chiude la milestone, la skill chiude anche quella del repo.
 - Il piano resta la fonte: dove la board non coincide, vale il piano.
 - Non ferma mai il lavoro: senza una board collegata non fa niente, e se la board non risponde lo dice in una riga del report.
-- Di base la board è il GitHub Project collegato al repo: serve gh con lo scope project (`gh auth refresh -s project`) e il repo collegato al Project (scheda Projects del repo, "Link a project").
-- Una board di Infinity si scrive in `docs/plans/board.json`: l'URL, la colonna di ogni stato, chi prende le card, il referente e il reparto; la priorità di ogni card la dà l'agente. Il token è `INFINITY_TOKEN`, nei file env del progetto.
+- Di base la board è il GitHub Project collegato al repo: serve gh con lo scope project (`gh auth refresh -s project`) e il repo collegato al Project (scheda Projects del repo, "Link a project"). Chi prende le card, il referente e il reparto si scrivono in `docs/plans/board.json`; i campi Priorità, Reparto e Referente si aggiungono una volta al Project, a mano.
+- Una board di Infinity si scrive in `docs/plans/board.json`: l'URL, la colonna di ogni stato, chi prende le card, il referente, il reparto e, se la cartella li ha, gli attributi del tipo e della milestone; la priorità di ogni card la dà l'agente. Il token è `INFINITY_TOKEN`, nei file env del progetto.
 - Se il repo non ha né un Project né `board.json`, all'inizio la skill chiede una volta se c'è una board di Infinity, con quei dati; se non c'è, lo scrive in `board.json` e non chiede più.
 
 ## Le altre skill dido-*

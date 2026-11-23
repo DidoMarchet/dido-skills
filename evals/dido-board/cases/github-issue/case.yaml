@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: github-issue
+expected_outcome: |
+  Il repo ha un GitHub Project con i campi Priorità, Reparto e Referente, e docs/plans/board.json dice chi prende le card (dido), il referente e il reparto. Il piano M1 ha uno step che corregge un difetto, uno step che dice "Chi: lorenzo" e una domanda aperta. Il piano diventa approvato e il Project ha una issue per ogni step e una per la domanda: lo step del difetto di tipo Bug, gli altri step Task o Feature, la domanda con il tipo Domanda; lo step 2 assegnato a lorenzo, gli altri a dido; tutte nella milestone M1 e con una priorità. Nessun comando gh fuori dallo script, nessun codice cambiato, nessun commit.
+---
+tags: [dido-board, dido-planning]
+---

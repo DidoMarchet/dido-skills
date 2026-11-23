@@ -3,7 +3,7 @@
 // primo testo lungo (HTML), le cose da fare il primo attributo checklist, la colonna un attributo
 // etichetta con una sola etichetta: la vista a colonne raggruppa per l'insieme delle etichette,
 // quindi una card con due etichette starebbe in un'altra colonna. Gli altri attributi li scrive
-// solo quando board.json li nomina (fields, priority).
+// solo quando board.json li nomina (fields, assignee, priority, type, milestone).
 
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
@@ -167,14 +167,19 @@ export const openInfinityBoard = async (config) => {
   const labelOf = (attribute, name) => attribute.settings?.labels?.find((label) => sameName(label.name, name))
   const labelNames = (attribute) => (attribute.settings?.labels ?? []).map((label) => label.name).join(', ')
   let workspaceMembers = null
-  const memberId = async (name) => {
+  // Il membro con quel nome o quell'email: { id }, o { problem } se non c'è o non è uno solo.
+  const findMember = async (name) => {
     workspaceMembers ??= await listAll(`workspaces/${workspaceId}/members`)
     const found = workspaceMembers.filter((member) => sameName(member.name ?? '', name) || sameName(member.email ?? '', name))
-    if (found.length === 1) return found[0].id
-    fieldProblems.push(found.length ? `ci sono più membri "${name}": scrivi l'email` : `"${name}" non è tra i membri del workspace`)
-    return null
+    if (found.length === 1) return { id: found[0].id }
+    return { problem: found.length ? `ci sono più membri "${name}": scrivi l'email` : `"${name}" non è tra i membri del workspace` }
   }
   const fieldValues = []
+  // Chi prende la card: l'attributo persone che board.json nomina in assignee.
+  const assigneeAttribute = config.assignee
+    ? folderAttributes.find((candidate) => candidate.type === 'members' && sameName(candidate.name, config.assignee))
+    : null
+  if (config.assignee && !assigneeAttribute) fieldProblems.push(`chi prende la card, "${config.assignee}", non è un attributo persone della cartella`)
   for (const [name, wantedValue] of Object.entries(config.fields ?? {})) {
     const attribute = folderAttributes.find((candidate) => sameName(candidate.name, name))
     if (!attribute) {
@@ -183,8 +188,9 @@ export const openInfinityBoard = async (config) => {
     }
     let data = null
     if (attribute.type === 'members') {
-      const id = await memberId(wantedValue)
-      data = id === null ? null : [id]
+      const { id, problem } = await findMember(wantedValue)
+      if (problem) fieldProblems.push(problem)
+      data = problem ? null : [id]
     } else if (attribute.type === 'label') {
       const label = labelOf(attribute, wantedValue)
       if (!label) fieldProblems.push(`"${wantedValue}" non è tra le etichette di ${attribute.name} (ci sono: ${labelNames(attribute)})`)
@@ -206,6 +212,32 @@ export const openInfinityBoard = async (config) => {
     const label = labelOf(priorityAttribute, priority)
     if (!label) return { problem: `la priorità "${priority}" non c'è (ci sono: ${labelNames(priorityAttribute)})` }
     return { value: { attribute_id: priorityAttribute.id, data: [label.id] }, text: `priorità ${label.name}` }
+  }
+
+  // Tipo e milestone: un'etichetta dell'attributo che board.json nomina in type e milestone.
+  const labelAttributeNamed = (name, what) => {
+    if (!name) return null
+    const attribute = folderAttributes.find((candidate) => candidate.type === 'label' && sameName(candidate.name, name))
+    if (!attribute) fieldProblems.push(`${what} "${name}" non è un attributo etichetta della cartella`)
+    return attribute ?? null
+  }
+  const typeAttribute = labelAttributeNamed(config.type, 'il tipo')
+  const milestoneAttribute = labelAttributeNamed(config.milestone, 'la milestone')
+  const labelValue = (attribute, wantedValue, article, noun) => {
+    if (!wantedValue || !attribute) return {}
+    const label = labelOf(attribute, wantedValue)
+    if (!label) return { problem: `${article} ${noun} "${wantedValue}" non c'è in ${attribute.name} (ci sono: ${labelNames(attribute)})` }
+    return { value: { attribute_id: attribute.id, data: [label.id] }, text: `${noun} ${label.name}` }
+  }
+  // Le proprietà che sync riceve con la card: tipo, milestone e chi la prende, solo se lo dice lo
+  // step. Ognuna { value, text } da scrivere, o { problem } se non si traduce.
+  const propertyValues = async ({ type, assignee, milestone }) => {
+    const parts = [labelValue(typeAttribute, type, 'il', 'tipo'), labelValue(milestoneAttribute, milestone, 'la', 'milestone')]
+    if (assignee && assigneeAttribute) {
+      const { id, problem } = await findMember(assignee)
+      parts.push(problem ? { problem } : { value: { attribute_id: assigneeAttribute.id, data: [id] }, text: `assegnata a ${assignee}` })
+    }
+    return parts.filter((part) => part.value || part.problem)
   }
 
   const value = (item, attribute) => item.values?.find((candidate) => candidate.attribute_id === attribute?.id)?.data
@@ -281,35 +313,49 @@ export const openInfinityBoard = async (config) => {
       }))
     },
 
-    createCard: async ({ title, body, todo, column, priority }) => {
+    createCard: async ({ title, body, todo, column, priority, ...properties }) => {
       const { value: priorityValue, text: priorityText, problem } = priorityFor(priority)
+      const parts = await propertyValues(properties)
+      const propertyList = parts.filter((part) => part.value).map((part) => part.value)
+      const set = new Set(propertyList.map((property) => property.attribute_id))
       const values = [
         ...textValues({ title, body }),
         ...(todoAttribute && todo.length ? [checklistValue([], todo)] : []),
         ...(column ? [columnValue(column)] : []),
-        ...fieldValues.map((field) => ({ attribute_id: field.attribute.id, data: field.data })),
+        ...fieldValues.filter((field) => !set.has(field.attribute.id)).map((field) => ({ attribute_id: field.attribute.id, data: field.data })),
         ...(priorityValue ? [priorityValue] : []),
+        ...propertyList,
       ]
       const item = await request('POST', `${boardPath}/items`, { body: { folder_id: folder.id, values } })
       const card = { id: item.id, title, body: htmlToText(textToHtml(body)), column: column ?? null, values }
-      return { card, notes: [priorityText ?? problem].filter(Boolean) }
+      return { card, notes: [priorityText ?? problem, ...parts.map((part) => part.problem)].filter(Boolean) }
     },
 
     // I campi vuoti della card e la priorità, se cambia: le cose scritte, per la riga di sync.
-    completeCard: async (card, { priority }) => {
+    completeCard: async (card, { priority, ...properties }) => {
       const current = (attribute) => card.values.find((candidate) => candidate.attribute_id === attribute.id)?.data
-      const missing = fieldValues.filter((field) => isEmpty(current(field.attribute)))
+      const parts = await propertyValues(properties)
+      const changed = parts.filter((part) => part.value && !sameData(current({ id: part.value.attribute_id }), part.value.data))
+      const set = new Set(parts.filter((part) => part.value).map((part) => part.value.attribute_id))
+      const missing = fieldValues.filter((field) => !set.has(field.attribute.id) && isEmpty(current(field.attribute)))
       const { value: priorityValue, text: priorityText, problem } = priorityFor(priority)
       const newPriority = priorityValue && !sameData(current(priorityAttribute), priorityValue.data) ? priorityValue : null
       const values = [
         ...missing.map((field) => ({ attribute_id: field.attribute.id, data: field.data })),
         ...(newPriority ? [newPriority] : []),
+        ...changed.map((part) => part.value),
       ]
       if (values.length) {
         await request('PUT', itemPath(card), { body: { values } })
         card.values = [...card.values.filter((old) => !values.some((next) => next.attribute_id === old.attribute_id)), ...values]
       }
-      return [...missing.map((field) => field.text), ...(newPriority ? [priorityText] : []), ...(problem ? [problem] : [])]
+      return [
+        ...missing.map((field) => field.text),
+        ...(newPriority ? [priorityText] : []),
+        ...changed.map((part) => part.text),
+        ...(problem ? [problem] : []),
+        ...parts.filter((part) => part.problem).map((part) => part.problem),
+      ]
     },
 
     editCard: async (card, { title, body, todo }) => {
@@ -329,5 +375,7 @@ export const openInfinityBoard = async (config) => {
 
     // Infinity non archivia: la card va nella colonna di archive (board.mjs).
     archiveCard: null,
+
+    closeMilestone: async () => "su Infinity la milestone è un'etichetta: non si chiude",
   }
 }
