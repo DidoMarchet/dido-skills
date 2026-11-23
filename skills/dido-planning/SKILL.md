@@ -72,7 +72,7 @@ Nel `docs/` del repo principale del progetto: quello che il suo `AGENTS.md` o `C
 - Un invariante del charter non si viola mai: se un passo sembra chiederlo, ci si ferma e si chiede.
 - Una scelta tecnica non banale va nel registro delle decisioni (vedi la tabella) nella stessa modifica: contesto, scelta, cosa è stato verificato, alternative scartate. Se cambia il charter, si aggiorna anche lui.
 - Ogni passo finisce verificato (dido-code-style, "Fatto vuol dire verificato") e con "Dove siamo" aggiornato: cosa è fatto, come è stato provato, cosa resta, le scelte fatte senza chiedere.
-- Se il progetto ha la skill dido-board, caricala quando il piano è approvato o ripreso, quando una sua domanda si apre o ha risposta e quando uno step parte, è fatto, entra in un commit, cambia o esce dal piano: tiene allineata la board del GitHub Project collegato al repo, e non ferma mai il lavoro.
+- Se il progetto ha la skill dido-board, caricala quando il piano è approvato o ripreso, quando una sua domanda si apre o ha risposta e quando uno step parte, è fatto, entra in un commit, cambia o esce dal piano: tiene allineata la board del progetto (il GitHub Project collegato al repo o la board di Infinity), e non ferma mai il lavoro.
 - Un commit per passo, se chi lavora con te ha chiesto i commit (dido-code-style), con piano e passo nel messaggio, in italiano: `M2 step 4: filtri della lista ordini`. Se sullo stesso repo lavorano più agenti, committa solo chi coordina, dopo aver guardato il diff e rilanciato le prove.
 
 ## Chiudere

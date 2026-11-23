@@ -14,7 +14,7 @@ Servono Claude Code, Node, Python 3, git e, per il backend, Docker con l'immagin
 | `<skill>/checks.py` | `JUDGED` (le verifiche da giudicare, per caso) e `check()`, che controlla le altre |
 | `<skill>/hidden/` | test nascosti: la sessione non li vede, la valutazione li copia nel repo e li toglie subito dopo |
 | `<skill>/reference/`, `dido-rilascio/work/` | soluzioni di riferimento e lavoro da rilasciare, come patch |
-| `dido-board/board.test.mjs` | le prove dello script di dido-board con il gh finto, senza sessioni: `node --test evals/dido-board/board.test.mjs` dalla root del repo |
+| `dido-board/board.test.mjs` | le prove dello script di dido-board con gh e Infinity finti, senza sessioni: `node --test evals/dido-board/board.test.mjs` dalla root del repo |
 
 ## Come si lancia
 
@@ -27,7 +27,7 @@ Dalla cartella `evals/`:
 5. `python3 bin/grade.py ~/dido-evals/<iterazione> merge`: `grading.json` di ogni sessione e `summary.md` con le verifiche passate, tempo e costo medi per caso.
 6. Poi i Postgres delle sessioni: `for run in ~/dido-evals/<iterazione>/*/*/*/run-*; do bin/backend-db.sh stop "$run"; done`.
 
-Con la skill, le `dido-*` sono quelle dell'utente (`~/.claude/skills`, collegate a `skills/` di questo repo) e, nelle copie degli starter, quelle di `skills/`. Senza, la skill provata è bloccata con `--disallowedTools`. Superpowers è acceso. `bin/settings.json` nega push, installazioni, `prisma generate`, `ai:update`, `docker compose` e `make up-dev`: con `node_modules` collegato scriverebbero nello starter vero. Nega anche `gh`, che toccherebbe GitHub: dido-board parla con un gh finto, `dido-board/fake-gh.mjs`.
+Con la skill, le `dido-*` sono quelle dell'utente (`~/.claude/skills`, collegate a `skills/` di questo repo) e, nelle copie degli starter, quelle di `skills/`. Senza, la skill provata è bloccata con `--disallowedTools`. Superpowers è acceso. `bin/settings.json` nega push, installazioni, `prisma generate`, `ai:update`, `docker compose` e `make up-dev`: con `node_modules` collegato scriverebbero nello starter vero. Nega anche `gh`, che toccherebbe GitHub: dido-board parla con un gh finto, `dido-board/fake-gh.mjs`, e nei casi `infinity-*` con un'API di Infinity finta, `dido-board/fake-infinity.mjs`.
 
 ## Aggiungere uno scenario
 

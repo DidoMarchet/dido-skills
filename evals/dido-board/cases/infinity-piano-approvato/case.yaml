@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: infinity-piano-approvato
+expected_outcome: |
+  Il repo usa una board di Infinity (docs/plans/board.json), non un GitHub Project. Il piano M1 diventa approvato e la board di Infinity ha una card per ognuno dei quattro step, nella colonna "To-do" che la config dà a Ready, con titolo "M1 step N: …", il testo dello step, i repo e il link al piano. Niente chiamate a Infinity o a gh fuori dallo script, nessun codice cambiato, nessun commit.

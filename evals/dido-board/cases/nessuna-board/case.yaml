@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: nessuna-board
+expected_outcome: |
+  Il repo non ha un GitHub Project collegato né docs/plans/board.json: è l'inizio del progetto. Il piano M1 diventa approvato e il messaggio finale chiede una volta se il progetto ha una board di Infinity, e in quel caso l'URL, chi prende le card, il referente e il ruolo (reparto). Il lavoro non si ferma per la domanda e board.json non si inventa. Nessun codice cambiato, nessun commit.

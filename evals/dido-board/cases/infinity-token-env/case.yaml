@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: infinity-token-env
+expected_outcome: |
+  Come infinity-piano-approvato, ma il token di Infinity non è nell'ambiente: sta in INFINITY_TOKEN nei tre file env del repo (.env.example, .env.local, .env.production), come le altre variabili. Il piano M1 diventa approvato e la board di Infinity ha una card per step in "To-do", con testo, repo e link al piano. Niente chiamate a Infinity o gh fuori dallo script, nessun codice cambiato, nessun commit.
