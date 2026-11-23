@@ -142,7 +142,7 @@ Si lancia a mano con `/dido-rilascio`.
 
 ## dido-board: la board del piano
 
-- Sulla board del progetto, una card per step del piano: titolo come nei commit ("M5 step 3: …"), il testo dello step, i repo che tocca e il link al piano. Ogni domanda aperta ha la sua card ("M5 domanda 2: …"), in Backlog finché non ha risposta, poi in Done.
+- Sulla board del progetto, una card per step del piano: un titolo da persona, cosa fa lo step in una o due frasi, i repo che tocca, il link al piano e nell'ultima riga lo step ("Step 3 del piano M5"). Le cose da fare dello step, spuntate come dice il piano, vanno nel campo checklist della cartella su Infinity e in fondo al testo, con le caselle, su GitHub. Ogni domanda aperta ha la sua card, in Backlog finché non ha risposta, poi in Done.
 - La card segue il lavoro: Ready quando lo step è deciso (piano approvato, nessuna domanda aperta, nessun ok che manca), Backlog finché aspetta una risposta, In progress quando parte, In review quando è fatto e verificato, Done quando entra in un commit. Così la board dice cosa è deciso e cosa no.
 - Il piano resta la fonte: dove la board non coincide, vale il piano.
 - Non ferma mai il lavoro: senza una board collegata non fa niente, e se la board non risponde lo dice in una riga del report.

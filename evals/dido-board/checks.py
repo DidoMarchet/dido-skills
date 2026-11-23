@@ -15,6 +15,7 @@ JUDGED = {
     "infinity-token-env": [],
     "nessuna-board": [2, 3],
     "infinity-assegna": [],
+    "infinity-cose-da-fare": [],
 }
 MEMBERS = {53509: "Davide Marchet", 51103: "Lorenzo Furno"}
 
@@ -48,6 +49,7 @@ def infinity_cards(run):
     state = json.loads(path.read_text())
     attributes = {attribute["name"]: attribute for attribute in state["attributes"]}
     title, description = (next(a for a in state["attributes"] if a["type"] == kind) for kind in ("text", "longtext"))
+    checklist = next((a for a in state["attributes"] if a["type"] == "checklist"), None)
     labels = {label["id"]: label["name"]
               for attribute in state["attributes"] if attribute["type"] == "label"
               for label in attribute["settings"]["labels"]}
@@ -67,12 +69,33 @@ def infinity_cards(run):
             "referent": [MEMBERS.get(member, member) for member in named("Referente")],
             "department": [labels[label] for label in named("Reparto")],
             "priority": [labels[label] for label in named("Priorità")],
+            "todo": values.get(checklist["id"], []) if checklist else [],
         })
     return cards
 
 
+def step_cards(cards, key):
+    """Le card di uno step, con la key nel titolo ("M1 step 2: …") o nell'ultima riga ("Step 2 del piano M1")."""
+    plan, _, number = key.split(" ")
+    line = f"step {number} del piano {plan}".lower()
+    return [card for card in cards if card["title"].startswith(f"{key}:")
+            or any(row.strip().lower() == line for row in card["body"].splitlines())]
+
+
+def step_card(cards, key):
+    found = step_cards(cards, key)
+    return found[0] if found else None
+
+
 def bash_commands(run):
     return [call["input"].get("command", "") for call in run.calls if call["name"] == "Bash"]
+
+
+def infinity_commands(run):
+    """I comandi che parlano con Infinity fuori dallo script: l'indirizzo dell'API, o il token con curl
+    o fetch. Guardare se INFINITY_TOKEN c'è non è una chiamata."""
+    return [command for command in bash_commands(run) if "board.mjs" not in command and (
+        "startinfinity" in command or ("INFINITY_TOKEN" in command and re.search(r"\b(curl|wget|fetch)\b", command)))]
 
 
 def gh_commands(run):
@@ -84,19 +107,20 @@ def check(case_name, index, run):
     if case_name == "piano-approvato":
         cards = board_cards(run)
         if index == 1:
-            per_step = {key: [card for card in cards if card["title"].startswith(f"{key}:")] for key in STEPS}
+            per_step = {key: step_cards(cards, key) for key in STEPS}
             ok = len(cards) == len(STEPS) and all(
                 len(found) == 1 and found[0].get("status") == "Ready" for found in per_step.values())
             return ok, "; ".join(f"{card['title']} ({card.get('status')})" for card in cards) or "board vuota"
         if index == 2:
             problems = []
             for key, word in STEPS.items():
-                card = next((card for card in cards if card["title"].startswith(f"{key}:")), None)
+                card = step_card(cards, key)
                 body = card["body"] if card else ""
-                missing = [part for part in (word, "Repo:", PLAN_LINK) if part not in body]
+                content = f"{card['title']}\n{body}\n" + "\n".join(item["name"] for item in card.get("todo", [])) if card else ""
+                missing = [part for part in ("Repo:", PLAN_LINK) if part not in body] + ([] if word in content else [word])
                 if missing:
                     problems.append(f"{key}: manca {missing}")
-            return not problems, "; ".join(problems) or "testo dello step, repo e link al piano in ogni card"
+            return not problems, "; ".join(problems) or "step, repo e link al piano in ogni card"
         if index == 3:
             commands = gh_commands(run)
             return not commands, f"comandi gh: {commands or 'nessuno'}"
@@ -122,23 +146,22 @@ def check(case_name, index, run):
     if case_name in ("infinity-piano-approvato", "infinity-token-env"):
         cards = infinity_cards(run)
         if index == 1:
-            per_step = {key: [card for card in cards if card["title"].startswith(f"{key}:")] for key in STEPS}
+            per_step = {key: step_cards(cards, key) for key in STEPS}
             ok = len(cards) == len(STEPS) and all(
                 len(found) == 1 and found[0]["status"] == "To-do" for found in per_step.values())
             return ok, "; ".join(f"{card['title']} ({card['status']})" for card in cards) or "board vuota"
         if index == 2:
             problems = []
             for key, word in STEPS.items():
-                card = next((card for card in cards if card["title"].startswith(f"{key}:")), None)
+                card = step_card(cards, key)
                 body = card["body"] if card else ""
-                missing = [part for part in (word, "Repo:", PLAN_LINK) if part not in body]
+                content = f"{card['title']}\n{body}\n" + "\n".join(item["name"] for item in card.get("todo", [])) if card else ""
+                missing = [part for part in ("Repo:", PLAN_LINK) if part not in body] + ([] if word in content else [word])
                 if missing:
                     problems.append(f"{key}: manca {missing}")
-            return not problems, "; ".join(problems) or "testo dello step, repo e link al piano in ogni card"
+            return not problems, "; ".join(problems) or "step, repo e link al piano in ogni card"
         if index == 3:
-            around = [command for command in bash_commands(run)
-                      if "board.mjs" not in command and re.search(r"startinfinity|INFINITY_TOKEN", command)]
-            commands = gh_commands(run) + around
+            commands = gh_commands(run) + infinity_commands(run)
             return not commands, f"comandi fuori dallo script: {commands or 'nessuno'}"
         if index == 4:
             changed = [name for name in run.changed_files() if name != "docs/plans/M1.md"]
@@ -152,7 +175,7 @@ def check(case_name, index, run):
     if case_name == "infinity-assegna":
         cards = infinity_cards(run)
         if index == 1:
-            per_step = {key: [card for card in cards if card["title"].startswith(f"{key}:")] for key in STEPS}
+            per_step = {key: step_cards(cards, key) for key in STEPS}
             ok = len(cards) == len(STEPS) and all(
                 len(found) == 1 and found[0]["status"] == "To-do" for found in per_step.values())
             return ok, "; ".join(f"{card['title']} ({card['status']})" for card in cards) or "board vuota"
@@ -162,16 +185,43 @@ def check(case_name, index, run):
                      if card[field] != value]
             return bool(cards) and not wrong, "; ".join(wrong) or ("tutte assegnate" if cards else "board vuota")
         if index == 3:
-            shown = {card["title"].split(":")[0]: card["priority"] for card in cards}
+            shown = {key: (step_card(cards, key) or {}).get("priority") for key in STEPS}
             ok = (len(cards) == len(STEPS)
-                  and all(len(priority) == 1 and priority[0] in ("Alta", "Media", "Normale") for priority in shown.values())
+                  and all(priority and len(priority) == 1 and priority[0] in ("Alta", "Media", "Normale") for priority in shown.values())
                   and shown.get("M1 step 1") == ["Alta"])
             return ok, "; ".join(f"{key}: {value}" for key, value in shown.items()) or "board vuota"
         if index == 4:
             changed = [name for name in run.changed_files() if name != "docs/plans/M1.md"]
             commits = run.new_commits()
-            around = [command for command in bash_commands(run)
-                      if "board.mjs" not in command and re.search(r"startinfinity|INFINITY_TOKEN", command)]
+            around = infinity_commands(run)
+            outside = gh_commands(run) + around
+            ok = not changed and not commits and not outside
+            return ok, f"altri file: {changed or 'nessuno'}; commit: {len(commits)}; comandi fuori: {outside or 'nessuno'}"
+    if case_name == "infinity-cose-da-fare":
+        cards = infinity_cards(run)
+        if index == 1:
+            ok = len(cards) == len(STEPS) and all(len(step_cards(cards, key)) == 1 for key in STEPS)
+            return ok, "; ".join(f"{card['title']} ({card['status']})" for card in cards) or "board vuota"
+        if index == 2:
+            todo = {key: (step_card(cards, key) or {}).get("todo", []) for key in STEPS}
+            done = {key: [item["done"] for item in items] for key, items in todo.items()}
+            ok = (len(done["M1 step 1"]) >= 2 and all(done["M1 step 1"])
+                  and True in done["M1 step 2"] and False in done["M1 step 2"]
+                  and len(done["M1 step 3"]) >= 2 and not any(done["M1 step 3"]))
+            shown = "; ".join(f"{key}: " + (", ".join(f"{'x' if item['done'] else ' '} {item['name']}" for item in items) or "vuota")
+                              for key, items in todo.items())
+            return ok, shown
+        if index == 3:
+            marks = re.compile(r"[☐☑✓✔✅]|\[[ xX]\]")
+            found = [f"{card['title']}: {line.strip()}" for card in cards for line in card["body"].splitlines() if marks.search(line)]
+            return not found, "; ".join(found) or "nessuna casella nel testo"
+        if index == 4:
+            wrong = [card["title"] for card in cards if re.search(r"\bM1\b|step", card["title"], re.I)]
+            return bool(cards) and not wrong, "; ".join(card["title"] for card in cards) or "board vuota"
+        if index == 5:
+            changed = [name for name in run.changed_files() if name != "docs/plans/M1.md"]
+            commits = run.new_commits()
+            around = infinity_commands(run)
             outside = gh_commands(run) + around
             ok = not changed and not commits and not outside
             return ok, f"altri file: {changed or 'nessuno'}; commit: {len(commits)}; comandi fuori: {outside or 'nessuno'}"

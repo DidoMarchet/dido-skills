@@ -1,5 +1,6 @@
 // La board del GitHub Project collegato al repo, attraverso gh. Le card sono bozze del Project e
-// la colonna è il campo Status.
+// la colonna è il campo Status. Il Project non ha un campo per le cose da fare: stanno nel testo,
+// come lista con le caselle, che GitHub mostra spuntabile.
 
 import { execFileSync } from 'node:child_process'
 import { finish, notUpdated, sameName, timeoutMs } from './output.mjs'
@@ -142,11 +143,16 @@ export const openGithubBoard = async (config) => {
     columns: statusField?.options.map((option) => option.name) ?? null,
     noColumns: 'il Project non ha il campo Status',
     noColumnsInCheck: 'nessun campo Status',
+    keepsBody: true,
     storedBody: (body) => body,
     // Campi e priorità sono delle board di Infinity: il Project non li ha.
     fieldsLine: null,
     fieldProblems: [],
     completeCard: async () => [],
+    todoLine: ({ text, done }) => `- [${done ? 'x' : ' '}] ${text}`,
+    todoProblem: null,
+    // Le cose da fare sono nel testo: se cambiano, cambia il testo.
+    todoChanged: () => false,
 
     loadCards: async () => {
       const cards = []

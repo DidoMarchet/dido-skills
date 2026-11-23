@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { attributeIds, columnNames, departmentNames, folderId, labelId, priorityNames } from './fake-infinity.mjs'
+import { attributeIds, columnNames, departmentNames, folderId, initialState, labelId, priorityNames } from './fake-infinity.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const boardScript = join(here, '../../skills/dido-board/board.mjs')
@@ -17,6 +17,9 @@ const fakeInfinity = join(here, 'fake-infinity.mjs')
 chmodSync(fakeGh, 0o755)
 
 const planLink = 'Piano: https://github.com/acme/notes-app/blob/main/docs/plans/M1.md'
+// L'ultima riga che lo script scrive nel testo di ogni card, scritta a mano per le key delle prove.
+const keyLines = { 'M1 step 1': 'Step 1 del piano M1', 'M1 step 2': 'Step 2 del piano M1', 'M1 step 3': 'Step 3 del piano M1', 'M1 step 10': 'Step 10 del piano M1', 'M1 domanda 2': 'Domanda 2 del piano M1' }
+const keyLine = (key) => keyLines[key] ?? key
 const plan = [
   { key: 'M1 step 1', title: 'Design', body: `Le schermate della lista delle note.\n\nRepo: app\n${planLink}` },
   { key: 'M1 step 2', title: 'Backend, le note', body: `Le rotte delle note, con i test.\n\nRepo: backend\n${planLink}` },
@@ -75,7 +78,9 @@ const session = ({ state, origin = 'https://github.com/acme/notes-app.git', git 
   const items = () => (existsSync(statePath) ? JSON.parse(readFileSync(statePath, 'utf8')).items ?? [] : [])
   const calls = () => (existsSync(logPath) ? readFileSync(logPath, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line)) : [])
   const writes = () => calls().filter((call) => /Add|Edit|Set|Archive/.test(call.operation ?? ''))
-  const card = (key) => items().find((item) => !item.archived && item.title.startsWith(`${key}:`))
+  // La card di uno step: dall'ultima riga del testo o, scritta prima del 23/11/2026, dal titolo.
+  const card = (key) =>
+    items().find((item) => !item.archived && (item.body.split('\n').includes(keyLine(key)) || item.title.startsWith(`${key}:`)))
   const readJsonLines = (path) =>
     existsSync(path) ? readFileSync(path, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line)) : []
   const infinity = {
@@ -98,10 +103,12 @@ const session = ({ state, origin = 'https://github.com/acme/notes-app.git', git 
         referent: value(attributeIds.referent),
         department: value(attributeIds.department)?.map((id) => labels[id]),
         priority: value(attributeIds.priority)?.map((id) => labels[id]),
+        todo: value(attributeIds.checklist),
       }
     })
   }
-  infinity.card = (key) => infinity.cards().find((item) => item.title.startsWith(`${key}:`))
+  infinity.card = (key) =>
+    infinity.cards().find((item) => (item.html ?? '').includes(`<p>${keyLine(key)}</p>`) || item.title.startsWith(`${key}:`))
   return { run, items, calls, writes, card, infinity }
 }
 
@@ -171,14 +178,14 @@ test('sync crea una card per step in Backlog, con titolo e testo', () => {
   const result = syncPlan(board)
   assert.equal(result.status, 0)
   assert.deepEqual(result.lines, [
-    'board: creata "M1 step 1: Design" in Backlog',
-    'board: creata "M1 step 2: Backend, le note" in Backlog',
-    'board: creata "M1 step 10: Chiusura" in Backlog',
+    'board: creata "Design" in Backlog',
+    'board: creata "Backend, le note" in Backlog',
+    'board: creata "Chiusura" in Backlog',
     'board: 3 card: 3 create, 0 cambiate, 0 già allineate',
   ])
   assert.deepEqual(
     board.items().map(({ title, body, status }) => ({ title, body, status })),
-    plan.map(({ key, title, body }) => ({ title: `${key}: ${title}`, body, status: 'Backlog' })),
+    plan.map(({ key, title, body }) => ({ title, body: `${body}\n\n${keyLine(key)}`, status: 'Backlog' })),
   )
 })
 
@@ -199,10 +206,10 @@ test('sync aggiorna il testo cambiato e lascia lo stato dov\'è', () => {
   const changed = [{ ...plan[0], body: `Le schermate della lista, anche vuota.\n\nRepo: app\n${planLink}` }]
   const result = syncPlan(board, changed)
   assert.deepEqual(result.lines, [
-    'board: "M1 step 1: Design": testo aggiornato',
+    'board: "Design": testo aggiornato',
     'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
   ])
-  assert.equal(board.card('M1 step 1').body, changed[0].body)
+  assert.equal(board.card('M1 step 1').body, `${changed[0].body}\n\nStep 1 del piano M1`)
   assert.equal(board.card('M1 step 1').status, 'In progress')
 })
 
@@ -211,11 +218,11 @@ test('sync con lo stato porta le card dove dice il piano, senza toccare titolo e
   syncPlan(board)
   const result = syncPlan(board, [{ key: 'M1 step 1', status: 'Done' }, { key: 'M1 step 2', status: 'in progress' }])
   assert.deepEqual(result.lines, [
-    'board: "M1 step 1: Design": ora in Done',
-    'board: "M1 step 2: Backend, le note": ora in In progress',
+    'board: "Design": ora in Done',
+    'board: "Backend, le note": ora in In progress',
     'board: 2 card: 0 create, 2 cambiate, 0 già allineate',
   ])
-  assert.equal(board.card('M1 step 1').body, plan[0].body)
+  assert.equal(board.card('M1 step 1').body, `${plan[0].body}\n\nStep 1 del piano M1`)
   assert.equal(board.card('M1 step 10').status, 'Backlog')
 })
 
@@ -224,7 +231,7 @@ test('sync con solo key e stato riallinea le card che ci sono e segnala quelle c
   syncPlan(board, [plan[0]])
   const result = syncPlan(board, [{ key: 'M1 step 1', status: 'In review' }, { key: 'M1 step 2', status: 'Done' }])
   assert.deepEqual(result.lines, [
-    'board: "M1 step 1: Design": ora in In review',
+    'board: "Design": ora in In review',
     'board: manca la card di "M1 step 2": rimanda lo step con title e body',
     'board: 2 card: 0 create, 1 cambiate, 0 già allineate, 1 mancanti',
   ])
@@ -237,7 +244,7 @@ test('move sposta la card dello step giusto, anche con step 1 e step 10', () => 
   syncPlan(board, [plan[2], plan[0], plan[1]])
   const result = board.run(['move', 'M1 step 1', 'in progress'])
   assert.equal(result.status, 0)
-  assert.deepEqual(result.lines, ['board: "M1 step 1: Design" ora è in In progress'])
+  assert.deepEqual(result.lines, ['board: "Design" ora è in In progress'])
   assert.equal(board.card('M1 step 1').status, 'In progress')
   assert.equal(board.card('M1 step 10').status, 'Backlog')
 })
@@ -246,7 +253,7 @@ test('move verso lo stato che la card ha già non scrive niente', () => {
   const board = session()
   syncPlan(board)
   const writesBefore = board.writes().length
-  assert.deepEqual(board.run(['move', 'M1 step 2', 'Backlog']).lines, ['board: "M1 step 2: Backend, le note" è già in Backlog'])
+  assert.deepEqual(board.run(['move', 'M1 step 2', 'Backlog']).lines, ['board: "Backend, le note" è già in Backlog'])
   assert.equal(board.writes().length, writesBefore)
 })
 
@@ -271,7 +278,7 @@ test('move verso uno stato che il Project non ha non scrive niente e dice quali 
 test('archive toglie la card, e lo step che torna nel piano ne ha una nuova', () => {
   const board = session()
   syncPlan(board)
-  assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "M1 step 2: Backend, le note"'])
+  assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "Backend, le note"'])
   assert.equal(board.card('M1 step 2'), undefined)
   syncPlan(board, [plan[1]])
   assert.equal(board.card('M1 step 2').status, 'Backlog')
@@ -299,6 +306,8 @@ test('un comando sbagliato risponde con una riga, esce con 0 e non chiama gh', (
   const cases = [
     [['sync', '-'], 'non è JSON', /^board: sync non riesce a leggere le card: /],
     [['sync', '-'], JSON.stringify([{ title: 'senza key' }]), /^board: sync vuole un array JSON/],
+    [['sync', '-'], JSON.stringify([{ key: 'M1 step 1', todo: ['senza done'] }]), /^board: sync vuole un array JSON .*todo è un array di \{ text, done \}$/],
+    [['sync', '-'], JSON.stringify([{ key: 'M1 step 1', todo: [{ text: 'x', done: 'sì' }] }]), /^board: sync vuole un array JSON/],
     [['sync'], undefined, /^board: sync vuole le card su stdin/],
     [['move', 'M1 step 1'], undefined, /^board: move vuole la key e lo stato/],
     [['archive'], undefined, /^board: archive vuole la key/],
@@ -368,21 +377,21 @@ test('Infinity: sync crea le card nella cartella dell\'URL, senza stato nella co
   const board = infinitySession()
   const result = syncPlan(board, [plan[0], { ...plan[1], status: 'Ready' }])
   assert.deepEqual(result.lines, [
-    'board: creata "M1 step 1: Design" in Backlog ("Stopped")',
-    'board: creata "M1 step 2: Backend, le note" in Ready ("To-do")',
+    'board: creata "Design" in Backlog ("Stopped")',
+    'board: creata "Backend, le note" in Ready ("To-do")',
     'board: 2 card: 2 create, 0 cambiate, 0 già allineate',
   ])
   assert.deepEqual(
     board.infinity.cards().map(({ title, html, column }) => ({ title, html, column })),
     [
       {
-        title: 'M1 step 1: Design',
-        html: '<p>Le schermate della lista delle note.</p><p>Repo: app<br>Piano: https://github.com/acme/notes-app/blob/main/docs/plans/M1.md</p>',
+        title: 'Design',
+        html: '<p>Le schermate della lista delle note.</p><p>Repo: app<br>Piano: https://github.com/acme/notes-app/blob/main/docs/plans/M1.md</p><p>Step 1 del piano M1</p>',
         column: 'Stopped',
       },
       {
-        title: 'M1 step 2: Backend, le note',
-        html: '<p>Le rotte delle note, con i test.</p><p>Repo: backend<br>Piano: https://github.com/acme/notes-app/blob/main/docs/plans/M1.md</p>',
+        title: 'Backend, le note',
+        html: '<p>Le rotte delle note, con i test.</p><p>Repo: backend<br>Piano: https://github.com/acme/notes-app/blob/main/docs/plans/M1.md</p><p>Step 2 del piano M1</p>',
         column: 'To-do',
       },
     ],
@@ -400,7 +409,7 @@ test('Infinity: sync ripetuto non crea doppioni e non scrive niente, anche con p
   assert.deepEqual(result.lines, ['board: 4 card: 0 create, 0 cambiate, 4 già allineate'])
   assert.equal(board.infinity.cards().length, 4)
   assert.equal(board.infinity.writes().length, writesBefore)
-  assert.equal(board.infinity.card('M1 step 3').title, 'M1 step 3: Lista <vuota> & piena')
+  assert.equal(board.infinity.card('M1 step 3').title, 'Lista <vuota> & piena')
 })
 
 test('Infinity: sync aggiorna il testo cambiato e lascia colonna e altri valori dove sono', () => {
@@ -415,11 +424,11 @@ test('Infinity: sync aggiorna il testo cambiato e lascia colonna e altri valori 
   const changed = [{ ...plan[0], body: `Le schermate della lista, anche vuota.\n\nRepo: app\n${planLink}` }]
   const result = syncPlan(board, changed)
   assert.deepEqual(result.lines, [
-    'board: "M1 step 1: Design": testo aggiornato',
+    'board: "Design": testo aggiornato',
     'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
   ])
   const card = board.infinity.card('M1 step 1')
-  assert.equal(card.html, `<p>Le schermate della lista, anche vuota.</p><p>Repo: app<br>${planLink}</p>`)
+  assert.equal(card.html, `<p>Le schermate della lista, anche vuota.</p><p>Repo: app<br>${planLink}</p><p>Step 1 del piano M1</p>`)
   assert.equal(card.column, 'Doing')
   assert.deepEqual(card.members, members)
 })
@@ -435,11 +444,11 @@ test('Infinity: move porta la card in ogni colonna della tabella', () => {
     ['backlog', 'Stopped', 'Backlog ("Stopped")'],
   ]
   for (const [status, column, label] of moves) {
-    assert.deepEqual(board.run(['move', 'M1 step 10', status]).lines, [`board: "M1 step 10: Chiusura" ora è in ${label}`])
+    assert.deepEqual(board.run(['move', 'M1 step 10', status]).lines, [`board: "Chiusura" ora è in ${label}`])
     assert.equal(board.infinity.card('M1 step 10').column, column)
     assert.equal(board.infinity.card('M1 step 1').column, 'Stopped')
   }
-  assert.deepEqual(board.run(['move', 'M1 step 10', 'Backlog']).lines, ['board: "M1 step 10: Chiusura" è già in Backlog ("Stopped")'])
+  assert.deepEqual(board.run(['move', 'M1 step 10', 'Backlog']).lines, ['board: "Chiusura" è già in Backlog ("Stopped")'])
 })
 
 test('Infinity: move verso uno stato che non c\'è non scrive niente e dice le colonne', () => {
@@ -459,9 +468,9 @@ test('Infinity: archive porta la card in Done senza cancellarla, e le card in "D
   }
   const board = infinitySession({ infinityState: { items: [quote], nextId: 2 } })
   syncPlan(board)
-  assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "M1 step 2: Backend, le note": ora è in Done'])
+  assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "Backend, le note": ora è in Done'])
   assert.equal(board.infinity.card('M1 step 2').column, 'Done')
-  assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "M1 step 2: Backend, le note": era già in Done'])
+  assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "Backend, le note": era già in Done'])
   assert.ok(board.infinity.calls().every((call) => call.method !== 'DELETE'))
   const manual = board.infinity.cards().find((card) => card.id === 'itemManual01')
   assert.equal(manual.column, 'Da quotare')
@@ -473,7 +482,7 @@ test('Infinity: senza la colonna di archive in columns, archive va nella colonna
   assert.equal(archive, 'Done')
   const board = infinitySession({ config: { ...infinityConfig, columns } })
   syncPlan(board)
-  assert.deepEqual(board.run(['archive', 'M1 step 1']).lines, ['board: archiviata "M1 step 1: Design": ora è in Done'])
+  assert.deepEqual(board.run(['archive', 'M1 step 1']).lines, ['board: archiviata "Design": ora è in Done'])
 })
 
 test('Infinity: legge tutte le pagine della cartella', () => {
@@ -519,8 +528,8 @@ test('docs/plans/board.json sbagliato risponde con una riga e non chiama niente'
 test('GitHub con docs/plans/board.json: columns cambia la colonna di uno stato e archive sposta invece di archiviare', () => {
   const board = session({ config: { service: 'github', columns: { 'In review': 'Done', archive: 'Done' } } })
   syncPlan(board)
-  assert.deepEqual(board.run(['move', 'M1 step 1', 'In review']).lines, ['board: "M1 step 1: Design" ora è in In review ("Done")'])
-  assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "M1 step 2: Backend, le note": ora è in Done'])
+  assert.deepEqual(board.run(['move', 'M1 step 1', 'In review']).lines, ['board: "Design" ora è in In review ("Done")'])
+  assert.deepEqual(board.run(['archive', 'M1 step 2']).lines, ['board: archiviata "Backend, le note": ora è in Done'])
   assert.equal(board.card('M1 step 2').status, 'Done')
   assert.ok(board.calls().every((call) => call.operation !== 'BoardArchive'))
   assert.equal(board.infinity.calls().length, 0)
@@ -537,8 +546,8 @@ test('Infinity: le card nuove hanno i campi di board.json e la priorità di sync
   const board = infinitySession({ config: assignedConfig })
   const result = syncPlan(board, [{ ...plan[0], priority: 'Alta', status: 'Ready' }, { ...plan[1], priority: 'normale' }])
   assert.deepEqual(result.lines, [
-    'board: creata "M1 step 1: Design" in Ready ("To-do") (priorità Alta)',
-    'board: creata "M1 step 2: Backend, le note" in Backlog ("Stopped") (priorità Normale)',
+    'board: creata "Design" in Ready ("To-do") (priorità Alta)',
+    'board: creata "Backend, le note" in Backlog ("Stopped") (priorità Normale)',
     'board: 2 card: 2 create, 0 cambiate, 0 già allineate',
   ])
   const cards = board.infinity.cards()
@@ -561,8 +570,8 @@ test('Infinity: sync cambia la priorità e riempie i campi vuoti, senza toccare 
   const assigned = infinitySession({ config: assignedConfig, infinityState: board.infinity.state() })
   const result = syncPlan(assigned, [{ ...plan[0], priority: 'Media' }, { key: 'M1 step 2', priority: 'Alta' }])
   assert.deepEqual(result.lines, [
-    'board: "M1 step 1: Design": Referente lorenzo@example.com, Reparto develop, priorità Media',
-    'board: "M1 step 2: Backend, le note": Responsabile Davide Marchet, Referente lorenzo@example.com, Reparto develop, priorità Alta',
+    'board: "Design": Referente lorenzo@example.com, Reparto develop, priorità Media',
+    'board: "Backend, le note": Responsabile Davide Marchet, Referente lorenzo@example.com, Reparto develop, priorità Alta',
     'board: 2 card: 0 create, 2 cambiate, 0 già allineate',
   ])
   assert.deepEqual(assigned.infinity.card('M1 step 1').members, [372681])
@@ -592,8 +601,8 @@ test('Infinity: con un campo che non si scrive le card si creano lo stesso, e sy
   const result = syncPlan(board, [{ ...plan[0], priority: 'Urgente' }, plan[1]])
   assert.deepEqual(result.lines, [
     'board: campi non scritti: "Mario" non è tra i membri del workspace',
-    'board: creata "M1 step 1: Design" in Backlog ("Stopped") (la priorità "Urgente" non c\'è (ci sono: Alta, Media, Normale, Delivered))',
-    'board: creata "M1 step 2: Backend, le note" in Backlog ("Stopped")',
+    'board: creata "Design" in Backlog ("Stopped") (la priorità "Urgente" non c\'è (ci sono: Alta, Media, Normale, Delivered))',
+    'board: creata "Backend, le note" in Backlog ("Stopped")',
     'board: 2 card: 2 create, 0 cambiate, 0 già allineate',
   ])
   assert.deepEqual(board.infinity.card('M1 step 1').members, [53509])
@@ -613,5 +622,146 @@ test("Infinity: senza INFINITY_TOKEN nell'ambiente il token viene da .env.local,
   const empty = infinitySession({ files: { '.env.local': 'INFINITY_TOKEN =\n' } })
   assert.deepEqual(empty.run(['check'], { env: { INFINITY_TOKEN: '' } }).lines, [
     'board: nessun Project collegato: la board è su Infinity e manca INFINITY_TOKEN',
+  ])
+})
+
+// Gli step 1 e 2 con le loro cose da fare, una già fatta.
+const todoPlan = [
+  { ...plan[0], todo: [{ text: 'schermate della lista piena', done: true }, { text: 'la lista vuota', done: false }] },
+  { ...plan[1], todo: [{ text: 'GET /notes' }] },
+]
+const todoOf = (card) => card.todo?.map(({ name, done }) => ({ name, done }))
+
+test('Infinity: le cose da fare vanno nel campo checklist, con le spunte del piano, e non nel testo', () => {
+  const board = infinitySession()
+  assert.deepEqual(syncPlan(board, todoPlan).lines, [
+    'board: creata "Design" in Backlog ("Stopped")',
+    'board: creata "Backend, le note" in Backlog ("Stopped")',
+    'board: 2 card: 2 create, 0 cambiate, 0 già allineate',
+  ])
+  const card = board.infinity.card('M1 step 1')
+  assert.deepEqual(todoOf(card), [
+    { name: 'schermate della lista piena', done: true },
+    { name: 'la lista vuota', done: false },
+  ])
+  assert.doesNotMatch(card.html, /lista vuota|lista piena/)
+  assert.deepEqual(todoOf(board.infinity.card('M1 step 2')), [{ name: 'GET /notes', done: false }])
+})
+
+test('Infinity: sync con le stesse cose da fare non scrive; una voce fatta cambia la sua spunta e le voci tengono il loro id', () => {
+  const board = infinitySession()
+  syncPlan(board, todoPlan)
+  const writesBefore = board.infinity.writes().length
+  assert.deepEqual(syncPlan(board, todoPlan).lines, ['board: 2 card: 0 create, 0 cambiate, 2 già allineate'])
+  assert.equal(board.infinity.writes().length, writesBefore)
+  const ids = board.infinity.card('M1 step 1').todo.map((item) => item.id)
+  const todo = [
+    { text: 'schermate della lista piena', done: true },
+    { text: 'la lista vuota', done: true },
+    { text: 'la lista lunga', done: false },
+  ]
+  assert.deepEqual(syncPlan(board, [{ ...todoPlan[0], todo }]).lines, [
+    'board: "Design": cose da fare aggiornate',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  const card = board.infinity.card('M1 step 1')
+  assert.deepEqual(todoOf(card), todo.map(({ text, done }) => ({ name: text, done })))
+  assert.deepEqual(card.todo.slice(0, 2).map((item) => item.id), ids)
+})
+
+test('Infinity: una spunta messa a mano sulla board torna come dice il piano', () => {
+  const board = infinitySession()
+  syncPlan(board, todoPlan)
+  const state = board.infinity.state()
+  const card = state.items.find((item) => item.values.some((value) => value.data === 'Backend, le note'))
+  card.values.find((value) => value.attribute_id === attributeIds.checklist).data[0].done = true
+  board.infinity.save(state)
+  assert.deepEqual(syncPlan(board, [todoPlan[1]]).lines, [
+    'board: "Backend, le note": cose da fare aggiornate',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual(todoOf(board.infinity.card('M1 step 2')), [{ name: 'GET /notes', done: false }])
+})
+
+test('Infinity: senza campo checklist nella cartella sync lo dice una volta e fa le card senza le cose da fare', () => {
+  const folders = initialState().folders.map((folder) => ({
+    ...folder,
+    attribute_ids: folder.attribute_ids.filter((id) => id !== attributeIds.checklist),
+  }))
+  const board = infinitySession({ infinityState: { folders } })
+  assert.deepEqual(syncPlan(board, todoPlan).lines, [
+    'board: la cartella "Sviluppo" non ha un campo checklist: le cose da fare restano solo nel piano',
+    'board: creata "Design" in Backlog ("Stopped")',
+    'board: creata "Backend, le note" in Backlog ("Stopped")',
+    'board: 2 card: 2 create, 0 cambiate, 0 già allineate',
+  ])
+  assert.equal(board.infinity.card('M1 step 1').todo, undefined)
+  assert.doesNotMatch(board.infinity.card('M1 step 1').html, /lista vuota/)
+  assert.deepEqual(syncPlan(board, todoPlan).lines.slice(1), ['board: 2 card: 0 create, 0 cambiate, 2 già allineate'])
+  assert.deepEqual(syncPlan(board, plan.slice(0, 2)).lines, ['board: 2 card: 0 create, 0 cambiate, 2 già allineate'])
+})
+
+test('GitHub: le cose da fare stanno nel testo come lista con le caselle, prima della riga dello step', () => {
+  const board = session()
+  syncPlan(board, todoPlan)
+  assert.equal(
+    board.card('M1 step 1').body,
+    `${plan[0].body}\n\n- [x] schermate della lista piena\n- [ ] la lista vuota\n\nStep 1 del piano M1`,
+  )
+  const writesBefore = board.writes().length
+  assert.deepEqual(syncPlan(board, todoPlan).lines, ['board: 2 card: 0 create, 0 cambiate, 2 già allineate'])
+  assert.equal(board.writes().length, writesBefore)
+  const done = [{ ...todoPlan[1], todo: [{ text: 'GET /notes', done: true }] }]
+  assert.deepEqual(syncPlan(board, done).lines, [
+    'board: "Backend, le note": testo aggiornato',
+    'board: 1 card: 0 create, 1 cambiate, 0 già allineate',
+  ])
+  assert.match(board.card('M1 step 2').body, /\n\n- \[x\] GET \/notes\n\nStep 2 del piano M1$/)
+})
+
+test('la card di una domanda dice nell\'ultima riga di quale piano è', () => {
+  const board = session()
+  const question = { key: 'M1 domanda 2', title: 'Le parole contano anche i numeri?', body: `Proposta: sì.\n\nStep: M1 step 1\n\nRepo: app\n${planLink}` }
+  syncPlan(board, [question])
+  assert.match(board.card('M1 domanda 2').body, /\n\nDomanda 2 del piano M1$/)
+  assert.deepEqual(board.run(['move', 'M1 domanda 2', 'Done']).lines, ['board: "Le parole contano anche i numeri?" ora è in Done'])
+})
+
+test('le card con la key nel titolo, scritte prima, si ritrovano: move le sposta e sync con il testo dà il titolo nuovo', () => {
+  const items = [
+    { id: 'PVTI_1', draftId: 'DI_1', title: 'M1 step 10: Chiusura', body: 'Testo vecchio.', status: 'Backlog' },
+    { id: 'PVTI_2', draftId: 'DI_2', title: 'M1 step 1: Design', body: 'Testo vecchio.', status: 'Backlog' },
+  ]
+  const board = session({ state: { items, nextId: 3 } })
+  assert.deepEqual(board.run(['move', 'M1 step 1', 'Ready']).lines, ['board: "M1 step 1: Design" ora è in Ready'])
+  assert.deepEqual(syncPlan(board, [plan[0], plan[2]]).lines, [
+    'board: "Design": testo aggiornato',
+    'board: "Chiusura": testo aggiornato',
+    'board: 2 card: 0 create, 2 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual(board.items().map(({ title, status }) => ({ title, status })), [
+    { title: 'Chiusura', status: 'Backlog' },
+    { title: 'Design', status: 'Ready' },
+  ])
+  assert.equal(board.card('M1 step 1').body, `${plan[0].body}\n\nStep 1 del piano M1`)
+  assert.deepEqual(syncPlan(board, [plan[0], plan[2]]).lines, ['board: 2 card: 0 create, 0 cambiate, 2 già allineate'])
+})
+
+test('Infinity: in una cartella senza testo lungo la key resta nel titolo, e sync e move ritrovano la card', () => {
+  const folders = initialState().folders.map((folder) => ({
+    ...folder,
+    attribute_ids: folder.attribute_ids.filter((id) => id !== attributeIds.description),
+  }))
+  const board = infinitySession({ infinityState: { folders } })
+  assert.deepEqual(syncPlan(board, [todoPlan[0]]).lines, [
+    'board: creata "M1 step 1: Design" in Backlog ("Stopped")',
+    'board: 1 card: 1 create, 0 cambiate, 0 già allineate',
+  ])
+  assert.deepEqual(syncPlan(board, [todoPlan[0]]).lines, ['board: 1 card: 0 create, 0 cambiate, 1 già allineate'])
+  assert.deepEqual(board.run(['move', 'M1 step 1', 'Ready']).lines, ['board: "M1 step 1: Design" ora è in Ready ("To-do")'])
+  assert.equal(board.infinity.cards().length, 1)
+  assert.deepEqual(todoOf(board.infinity.card('M1 step 1')), [
+    { name: 'schermate della lista piena', done: true },
+    { name: 'la lista vuota', done: false },
   ])
 })

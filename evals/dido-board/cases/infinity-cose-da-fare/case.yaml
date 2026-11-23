@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: infinity-cose-da-fare
+expected_outcome: |
+  Il caso vero di bici.pro (23/11/2026): la board di Infinity ha nella cartella un campo checklist ("Sub task") e chi lavora chiede card comprensibili con le cose da fare. Ogni step del piano M1 ha la sua card; le cose da fare stanno nel campo checklist, spuntate come dice "Dove siamo", e non nel testo della card; i titoli dicono cosa si fa, senza "M1 step N". Niente chiamate a Infinity fuori dallo script, nessun codice cambiato, nessun commit.

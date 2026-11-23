@@ -8,9 +8,12 @@
 //   node board.mjs move "M5 step 3" "In progress"
 //   node board.mjs archive "M5 step 3"
 //
-// sync legge un array JSON di { key, title, body, status }. La key ("M5 step 3") trova la card,
-// il cui titolo è "<key>: <title>". Senza status una card nuova va in Backlog e una che c'è resta
-// dov'è; senza title o body una card che c'è tiene i suoi, e una che manca non si crea.
+// sync legge un array JSON di { key, title, body, todo, priority, status }. Il titolo della card è
+// title, da leggere per una persona; la key ("M5 step 3") sta nell'ultima riga del testo ("Step 3
+// del piano M5") e da lì sync, move e archive ritrovano la card. todo è un array di { text, done }:
+// su Infinity va nel campo checklist della cartella, su GitHub nel testo come lista con le caselle.
+// Senza status una card nuova va in Backlog e una che c'è resta dov'è. title, body e todo vanno
+// insieme: senza nessuno dei tre una card che c'è tiene il suo testo, e una che manca non si crea.
 //
 // docs/plans/board.json (facoltativo; senza, la board è il GitHub Project):
 //   { "service": "github" | "infinity" | "none", "url": "<board di Infinity>",
@@ -34,7 +37,25 @@ const doneStatus = 'Done'
 const archiveStatus = 'archive'
 
 const sameText = (first, second) => first.replace(/\r\n/g, '\n').trim() === second.replace(/\r\n/g, '\n').trim()
-const titleFor = (key, title) => (title?.trim() ? `${key}: ${title.trim()}` : key)
+// Il titolo da leggere per una persona. Una board che non tiene il testo (una cartella di Infinity
+// senza testo lungo) perderebbe la riga dello step: lì la key resta nel titolo, come "M5 step 3: …".
+const titleFor = (board, key, title) => {
+  if (!title?.trim()) return key
+  return board.keepsBody ? title.trim() : `${key}: ${title.trim()}`
+}
+
+// La riga con cui la card dice il suo step: "M5 step 3" diventa "Step 3 del piano M5".
+const keyLine = (key) => {
+  const match = key.match(/^(.+) (step|domanda) (\S+)$/i)
+  if (!match) return key
+  const [, plan, kind, number] = match
+  return `${kind[0].toUpperCase()}${kind.slice(1).toLowerCase()} ${number} del piano ${plan}`
+}
+
+// Il testo della card: quello dello step, le cose da fare se la board le tiene nel testo (GitHub)
+// e per ultima la riga dello step.
+const cardBody = (board, key, body, todo) =>
+  [body.trim(), board.todoLine ? todo.map(board.todoLine).join('\n') : '', keyLine(key)].filter(Boolean).join('\n\n')
 
 const repositoryRoot = () => {
   try {
@@ -97,8 +118,15 @@ const findColumn = ({ config, board }, status) => {
   return { column, label: !state || sameName(state, column) ? column : `${state} ("${column}")` }
 }
 
-// Il ":" dopo la key separa "M5 step 1" da "M5 step 10".
-const findCard = (cards, key) => cards.find((card) => card.title === key || card.title.startsWith(`${key}:`))
+const findCard = (cards, key) => {
+  const line = keyLine(key)
+  return (
+    cards.find((card) => card.body.split('\n').some((candidate) => sameName(candidate, line))) ??
+    // Le card scritte prima del 23/11/2026 hanno la key nel titolo ("M5 step 3: …"): la prima sync
+    // con il testo le porta al titolo nuovo. Il ":" separa "M5 step 1" da "M5 step 10".
+    cards.find((card) => card.title === key || card.title.startsWith(`${key}:`))
+  )
+}
 
 const check = async () => {
   const context = await openBoard()
@@ -125,8 +153,15 @@ const readEntries = (source) => {
   } catch (error) {
     finish(`sync non riesce a leggere le card: ${error.message.slice(0, 120)}`)
   }
-  const valid = Array.isArray(entries) && entries.every((entry) => typeof entry?.key === 'string' && entry.key.trim())
-  if (!valid) finish('sync vuole un array JSON di { key, title, body, status }, ognuno con la sua key')
+  const isTodo = (todo) =>
+    todo === undefined ||
+    (Array.isArray(todo) &&
+      todo.every((item) => typeof item?.text === 'string' && item.text.trim() && [undefined, true, false].includes(item.done)))
+  const valid =
+    Array.isArray(entries) && entries.every((entry) => typeof entry?.key === 'string' && entry.key.trim() && isTodo(entry.todo))
+  if (!valid) {
+    finish('sync vuole un array JSON di { key, title, body, todo, status }, ognuno con la sua key; todo è un array di { text, done }')
+  }
   return entries
 }
 
@@ -137,33 +172,35 @@ const sync = async (source) => {
   const cards = await board.loadCards()
   const counts = { created: 0, changed: 0, aligned: 0, missing: 0 }
   if (board.fieldProblems.length) say(`campi non scritti: ${board.fieldProblems.join('; ')}`)
+  if (board.todoProblem && entries.some((entry) => entry.todo?.length)) say(board.todoProblem)
   for (const entry of entries) {
     const key = entry.key.trim()
     const card = findCard(cards, key)
+    const hasText = ['title', 'body', 'todo'].some((field) => entry[field] !== undefined)
     // Solo key e stato servono a riallineare: una card nuova senza testo non direbbe niente.
-    if (!card && entry.title === undefined && entry.body === undefined) {
+    if (!card && !hasText) {
       counts.missing += 1
       say(`manca la card di "${key}": rimanda lo step con title e body`)
       continue
     }
+    const todo = (entry.todo ?? []).map((item) => ({ text: item.text.trim(), done: item.done === true }))
+    const text = hasText ? { title: titleFor(board, key, entry.title), body: cardBody(board, key, entry.body ?? '', todo), todo } : null
     const wantedStatus = entry.status ?? (card ? null : newCardStatus)
     const { column, label, problem } = wantedStatus ? findColumn(context, wantedStatus) : {}
     if (!card) {
-      const title = titleFor(key, entry.title)
-      const { card: created, notes } = await board.createCard({ title, body: entry.body ?? '', column, priority: entry.priority })
+      const { card: created, notes } = await board.createCard({ ...text, column, priority: entry.priority })
       cards.push(created)
       counts.created += 1
       const details = [...notes, ...(problem ? [problem] : [])]
-      say(`creata "${title}"${column ? ` in ${label}` : ''}${details.length ? ` (${details.join(', ')})` : ''}`)
+      say(`creata "${text.title}"${column ? ` in ${label}` : ''}${details.length ? ` (${details.join(', ')})` : ''}`)
       continue
     }
-    const title = entry.title === undefined ? card.title : titleFor(key, entry.title)
-    const body = entry.body === undefined ? card.body : entry.body
     const changes = []
-    if (title !== card.title || !sameText(board.storedBody(body), card.body)) {
-      await board.editCard(card, { title, body })
-      changes.push('testo aggiornato')
-    }
+    const textChanged = text && (text.title !== card.title || !sameText(board.storedBody(text.body), card.body))
+    const todoChanged = text && board.todoChanged(card, todo)
+    if (textChanged || todoChanged) await board.editCard(card, text)
+    if (textChanged) changes.push('testo aggiornato')
+    if (todoChanged) changes.push('cose da fare aggiornate')
     if (column && !sameName(card.column ?? '', column)) {
       await board.moveCard(card, column)
       changes.push(`ora in ${label}`)
@@ -172,7 +209,7 @@ const sync = async (source) => {
     if (problem) changes.push(problem)
     if (changes.length) {
       counts.changed += 1
-      say(`"${title}": ${changes.join(', ')}`)
+      say(`"${text?.title ?? card.title}": ${changes.join(', ')}`)
     } else {
       counts.aligned += 1
     }

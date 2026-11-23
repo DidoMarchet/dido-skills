@@ -15,6 +15,7 @@ case "$case_name" in
   piano-approvato) plan_state='**bozza, da approvare**'; gh_mode=ok ;;
   github-non-risponde) plan_state='**approvato da Dido il 20/11/2026**, "va bene, procedi"'; gh_mode=auth ;;
   infinity-piano-approvato|infinity-assegna|infinity-token-env|nessuna-board) plan_state='**bozza, da approvare**'; gh_mode=ok ;;
+  infinity-cose-da-fare) plan_state='**approvato da Dido il 20/11/2026**, "va bene, procedi"'; gh_mode=ok ;;
   *) echo "caso sconosciuto: $case_name" >&2; exit 1 ;;
 esac
 
@@ -97,6 +98,48 @@ Nessuna.
 
 20/11/2026: piano scritto, nessuno step fatto.
 EOF
+
+if [ "$case_name" = infinity-cose-da-fare ]; then
+  # Il caso di bici.pro: un piano già avviato, con i punti di ogni step e lo stato in "Dove siamo".
+  cat > src/words.js <<'EOF'
+// Le parole di un testo: separate da spazi, anche più di uno.
+export const countWords = (text) => text.split(/\s+/).filter(Boolean).length
+EOF
+  cat > test/words.test.js <<'EOF'
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { countWords } from '../src/words.js'
+
+test('conta le parole separate da uno o più spazi', () => {
+  assert.equal(countWords('uno due  tre'), 3)
+  assert.equal(countWords('   '), 0)
+})
+EOF
+  python3 - <<'PYPLAN'
+from pathlib import Path
+path = Path("docs/plans/M1.md")
+plan = path.read_text()
+steps = plan[plan.index("## Step"):plan.index("## Dipendenze nuove")]
+plan = plan.replace(steps, """## Step
+
+1. **Conteggio delle parole**: `countWords(text)` dice quante parole ha un testo. Le parole sono separate da spazi, anche più di uno; un testo vuoto o di soli spazi ne ha 0.
+   - `countWords` in `src/words.js`
+   - il test in `test/words.test.js`
+2. **Backend, le parole nella risposta**: `GET /notes` restituisce anche `words` per ogni nota.
+   - `words` in ogni nota della risposta
+   - il test della rotta
+3. **Lista con le parole**: la lista delle note mostra quante parole ha ogni nota.
+   - "N parole" sotto il titolo di ogni nota
+   - "1 parola" al singolare
+4. **Chiusura**: prove complete, revisione del codice e report.
+
+""")
+plan = plan.replace("20/11/2026: piano scritto, nessuno step fatto.", """20/11/2026: piano scritto e approvato.
+
+21/11/2026: step 1 fatto, `countWords` con il suo test. Step 2 in corso: `words` c'è nella risposta di `GET /notes`, manca il test della rotta.""")
+path.write_text(plan)
+PYPLAN
+fi
 
 mkdir -p .claude/skills
 cp -R "${BOARD_SKILL:-$HERE/../../skills/dido-board}" .claude/skills/dido-board

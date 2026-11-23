@@ -23,6 +23,7 @@ export const attributeIds = {
   referent: '0b6f3c1e-1111-4a1a-9a01-000000000006',
   department: '0b6f3c1e-1111-4a1a-9a01-000000000007',
   priority: '0b6f3c1e-1111-4a1a-9a01-000000000008',
+  checklist: '0b6f3c1e-1111-4a1a-9a01-000000000009',
 }
 // Come su bici.pro: le colonne sono una parte delle etichette dell'attributo, che è a scelta multipla.
 export const columnNames = ['Da quotare', 'To-do', 'Doing', 'Test', 'Done', 'Stopped']
@@ -84,6 +85,7 @@ export const initialState = () => ({
       settings: { multiple: false, allowNew: false, allowEmpty: true, labels: labelsOf(priorityNames) },
       deleted: false,
     },
+    { id: attributeIds.checklist, object: 'attribute', name: 'Sub task', type: 'checklist', settings: {}, deleted: false },
     { id: attributeIds.createdAt, object: 'attribute', name: 'Creato', type: 'created_at', settings: {}, deleted: false },
   ],
   items: [],
@@ -135,6 +137,11 @@ const checkValues = (state, folder, values) => {
     } else if (attribute.type === 'label') {
       const known = attribute.settings.labels.map((label) => label.id)
       if (!Array.isArray(value.data) || value.data.some((id) => !known.includes(id))) return `${attribute.name} has unknown labels`
+    } else if (attribute.type === 'checklist') {
+      // Come l'API vera: ogni voce vuole un id UUID, il nome e la spunta.
+      const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      const valid = (entry) => uuid.test(entry?.id ?? '') && typeof entry.name === 'string' && typeof entry.done === 'boolean'
+      if (!Array.isArray(value.data) || !value.data.every(valid)) return `${attribute.name} must be a list of { id, name, done }`
     } else if (attribute.type === 'members') {
       const known = members.map((member) => member.id)
       if (!Array.isArray(value.data) || value.data.some((id) => !known.includes(id))) return `${attribute.name} has unknown members`

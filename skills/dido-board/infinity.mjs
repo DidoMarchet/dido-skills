@@ -1,9 +1,11 @@
 // La board di Infinity (startinfinity.com) indicata in docs/plans/board.json, attraverso l'API v2.
 // Una card è un item della cartella dell'URL: il titolo è il primo attributo di testo, il testo il
-// primo testo lungo (HTML), la colonna un attributo etichetta con una sola etichetta: la vista a
-// colonne raggruppa per l'insieme delle etichette, quindi una card con due etichette starebbe in
-// un'altra colonna. Gli altri attributi li scrive solo quando board.json li nomina (fields, priority).
+// primo testo lungo (HTML), le cose da fare il primo attributo checklist, la colonna un attributo
+// etichetta con una sola etichetta: la vista a colonne raggruppa per l'insieme delle etichette,
+// quindi una card con due etichette starebbe in un'altra colonna. Gli altri attributi li scrive
+// solo quando board.json li nomina (fields, priority).
 
+import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -150,6 +152,7 @@ export const openInfinityBoard = async (config) => {
   const titleAttribute = folderAttributes.find((attribute) => attribute.type === 'text')
   if (!titleAttribute) notUpdated(`la cartella "${folder.name}" non ha un attributo di testo per il titolo delle card`)
   const bodyAttribute = folderAttributes.find((attribute) => attribute.type === 'longtext') ?? null
+  const todoAttribute = folderAttributes.find((attribute) => attribute.type === 'checklist') ?? null
   // Le colonne: l'attributo etichetta che ha più colonne di docs/plans/board.json.
   const wanted = Object.values(config.columns)
   const labelAttributes = folderAttributes.filter((attribute) => attribute.type === 'label')
@@ -215,6 +218,17 @@ export const openInfinityBoard = async (config) => {
     { attribute_id: titleAttribute.id, data: title },
     ...(bodyAttribute ? [{ attribute_id: bodyAttribute.id, data: textToHtml(body) }] : []),
   ]
+  // La checklist di una card: le voci del piano, con l'id che avevano sulla board quando il nome è
+  // lo stesso. L'API vuole un id UUID per ogni voce.
+  const checklistValue = (current, todo) => {
+    const unused = [...current]
+    const data = todo.map(({ text, done }) => {
+      const index = unused.findIndex((item) => item.name === text)
+      const id = index === -1 ? randomUUID() : unused.splice(index, 1)[0].id
+      return { id, name: text, done }
+    })
+    return { attribute_id: todoAttribute.id, data }
+  }
   const itemPath = (card) => `${boardPath}/items/${card.id}`
   const isEmpty = (data) => data === undefined || data === null || data === '' || (Array.isArray(data) && !data.length)
   const sameData = (first, second) => JSON.stringify(first ?? null) === JSON.stringify(second ?? null)
@@ -240,10 +254,18 @@ export const openInfinityBoard = async (config) => {
     columns: columnAttribute ? labels.map((label) => label.name) : null,
     noColumns: `la cartella "${folder.name}" non ha un attributo etichetta per le colonne`,
     noColumnsInCheck: 'nessun attributo etichetta per le colonne',
+    keepsBody: Boolean(bodyAttribute),
     // Il testo come si rilegge dalla board dopo averlo scritto, per vedere se è cambiato.
     storedBody: (body) => (bodyAttribute ? htmlToText(textToHtml(body)) : ''),
     fieldsLine,
     fieldProblems,
+    todoLine: null,
+    todoProblem: todoAttribute ? null : `la cartella "${folder.name}" non ha un campo checklist: le cose da fare restano solo nel piano`,
+    todoChanged: (card, todo) => {
+      if (!todoAttribute) return false
+      const current = (value(card, todoAttribute) ?? []).map(({ name, done }) => ({ text: name, done }))
+      return !sameData(current, todo)
+    },
 
     loadCards: async () => {
       const items = await listAll(`${boardPath}/items`, [
@@ -259,10 +281,11 @@ export const openInfinityBoard = async (config) => {
       }))
     },
 
-    createCard: async ({ title, body, column, priority }) => {
+    createCard: async ({ title, body, todo, column, priority }) => {
       const { value: priorityValue, text: priorityText, problem } = priorityFor(priority)
       const values = [
         ...textValues({ title, body }),
+        ...(todoAttribute && todo.length ? [checklistValue([], todo)] : []),
         ...(column ? [columnValue(column)] : []),
         ...fieldValues.map((field) => ({ attribute_id: field.attribute.id, data: field.data })),
         ...(priorityValue ? [priorityValue] : []),
@@ -289,8 +312,13 @@ export const openInfinityBoard = async (config) => {
       return [...missing.map((field) => field.text), ...(newPriority ? [priorityText] : []), ...(problem ? [problem] : [])]
     },
 
-    editCard: async (card, { title, body }) => {
-      await request('PUT', itemPath(card), { body: { values: textValues({ title, body }) } })
+    editCard: async (card, { title, body, todo }) => {
+      const values = [
+        ...textValues({ title, body }),
+        ...(todoAttribute ? [checklistValue(value(card, todoAttribute) ?? [], todo)] : []),
+      ]
+      await request('PUT', itemPath(card), { body: { values } })
+      card.values = [...card.values.filter((old) => !values.some((next) => next.attribute_id === old.attribute_id)), ...values]
       Object.assign(card, { title, body })
     },
 
