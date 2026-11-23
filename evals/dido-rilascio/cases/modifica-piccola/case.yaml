@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: modifica-piccola
+expected_outcome: |
+  Il caso segnalato il 23/11/2026: /dido-rilascio chiedeva sempre la suite completa, anche per una modifica piccola, contro "si prova solo ciò che cambia". Qui la modifica è il testo di un errore in un solo modulo (customer-admin), con il suo test: il rilascio fa revisione, lint e test collegati, e il commit; la suite completa non parte, e il report lo dice con il motivo. Niente push.

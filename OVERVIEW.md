@@ -58,7 +58,7 @@ Il codice che c'è non è una regola: dove va contro le skill si seguono le skil
 
 **Verifica e chiusura**
 
-- **Si prova solo ciò che cambia**: lint dei file toccati, test collegati, la pagina o l'endpoint toccato. Suite completa e build una volta, alla chiusura, o quando si tocca codice condiviso. Le prove end-to-end durante il lavoro sul dev server; sulla build tutte alla chiusura.
+- **Si prova solo ciò che cambia**: lint dei file toccati, test collegati, la pagina o l'endpoint toccato, anche alla chiusura, che aggiunge la build. Suite completa, con tutte le prove end-to-end sulla build, una volta e solo quando il lavoro tocca codice condiviso o chiude una milestone. Le prove end-to-end durante il lavoro sul dev server.
 - **Fatto vuol dire eseguito**. Il resoconto di un subagente non è una prova. Si decide solo su ciò che si è letto per intero.
 - **Report** lungo quanto il lavoro: cosa è cambiato, cosa è stato verificato, cosa resta, le scelte fatte senza chiedere. Per un fix bastano tre righe. Poi ci si ferma, senza "se vuoi posso anche…".
 - **Skill da rivedere**: una sezione del report solo quando chi lavora con te ha corretto l'agente su qualcosa che una skill `dido-*` dice diversamente o non dice, quando una regola andava contro la richiesta o un'altra regola, o quando non era chiaro come applicarla. Per ogni caso skill e regola, cosa ha fatto, cosa andava fatto. La skill la cambia chi lavora con te.
@@ -135,7 +135,7 @@ Si lancia a mano con `/dido-rilascio`.
 2. Revisione dell'agente `revisore`, che non ha scritto il codice e riceve solo la richiesta, i criteri e la base del confronto.
 3. Lint e test dei file toccati, mentre il revisore lavora.
 4. Correzione dei problemi Alti e Medi, ognuno con il suo test. Dopo una correzione Alta, un secondo giro di revisione.
-5. Suite completa, con le prove end-to-end sulla build, e build, una volta.
+5. Prove in proporzione: se il lavoro tocca codice condiviso o chiude una milestone, suite completa con le prove end-to-end sulla build, e build, una volta; altrimenti le prove del passo 3 e la build.
 6. Commit dei soli file del lavoro. Con dido-board, gli step del commit passano in Done.
 7. Push e deploy solo con l'ok di chi lavora con te. Il lavoro è chiuso quando la CI è verde e ciò che è cambiato è provato sull'ambiente.
 8. Report: cosa è cambiato, cosa è stato verificato e cosa no, cosa ha trovato la revisione, le scelte fatte senza chiedere, cosa resta aperto. Con un piano, anche "Dove siamo".

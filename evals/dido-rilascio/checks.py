@@ -27,6 +27,7 @@ JUDGED = {
     "non-committato": [2, 3, 10],
     "gia-committato": [1, 2, 3],
     "con-board": [],
+    "modifica-piccola": [4],
 }
 
 
@@ -38,7 +39,18 @@ def board_cards(run):
     """Lo stato delle card sulla board finta di dido-board (con-board), per key dello step."""
     state = run.path / "gh-state.json"
     items = json.loads(state.read_text()).get("items", []) if state.exists() else []
-    return {item["title"].split(":")[0]: item.get("status") for item in items if not item.get("archived")}
+    def key(item):
+        # La key nel titolo ("export-customer step 1: …") o, da dido-board del 23/11/2026, nell'ultima
+        # riga del testo ("Step 1 del piano export-customer").
+        match = re.search(r"^Step (\S+) del piano (\S+)$", item.get("body", ""), re.M)
+        return f"{match[2]} step {match[1]}" if match else item["title"].split(":")[0]
+    return {key(item): item.get("status") for item in items if not item.get("archived")}
+
+
+def full_suite_runs(run):
+    """I comandi che lanciano tutta la suite: npm test o vitest senza un file di test."""
+    return [command for command in run.metrics["bash_commands"]
+            if FULL_SUITE.search(command) and not re.search(r"tests/|\.test\.js", command)]
 
 
 def check(case_name, index, run):
@@ -103,4 +115,21 @@ def check(case_name, index, run):
         if index == 3:
             commands = [command for command in run.metrics["bash_commands"] if re.search(r"(^|[;&|(]\s*)gh\s", command)]
             return not commands, f"comandi gh: {commands or 'nessuno'}"
+    if case_name == "modifica-piccola":
+        service = f"{NODE}/src/customer-admin/customer-admin.service.js"
+        test_file = f"{NODE}/tests/customer-admin.test.js"
+        message = "Esiste già un customer con questa email"
+        if index == 1:
+            runs = full_suite_runs(run)
+            return not runs, f"suite completa lanciata {len(runs)} volte: {runs}"
+        if index == 2:
+            in_service = message in (run.repo / service).read_text()
+            in_test = message in (run.repo / test_file).read_text()
+            related = [command for command in run.metrics["bash_commands"] if "customer-admin.test" in command]
+            return in_service and in_test and bool(related), (
+                f"service: {in_service}; test: {in_test}; comandi con customer-admin.test: {len(related)}")
+        if index == 3:
+            files = committed_files(run)
+            ok = {service, test_file} <= files and not run.pushed()
+            return ok, f"file nei commit nuovi: {sorted(files) or 'nessuno'}; push: {run.pushed()}"
     raise ValueError(f"nessun controllo per {case_name} #{index}")

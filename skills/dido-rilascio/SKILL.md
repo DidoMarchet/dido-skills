@@ -1,6 +1,6 @@
 ---
 name: dido-rilascio
-description: "Usare quando chi lavora con te scrive /dido-rilascio per chiudere un lavoro: perimetro, revisione indipendente, correzioni, prove complete, commit, push e controllo del deploy."
+description: "Usare quando chi lavora con te scrive /dido-rilascio per chiudere un lavoro: perimetro, revisione indipendente, correzioni, prove in proporzione a ciò che cambia, commit, push e controllo del deploy."
 disable-model-invocation: true
 argument-hint: "[base del confronto, es. main]"
 ---
@@ -31,10 +31,11 @@ Si passa al passo successivo solo quando la condizione è vera.
 
 4. **Correzioni.** Ogni problema Alto o Medio nel perimetro si corregge con un test che senza la correzione fallisce, dove un test si può scrivere (dido-code-style, "Test"). Poi rifai il passo 3. Dopo una correzione Alta il revisore fa un secondo giro sul diff nuovo. Se dopo due giri resta un problema Alto, fermati e chiedi.
 
-5. **Prove complete, una volta.** La suite completa dei test, con tutte le prove end-to-end sulla build, e la build.
-   - Se qualcosa fallisce: correggi e rilancia solo i test falliti finché passano.
-   - La suite completa si rilancia solo se la correzione tocca codice condiviso (layout, componenti comuni, configurazione, store, rotte, middleware).
-   - Un test che fallisce per motivi estranei alla modifica non si corregge qui: va nel report con l'output.
+5. **Prove in proporzione a ciò che cambia.** Guarda il diff dalla base:
+   - tocca codice condiviso (configurazione, layout, componenti comuni, store, rotte, middleware, schema del database, dipendenze) o chiude una milestone → la suite completa dei test, con tutte le prove end-to-end sulla build, e la build, una volta;
+   - altrimenti → bastano le verifiche del passo 3, più la build se il progetto ne ha una. La suite completa non parte, e il report dice perché.
+
+   Se qualcosa fallisce: correggi e rilancia solo i test falliti finché passano. La suite completa si rilancia solo se la correzione tocca codice condiviso. Un test che fallisce per motivi estranei alla modifica non si corregge qui: va nel report con l'output.
 
 6. **Commit**, quando dido-code-style dice che si può. `git add` per nome dei soli file di questo lavoro, messaggio in italiano, con piano e passo se c'è un piano. Se il progetto ha la skill dido-board, dopo il commit porta in Done gli step che ci sono entrati.
 

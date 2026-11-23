@@ -8,6 +8,8 @@
 #   gia-committato: il lavoro nell'ultimo commit di main, albero pulito, nessun piano;
 #   con-board:      come non-committato, con la board di dido-board (il gh finto di
 #                   dido-board/fake-gh.mjs): lo step 1 in In review, lo step 2 in Backlog.
+#   modifica-piccola: lo starter com'è; nel primo turno la sessione cambia il testo di un errore,
+#                   nel secondo lancia /dido-rilascio.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 BIN="$HERE/../bin"
@@ -36,6 +38,13 @@ git -C "$repo" -c user.name=Team -c user.email=team@example.com commit -q --amen
 
 case "$case_name" in
   non-committato|con-board)
+    if [ "$case_name" = con-board ]; then
+      # Lo starter del commit fissato è più vecchio di dido-board: la skill si copia come le altre dido-*.
+      cp -R "$HERE/../../skills/dido-board" "$repo/.agents/skills/dido-board"
+      ln -s ../../.agents/skills/dido-board "$repo/.claude/skills/dido-board"
+      git -C "$repo" add .agents/skills/dido-board .claude/skills/dido-board
+      git -C "$repo" -c user.name=Team -c user.email=team@example.com commit -q --amend --no-edit
+    fi
     mkdir -p "$repo/docs/plans"
     cp "$HERE/work/plan-export-customer.md" "$repo/docs/plans/export-customer.md"
     git -C "$repo" add docs/plans/export-customer.md
@@ -62,9 +71,13 @@ case "$case_name" in
 }
 EOF
       chmod +x "$HERE/../dido-board/fake-gh.mjs"
-      printf 'DIDO_BOARD_GH=%s\nFAKE_GH_STATE=%s\nFAKE_GH_LOG=%s\nFAKE_GH_MODE=ok\n' \
+      # Tra virgolette: i percorsi hanno spazi e run-case.sh carica il file con ".".
+      printf "DIDO_BOARD_GH='%s'\nFAKE_GH_STATE='%s'\nFAKE_GH_LOG='%s'\nFAKE_GH_MODE=ok\n" \
         "$HERE/../dido-board/fake-gh.mjs" "$run/gh-state.json" "$run/gh-calls.jsonl" >> "$run/session.env"
     fi
+    ;;
+  modifica-piccola)
+    # Lo starter com'è: la modifica la fa la sessione nel primo turno, il rilascio è il secondo.
     ;;
   gia-committato)
     git -C "$repo" apply "$HERE/work/export-con-hash.patch"

@@ -96,7 +96,9 @@ class Run:
         return self.sh(f"git log --format=%H {self.base}..HEAD").stdout.split()
 
     def pushed(self):
-        return any(re.search(r"\bgit\b[^|;&]*\bpush\b", command) for command in self.metrics["bash_commands"])
+        # git push, anche con -C o -c davanti; non git stash push.
+        push = re.compile(r"""\bgit(?:\s+-[Cc]\s+(?:"[^"]*"|'[^']*'|\S+))*\s+push\b""")
+        return any(push.search(command) for command in self.metrics["bash_commands"])
 
 
 def load_checks(skill):
