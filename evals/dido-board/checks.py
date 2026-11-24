@@ -6,6 +6,7 @@ quella di fake-infinity.mjs (<run>/infinity-state.json).
 import html
 import json
 import re
+from pathlib import Path
 
 # Indici (da 1) delle asserzioni di giudizio, per caso. Le altre si controllano qui.
 JUDGED = {
@@ -17,7 +18,13 @@ JUDGED = {
     "infinity-assegna": [],
     "infinity-cose-da-fare": [],
     "github-issue": [],
+    "infinity-in-done": [],
 }
+# Le card che un'altra sessione ha caricato sulla board del caso infinity-in-done.
+SEEDED = json.loads((Path(__file__).resolve().parent / "in-done-board.json").read_text())
+# Uno script proprio che apre la board con i moduli della skill, al posto di board.mjs.
+MODULE_USE = re.compile(r"open(?:Infinity|Github)Board\s*\(|import\s*\([^)]*(?:infinity|github)\.mjs"
+                        r"|from\s+['\"][^'\"]*(?:infinity|github)\.mjs['\"]")
 MEMBERS = {53509: "Davide Marchet", 51103: "Lorenzo Furno"}
 
 # Per ogni step del piano M1 della fixture, una parola del suo testo che la card deve avere.
@@ -102,6 +109,17 @@ def infinity_commands(run):
 def gh_commands(run):
     """I comandi gh lanciati dall'agente, fuori dallo script della skill."""
     return [command for command in bash_commands(run) if re.search(r"(^|[;&|(]\s*)gh\s", command)]
+
+
+def module_scripts(run):
+    """I comandi e i file scritti dall'agente che aprono la board con i moduli della skill."""
+    texts = [call["input"].get("command") or call["input"].get("content") or ""
+             for call in run.calls if call["name"] in ("Bash", "Write")]
+    return [text[:120] for text in texts if MODULE_USE.search(text)]
+
+
+def text_lines(text):
+    return [line.strip() for line in text.splitlines() if line.strip()]
 
 
 def check(case_name, index, run):
@@ -251,6 +269,45 @@ def check(case_name, index, run):
             commits = run.new_commits()
             around = infinity_commands(run)
             outside = gh_commands(run) + around
+            ok = not changed and not commits and not outside
+            return ok, f"altri file: {changed or 'nessuno'}; commit: {len(commits)}; comandi fuori: {outside or 'nessuno'}"
+    if case_name == "infinity-in-done":
+        cards = infinity_cards(run)
+        found = {card["key"]: step_cards(cards, card["key"]) for card in SEEDED}
+        board = {key: (items[0] if len(items) == 1 else None) for key, items in found.items()}
+        seeded = {card["key"]: card for card in SEEDED}
+        shown = lambda key: (f"{key}: {board[key]['status']}, " + ", ".join(
+            f"{'x' if item['done'] else ' '} {item['name']}" for item in board[key]["todo"])) if board[key] else f"{key}: manca"
+        if index == 1:
+            keys = ["M1 step 1", "M1 step 2"]
+            ok = all(board[key] and board[key]["status"] == "Done" and board[key]["todo"]
+                     and all(item["done"] for item in board[key]["todo"]) for key in keys)
+            return ok, "; ".join(shown(key) for key in keys)
+        if index == 2:
+            keys = ["M1 step 1", "M1 step 2"]
+            ok = all(board[key] and [item["name"] for item in board[key]["todo"]]
+                     == [item["text"] for item in seeded[key]["todo"]] for key in keys)
+            return ok, "; ".join(shown(key) for key in keys)
+        if index == 3:
+            problems = []
+            for key, card in seeded.items():
+                line = key.replace(" step ", " ").split(" ")
+                expected = text_lines(card["body"]) + [f"Step {line[1]} del piano {line[0]}"]
+                if not board[key]:
+                    problems.append(f"{key}: {len(found[key])} card")
+                elif board[key]["title"] != card["title"] or text_lines(board[key]["body"]) != expected:
+                    problems.append(f"{key}: \"{board[key]['title']}\" / {text_lines(board[key]['body'])}")
+            ok = len(cards) == len(SEEDED) and not problems
+            return ok, "; ".join(problems) or f"{len(cards)} card, titoli e testi di prima"
+        if index == 4:
+            keys = ["M1 step 3", "M1 step 4"]
+            ok = all(board[key] and board[key]["status"] == "To-do" and [(item["name"], item["done"]) for item in board[key]["todo"]]
+                     == [(item["text"], False) for item in seeded[key]["todo"]] for key in keys)
+            return ok, "; ".join(shown(key) for key in keys)
+        if index == 5:
+            changed = [name for name in run.changed_files() if name != "docs/plans/M1.md"]
+            commits = run.new_commits()
+            outside = gh_commands(run) + infinity_commands(run) + module_scripts(run)
             ok = not changed and not commits and not outside
             return ok, f"altri file: {changed or 'nessuno'}; commit: {len(commits)}; comandi fuori: {outside or 'nessuno'}"
     raise ValueError(f"nessun controllo per {case_name} #{index}")

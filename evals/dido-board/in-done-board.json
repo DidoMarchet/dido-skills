@@ -1,0 +1,44 @@
+[
+  {
+    "key": "M1 step 1",
+    "title": "Contare le parole di un testo",
+    "column": "Doing",
+    "body": "Una funzione che dice quante parole ha un testo, da usare nell'app e nel backend.\n\nRepo: app\nPiano: https://github.com/acme/notes-app/blob/main/docs/plans/M1.md",
+    "todo": [
+      { "text": "countWords in src/words.js", "done": true },
+      { "text": "spazi doppi e testo di soli spazi", "done": true },
+      { "text": "il test in test/words.test.js", "done": false }
+    ]
+  },
+  {
+    "key": "M1 step 2",
+    "title": "Le parole nella risposta del backend",
+    "column": "Test",
+    "body": "GET /notes dice anche quante parole ha ogni nota, così l'app non le conta da sola.\n\nRepo: backend\nPiano: https://github.com/acme/notes-app/blob/main/docs/plans/M1.md",
+    "todo": [
+      { "text": "il campo words in ogni nota di GET /notes", "done": true },
+      { "text": "il test della rotta", "done": false }
+    ]
+  },
+  {
+    "key": "M1 step 3",
+    "title": "Le parole sotto ogni nota",
+    "column": "To-do",
+    "body": "La lista delle note mostra quante parole ha ogni nota, sotto il titolo.\n\nRepo: app\nPiano: https://github.com/acme/notes-app/blob/main/docs/plans/M1.md",
+    "todo": [
+      { "text": "\"N parole\" sotto il titolo", "done": false },
+      { "text": "\"1 parola\" al singolare", "done": false }
+    ]
+  },
+  {
+    "key": "M1 step 4",
+    "title": "Prove finali e report del piano",
+    "column": "To-do",
+    "body": "Le prove complete, la revisione del codice e il report di chiusura.\n\nRepo: app, backend\nPiano: https://github.com/acme/notes-app/blob/main/docs/plans/M1.md",
+    "todo": [
+      { "text": "prove complete", "done": false },
+      { "text": "revisione del codice", "done": false },
+      { "text": "report", "done": false }
+    ]
+  }
+]

@@ -292,6 +292,11 @@ export const openInfinityBoard = async (config) => {
     fieldsLine,
     fieldProblems,
     todoLine: null,
+    // Le cose da fare stanno nel campo checklist, non nel testo.
+    splitTodo: (card, body) => ({
+      body: body.trim(),
+      todo: (value(card, todoAttribute) ?? []).map(({ name, done }) => ({ text: name, done: done === true })),
+    }),
     todoProblem: todoAttribute ? null : `la cartella "${folder.name}" non ha un campo checklist: le cose da fare restano solo nel piano`,
     todoChanged: (card, todo) => {
       if (!todoAttribute) return false
@@ -358,14 +363,18 @@ export const openInfinityBoard = async (config) => {
       ]
     },
 
+    // Scrive solo quello che sync passa: il testo riscritto perderebbe link e formattazione.
     editCard: async (card, { title, body, todo }) => {
       const values = [
-        ...textValues({ title, body }),
-        ...(todoAttribute ? [checklistValue(value(card, todoAttribute) ?? [], todo)] : []),
+        ...(title === undefined ? [] : [{ attribute_id: titleAttribute.id, data: title }]),
+        ...(body === undefined || !bodyAttribute ? [] : [{ attribute_id: bodyAttribute.id, data: textToHtml(body) }]),
+        ...(todo === undefined || !todoAttribute ? [] : [checklistValue(value(card, todoAttribute) ?? [], todo)]),
       ]
+      if (!values.length) return
       await request('PUT', itemPath(card), { body: { values } })
       card.values = [...card.values.filter((old) => !values.some((next) => next.attribute_id === old.attribute_id)), ...values]
-      Object.assign(card, { title, body })
+      if (title !== undefined) card.title = title
+      if (body !== undefined) card.body = htmlToText(textToHtml(body))
     },
 
     moveCard: async (card, column) => {

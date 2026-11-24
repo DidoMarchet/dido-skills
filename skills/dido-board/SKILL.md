@@ -8,7 +8,7 @@ allowed-tools: Bash(node "${CLAUDE_SKILL_DIR}/board.mjs" *)
 
 La board del progetto segue il piano di dido-planning: una card per step e una per domanda aperta, che si spostano con il lavoro. Chi la guarda vede cosa è deciso e cosa no, cosa è in corso e cosa è fatto, chi fa cosa e di che tipo è. Sul GitHub Project ogni card è una issue del repo, che si chiude quando arriva in Done. Il piano resta la fonte: la card ne porta una copia da leggere sulla board, e dove non coincidono vale il piano. La board non ferma mai il lavoro.
 
-Tutto passa da `board.mjs`, accanto a questo file. Risponde con righe che cominciano con `board:` ed esce sempre senza errore.
+Tutto passa da `board.mjs`, accanto a questo file, anche leggere la board. Risponde con righe che cominciano con `board:` (`show` con le card in JSON) ed esce sempre senza errore.
 
 ## Quale board
 
@@ -48,7 +48,7 @@ Con la skill si usano sempre gli stati della tabella qui sotto: è lo script a p
 | Il piano è approvato | `sync` di tutti gli step, con title, body e todo: quelli decisi con lo stato Ready, gli altri senza stato; poi `sync` delle domande aperte |
 | Riprendi un piano già avviato | `sync` degli step già partiti, con key e lo stato che dice "Dove siamo", e di quelli decisi in Ready; poi `sync` con title, body e todo di quelli che lo script dice mancanti, e delle domande aperte |
 | Uno step entra nel piano o cambia il suo testo | `sync` di quello step, in Ready se è deciso |
-| Una cosa da fare di uno step è fatta | `sync` di quello step con title, body e todo |
+| Una cosa da fare di uno step è fatta | `sync` di quello step con key e todo: le voci che `show` dà per la sua card, spuntate come dice il piano |
 | Nel piano si apre una domanda | `sync` della domanda; gli step che aspettano la risposta, se erano in Ready, `move` in Backlog |
 | Una domanda ha risposta, o arriva l'ok che uno step aspettava | la domanda `move` in Done; gli step che ora sono decisi `move` in Ready |
 | Uno step parte | `move` in In progress |
@@ -108,9 +108,12 @@ Una card per ogni domanda aperta del piano (sezione "Domande aperte" o domande s
 node "${CLAUDE_SKILL_DIR}/board.mjs" sync - <<'EOF'
 [
   { "key": "M5 step 3", "title": "Bibbia completa nell'app", "body": "Cosa fa lo step e perché…\n\nRepo: backend, app\nPiano: https://github.com/acme/app/blob/main/docs/plans/M5.md", "todo": [{ "text": "import dei libri nel backend", "done": true }, { "text": "lettura nell'app", "done": false }], "priority": "Alta", "type": "Feature", "assignee": "lorenzo" },
-  { "key": "M5 step 4", "status": "Done" }
+  { "key": "M5 step 4", "status": "Done" },
+  { "key": "M5 step 2", "todo": [{ "text": "rotta dei libri", "done": true }, { "text": "test della rotta", "done": true }], "status": "Done" }
 ]
 EOF
+node "${CLAUDE_SKILL_DIR}/board.mjs" show M5
+node "${CLAUDE_SKILL_DIR}/board.mjs" show "M5 step 2"
 node "${CLAUDE_SKILL_DIR}/board.mjs" move "M5 step 3" "In progress"
 node "${CLAUDE_SKILL_DIR}/board.mjs" archive "M5 step 3"
 node "${CLAUDE_SKILL_DIR}/board.mjs" close-milestone M5
@@ -119,13 +122,16 @@ node "${CLAUDE_SKILL_DIR}/board.mjs" check
 
 Su GitHub creare una card vuol dire tre chiamate, di circa due secondi l'una: la `sync` di un piano intero dura qualche minuto. Lanciala dandole fino a dieci minuti. Se si interrompe, rilanciala uguale: riparte senza doppioni.
 
-`sync` non crea doppioni: trova la card dalla key, cambia titolo, testo, cose da fare e priorità solo se sono diversi e la sposta solo se gli dai lo stato. title, body e todo vanno insieme: se ne mandi uno, la card prende quello che mandi e il resto resta vuoto; senza nessuno dei tre, una card che c'è tiene i suoi e una che manca non si crea. Le cose da fare sono una copia del piano: una spunta messa a mano sulla board la prossima `sync` la rimette come dice il piano. Le card scritte con la key nel titolo ("M5 step 3: …") si ritrovano lo stesso, e la prima `sync` con il testo le porta al titolo nuovo. Su GitHub le bozze del Project fatte prima delle issue diventano issue alla prima `sync`, nella stessa colonna. Si può rilanciare quando serve. `check` dice a quale board è collegato il repo e la colonna di ogni stato.
+`sync` non crea doppioni: trova la card dalla key, cambia titolo, testo, cose da fare e priorità solo se sono diversi e la sposta solo se gli dai lo stato. Di title, body e todo cambia solo quello che mandi: con key, todo e status la card tiene titolo e testo. todo è sempre la lista intera, e una card che manca si crea solo con il title. Le cose da fare sono una copia del piano: una spunta messa a mano sulla board la prossima `sync` con todo la rimette come dice il piano. Le card scritte con la key nel titolo ("M5 step 3: …") si ritrovano lo stesso, e la prima `sync` con il testo le porta al titolo nuovo. Su GitHub le bozze del Project fatte prima delle issue diventano issue alla prima `sync`, nella stessa colonna. Si può rilanciare quando serve. `check` dice a quale board è collegato il repo e la colonna di ogni stato.
+
+`show` dà le card della board in JSON, nella forma che vuole `sync`: key, title, body, todo e status. Senza altro le dà tutte, con il nome di un piano quelle del piano, con una key quella dello step. Serve quando ti manca quello che la card ha già, come le voci scritte da un'altra sessione: le prendi da lì, cambi quello che serve e rimandi a `sync` solo quello. Le card archiviate non le dà. Una card senza key non è della skill: non toccarla.
 
 Su GitHub `move` in Done chiude la issue, e in un'altra colonna la riapre; `archive` la chiude come non pianificata e la toglie dalla board, e lo step che torna nel piano riprende la stessa issue. Su Infinity `archive` non cancella: porta la card nella colonna di `archive`, e `close-milestone` non fa niente, perché lì la milestone è un'etichetta.
 
 ## Errori da evitare
 
 - Issue, label, milestone o card fatte a mano con gh o con l'API di Infinity, anche per sistemare quello che lo script dice di non aver scritto: sulla board vanno solo le card di `board.mjs`, una per step e una per domanda aperta.
+- La board letta con gh, con l'API di Infinity o con uno script tuo che usa i file della skill: si legge con `show`.
 - Card per le cose minute dentro uno step: sono le sue cose da fare, in todo. Le card sono gli step e le domande del piano.
 - Le cose da fare nel testo della card, con caselle come ☐, ☑ o "- [ ]": vanno in todo, e lo script le mette nel campo giusto.
 - La key, il numero dello step o il nome del piano nel titolo.

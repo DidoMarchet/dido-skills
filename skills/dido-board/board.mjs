@@ -4,6 +4,7 @@
 // Non ferma mai il lavoro: esce sempre con 0 e risponde con righe che cominciano con "board:".
 //
 //   node board.mjs check                          a quale board è collegato il repo, con gli stati
+//   node board.mjs show [M5 | "M5 step 3"]        le card in JSON, come le vuole sync
 //   node board.mjs sync - <<'EOF' … EOF           crea o aggiorna le card (anche: sync <file>)
 //   node board.mjs move "M5 step 3" "In progress"
 //   node board.mjs archive "M5 step 3"
@@ -15,8 +16,11 @@
 // title, da leggere per una persona; la key ("M5 step 3") sta nell'ultima riga del testo ("Step 3
 // del piano M5") e da lì sync, move e archive ritrovano la card. todo è un array di { text, done }:
 // su Infinity va nel campo checklist della cartella, su GitHub nel testo come lista con le caselle.
-// Senza status una card nuova va in Backlog e una che c'è resta dov'è. title, body e todo vanno
-// insieme: senza nessuno dei tre una card che c'è tiene il suo testo, e una che manca non si crea.
+// Senza status una card nuova va in Backlog e una che c'è resta dov'è. Di title, body e todo
+// cambia solo quello che sync riceve, e todo è sempre la lista intera; una card che manca si crea
+// solo con il title. show risponde con le card (tutte, di un piano o una) nella stessa forma:
+// { key, title, body, todo, status }, senza key le card che non sono della skill. Tutti gli altri
+// comandi rispondono con righe "board:".
 //
 // docs/plans/board.json (facoltativo; senza, la board è il GitHub Project):
 //   { "service": "github" | "infinity" | "none", "url": "<board di Infinity>",
@@ -43,6 +47,8 @@ const configFile = 'docs/plans/board.json'
 const newCardStatus = 'Backlog'
 const doneStatus = 'Done'
 const archiveStatus = 'archive'
+// Gli stati della skill, quelli della tabella "Quando" di SKILL.md.
+const skillStates = ['Backlog', 'Ready', 'In progress', 'In review', 'Done']
 
 const sameText = (first, second) => first.replace(/\r\n/g, '\n').trim() === second.replace(/\r\n/g, '\n').trim()
 // Il titolo da leggere per una persona. Una board che non tiene il testo (una cartella di Infinity
@@ -60,10 +66,39 @@ const keyLine = (key) => {
   return `${kind[0].toUpperCase()}${kind.slice(1).toLowerCase()} ${number} del piano ${plan}`
 }
 
+// La key di una card: dalla riga dello step o, card scritta prima del 23/11/2026, dal titolo
+// ("M5 step 3: …"). null per le card che non sono della skill.
+const keyOf = (card) => {
+  const line = card.body
+    .split('\n')
+    .map((candidate) => candidate.trim().match(/^(step|domanda) (\S+) del piano (.+)$/i))
+    .findLast(Boolean)
+  if (line) return `${line[3]} ${line[1].toLowerCase()} ${line[2]}`
+  if (card.keyInTitle === false) return null
+  return card.title.match(/^(.+? (?:step|domanda) [^\s:]+)(?::|$)/i)?.[1] ?? null
+}
+
 // Il testo della card: quello dello step, le cose da fare se la board le tiene nel testo (GitHub)
 // e per ultima la riga dello step.
 const cardBody = (board, key, body, todo) =>
   [body.trim(), board.todoLine ? todo.map(board.todoLine).join('\n') : '', keyLine(key)].filter(Boolean).join('\n\n')
+
+// La card come la manda sync: il titolo senza la key, il testo senza la riga dello step e le cose
+// da fare, che la board legge dal suo campo o, su GitHub, dalle righe con la casella subito prima
+// della riga dello step. Il testo che una persona ha scritto dopo quella riga resta nel testo.
+// È il contrario di titleFor e cardBody: rimandata a sync, una card scritta dallo script resta com'è.
+const cardParts = (board, card, key) => {
+  let { title } = card
+  if (key && title === key) title = ''
+  else if (key && title.startsWith(`${key}:`)) title = title.slice(key.length + 1).trim()
+  const lines = card.body.replace(/\r\n/g, '\n').split('\n')
+  const line = key ? keyLine(key) : null
+  const at = line ? lines.findLastIndex((candidate) => sameName(candidate, line)) : -1
+  const before = at === -1 ? lines : lines.slice(0, at)
+  const after = at === -1 ? '' : lines.slice(at + 1).join('\n').trim()
+  const { body, todo } = board.splitTodo(card, before.join('\n'))
+  return { title, body: [body, after].filter(Boolean).join('\n\n'), todo }
+}
 
 const repositoryRoot = () => {
   try {
@@ -115,6 +150,11 @@ const openBoard = async () => {
 
 // La colonna di uno stato: quella di columns in docs/plans/board.json, o quella con il suo nome.
 const configuredState = (config, status) => Object.keys(config.columns).find((state) => sameName(state, status))
+
+// Lo stato di una colonna, il contrario di findColumn: quello che columns le dà (non archive), o il
+// nome della colonna.
+const stateOf = (config, column) =>
+  Object.keys(config.columns).find((state) => !sameName(state, archiveStatus) && sameName(config.columns[state], column)) ?? column
 
 const findColumn = ({ config, board }, status) => {
   if (!board.columns) return { problem: board.noColumns }
@@ -204,14 +244,21 @@ const sync = async (source) => {
         changes.push(...recovered.changes)
       }
     }
-    // Solo key e stato servono a riallineare: una card nuova senza testo non direbbe niente.
-    if (!card && !hasText) {
+    // Una card nuova vuole il titolo: senza, sulla board si leggerebbe solo la key.
+    if (!card && !entry.title?.trim()) {
       counts.missing += 1
-      say(`manca la card di "${key}": rimanda lo step con title e body`)
+      say(`manca la card di "${key}": rimanda lo step con title, body e todo`)
       continue
     }
-    const todo = (entry.todo ?? []).map((item) => ({ text: item.text.trim(), done: item.done === true }))
-    const text = hasText ? { title: titleFor(board, key, entry.title), body: cardBody(board, key, entry.body ?? '', todo), todo } : null
+    // Quello che sync non riceve tra title, body e todo resta com'è sulla card.
+    const current = card ? cardParts(board, card, key) : { title: '', body: '', todo: [] }
+    // Una voce su una riga sola: su GitHub un a capo la spezzerebbe fuori dalla lista.
+    const todo = entry.todo
+      ? entry.todo.map((item) => ({ text: item.text.replace(/\s*\n\s*/g, ' ').trim(), done: item.done === true }))
+      : current.todo
+    const text = hasText
+      ? { title: titleFor(board, key, entry.title ?? current.title), body: cardBody(board, key, entry.body ?? current.body, todo), todo }
+      : null
     // Una card ritrovata senza colonna va dove dice chi l'ha ritrovata o dove va una nuova.
     const wantedStatus = entry.status ?? (card?.column || (card && !changes.length) ? null : (recoveredStatus ?? newCardStatus))
     const { column, label, problem } = wantedStatus ? findColumn(context, wantedStatus) : {}
@@ -230,10 +277,20 @@ const sync = async (source) => {
       continue
     }
     if (board.prepareCard) changes.push(...(await board.prepareCard(card)))
-    const textChanged = text && (text.title !== card.title || !sameText(board.storedBody(text.body), card.body))
-    const todoChanged = text && board.todoChanged(card, todo)
-    if (textChanged || todoChanged) await board.editCard(card, text)
-    if (textChanged) changes.push('testo aggiornato')
+    // Si scrive solo quello che sync ha ricevuto ed è cambiato: su Infinity riscrivere il testo
+    // toglierebbe link e formattazione. Su GitHub le cose da fare stanno nel testo.
+    const sent = (field) => entry[field] !== undefined
+    const titleChanged = sent('title') && text.title !== card.title
+    const bodyChanged = (sent('body') || (board.todoLine && sent('todo'))) && !sameText(board.storedBody(text.body), card.body)
+    const todoChanged = sent('todo') && board.todoChanged(card, todo)
+    if (titleChanged || bodyChanged || todoChanged) {
+      await board.editCard(card, {
+        ...(titleChanged ? { title: text.title } : {}),
+        ...(bodyChanged ? { body: text.body } : {}),
+        ...(todoChanged ? { todo } : {}),
+      })
+    }
+    if (titleChanged || bodyChanged) changes.push('testo aggiornato')
     if (todoChanged) changes.push('cose da fare aggiornate')
     // La board che lega altro alla colonna (GitHub: la issue chiusa in Done) lo allinea sempre; la
     // riga lo dice solo quando la colonna era già quella.
@@ -255,6 +312,26 @@ const sync = async (source) => {
   }
   const missing = counts.missing ? `, ${counts.missing} mancanti` : ''
   say(`${entries.length} card: ${counts.created} create, ${counts.changed} cambiate, ${counts.aligned} già allineate${missing}`)
+}
+
+// Le card della board in JSON, come le vuole sync: tutte, quelle di un piano o quella di una key.
+const show = async (filter) => {
+  const { config, board } = await openBoard()
+  const wanted = filter?.trim()
+  const archiveColumn = config.columns[configuredState(config, archiveStatus) ?? '']
+  const rows = []
+  for (const card of await board.loadCards()) {
+    const key = keyOf(card)
+    if (wanted && !(key && (sameName(key, wanted) || sameName(planOf(key) ?? '', wanted)))) continue
+    const status = card.column ? stateOf(config, card.column) : null
+    // Una card nella colonna di archive tutta sua è archiviata: show non la dà, come GitHub non dà
+    // quelle che archivia. Rimandata a sync con quello stato, riaprirebbe la issue.
+    const isArchived = archiveColumn && status && sameName(card.column, archiveColumn) && !skillStates.some((state) => sameName(state, status))
+    if (isArchived) continue
+    rows.push({ ...(key ? { key } : {}), ...cardParts(board, card, key), ...(status ? { status } : {}) })
+  }
+  if (!rows.length) finish(wanted ? `nessuna card per "${wanted}"` : 'la board non ha card')
+  process.stdout.write(`${JSON.stringify(rows, null, 2)}\n`)
 }
 
 const move = async (key, status) => {
@@ -309,6 +386,7 @@ const closeMilestone = async (plan) => {
 const [command, ...args] = process.argv.slice(2)
 const commands = {
   check: () => check(),
+  show: () => show(args[0]),
   sync: () => sync(args[0]),
   move: () => move(args[0], args[1]),
   archive: () => archive(args[0]),
@@ -316,7 +394,7 @@ const commands = {
 }
 
 try {
-  if (!commands[command]) finish(`comando sconosciuto "${command ?? ''}": check, sync, move, archive o close-milestone`)
+  if (!commands[command]) finish(`comando sconosciuto "${command ?? ''}": check, show, sync, move, archive o close-milestone`)
   await commands[command]()
 } catch (error) {
   // Anche un errore dello script diventa una riga: la board non ferma mai il lavoro.

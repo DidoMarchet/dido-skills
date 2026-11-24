@@ -15,7 +15,7 @@ case "$case_name" in
   piano-approvato|github-issue) plan_state='**bozza, da approvare**'; gh_mode=ok ;;
   github-non-risponde) plan_state='**approvato da Dido il 20/11/2026**, "va bene, procedi"'; gh_mode=auth ;;
   infinity-piano-approvato|infinity-assegna|infinity-token-env|nessuna-board) plan_state='**bozza, da approvare**'; gh_mode=ok ;;
-  infinity-cose-da-fare) plan_state='**approvato da Dido il 20/11/2026**, "va bene, procedi"'; gh_mode=ok ;;
+  infinity-cose-da-fare|infinity-in-done) plan_state='**approvato da Dido il 20/11/2026**, "va bene, procedi"'; gh_mode=ok ;;
   *) echo "caso sconosciuto: $case_name" >&2; exit 1 ;;
 esac
 
@@ -141,6 +141,34 @@ path.write_text(plan)
 PYPLAN
 fi
 
+if [ "$case_name" = infinity-in-done ]; then
+  # Il caso di bici.pro del 24/11/2026: gli step 1 e 2 sono fatti, e le card le ha caricate un'altra
+  # sessione, con cose da fare che il piano non elenca (in-done-board.json).
+  cat > src/words.js <<'EOF'
+// Le parole di un testo: separate da spazi, anche più di uno.
+export const countWords = (text) => text.split(/\s+/).filter(Boolean).length
+EOF
+  cat > test/words.test.js <<'EOF'
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { countWords } from '../src/words.js'
+
+test('conta le parole separate da uno o più spazi', () => {
+  assert.equal(countWords('uno due  tre'), 3)
+  assert.equal(countWords('   '), 0)
+})
+EOF
+  python3 - <<'PYPLAN'
+from pathlib import Path
+path = Path("docs/plans/M1.md")
+plan = path.read_text()
+plan = plan.replace("20/11/2026: piano scritto, nessuno step fatto.", """20/11/2026: piano scritto e approvato; le card sulla board di Infinity le ha caricate la sessione di quel giorno.
+
+22/11/2026: step 1 fatto, `countWords` con il suo test (commit `4f1c2a7`). Step 2 fatto, `words` nella risposta di `GET /notes` con il test della rotta (commit `9b3e5d1`). Restano gli step 3 e 4.""")
+path.write_text(plan)
+PYPLAN
+fi
+
 if [ "$case_name" = github-issue ]; then
   # Un piano come quelli veri: uno step che corregge un difetto, uno che dice chi lo prende, una domanda.
   python3 - <<'PYPLAN'
@@ -238,6 +266,8 @@ fi
 if [[ "$case_name" == infinity-* || "$case_name" == nessuna-board ]]; then
   echo '{ "linked": false }' > "$run/gh-state.json"
 fi
+# In infinity-in-done la board ha già le card degli step, come le ha caricate un'altra sessione.
+[ "$case_name" = infinity-in-done ] && node "$HERE/seed-in-done.mjs" "$run/infinity-state.json"
 if [[ "$case_name" == infinity-* ]]; then
   [ "$case_name" = infinity-token-env ] || echo "INFINITY_TOKEN=token-di-prova" >> "$run/session.env"
   printf "DIDO_BOARD_FETCH='%s'\nFAKE_INFINITY_STATE='%s'\nFAKE_INFINITY_LOG='%s'\n" \

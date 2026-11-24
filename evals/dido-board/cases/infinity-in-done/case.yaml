@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: infinity-in-done
+expected_outcome: |
+  Il caso vero di bici.pro (24/11/2026): le card del piano M1 le ha caricate un'altra sessione, con cose da fare che il piano non elenca. Gli step 1 e 2 sono fatti e committati, e chi lavora chiede di portarli in Done con tutti i sotto-task spuntati. Le due card vanno in Done con le loro voci spuntate, senza voci perse, cambiate o aggiunte; titoli e testi delle quattro card restano come erano; gli step 3 e 4 non si toccano. La board si legge e si scrive solo con lo script: niente gh, chiamate a Infinity o script propri che usano i moduli della skill. Nessun codice cambiato, nessun commit.

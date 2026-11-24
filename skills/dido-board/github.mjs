@@ -15,6 +15,8 @@ const ghCommand = process.env.DIDO_BOARD_GH || 'gh'
 const maxItemPages = 20
 // Il colore delle label dei tipi che il repo non ha: grigio, come le label nuove di GitHub.
 const labelColor = 'ededed'
+// Una cosa da fare nel testo della issue: "- [ ] testo", "- [x] testo" quando è fatta.
+const todoPattern = /^- \[([ xX])\] (.+)$/
 
 const describeFailure = (error) => {
   if (error.code === 'ENOENT') return 'gh non è installato'
@@ -423,6 +425,17 @@ export const openGithubBoard = async (config) => {
     fieldsLine: `${fieldsPart}; ${typesPart}`,
     fieldProblems,
     todoLine: ({ text, done }) => `- [${done ? 'x' : ' '}] ${text}`,
+    // Le cose da fare sono le righe con la casella in fondo al testo, come le scrive todoLine (o le
+    // spunta una persona su GitHub): il testo senza di loro e la lista.
+    splitTodo: (card, body) => {
+      const lines = body.trimEnd().split('\n')
+      const start = lines.findLastIndex((line) => !todoPattern.test(line)) + 1
+      const todo = lines.slice(start).map((line) => {
+        const [, mark, text] = line.match(todoPattern)
+        return { text: text.trim(), done: mark !== ' ' }
+      })
+      return { body: lines.slice(0, start).join('\n').trim(), todo }
+    },
     todoProblem: null,
     // Le cose da fare sono nel testo: se cambiano, cambia il testo.
     todoChanged: () => false,
@@ -547,7 +560,8 @@ export const openGithubBoard = async (config) => {
       return [...changes, ...[assigneeProblem, priorityProblem].filter(Boolean)]
     },
 
-    editCard: async (card, { title, body }) => {
+    // Scrive il titolo e il testo che sync passa; quello che non passa resta.
+    editCard: async (card, { title = card.title, body = card.body }) => {
       if (card.kind === 'issue') graphql(editIssueMutation, { issue: card.contentId, title, body })
       else graphql(editDraftMutation, { draft: card.contentId, title, body })
       Object.assign(card, { title, body })
