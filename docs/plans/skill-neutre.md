@@ -18,6 +18,43 @@
 - nei tre starter il comportamento resta quello di oggi (le convenzioni sono le stesse, solo spostate);
 - `ai:update` in un sito toglie il vecchio nome della skill frontend e non ne lascia due.
 
+## Dal documento di partenza
+
+Da `docs/riorganizzazione-skill-linee-guida-software.md`, che si toglie quando il lavoro parte. Si tiene ciò che non va contro le scelte di Dido; i segreti nei file env restano come convenzione degli starter.
+
+**Vincoli per non perdere qualità**
+- Neutro non vuol dire vago: ogni regola dice quando si applica, il risultato atteso e, dove si può, come si verifica.
+- Si distinguono requisiti di correttezza e sicurezza, valori predefiniti che il progetto può cambiare, ed esempi. Niente divieti senza motivo, e niente "dipende dal progetto" senza il criterio per scegliere.
+- I requisiti di prodotto cambiano strumenti e strategie, mai la protezione dei dati, i permessi verificati o le prove dichiarate.
+- Non si indeboliscono controlli di sicurezza, integrità, accessibilità o rilascio per accorciare il testo. Una regola tolta è superflua, di un solo progetto, o sostituita da una migliore.
+- I contratti pubblici si tengono, con una migrazione quando qualcuno dipende dal comportamento di prima: "togli il vecchio" non autorizza rotture.
+- Per gli effetti esterni importanti (mail, pagamenti, webhook) si considera il guasto tra il salvataggio e l'invio: idempotenza, retry e consegna si scelgono in base al requisito, senza una tecnica unica.
+- Le preferenze di Dido e dello starter non si perdono: si spostano.
+
+**Regole da riscrivere**, da verificare con l'inventario e le prove
+
+| Regola di oggi | Come diventa |
+|---|---|
+| Hero animata, ingressi dal basso, una sezione per schermata | Scelte creative: nelle convenzioni o nel design del progetto |
+| Una sola easing, chiusura speculare, pannello sempre azzerato | Nella skill: movimento coerente e corretto; il dettaglio nello starter |
+| Una libreria per ogni animazione, niente CSS o `scroll-snap` | Nella skill: la soluzione più semplice che fa ciò che serve, con gli strumenti già scelti; il resto nello starter |
+| Misure arrotondate anche contro il design | Nella skill: si segue il design approvato e si segnalano le incongruenze; l'arrotondamento nello starter Nuxt |
+| Riuso obbligatorio alla seconda somiglianza | Si riusa quando la responsabilità è la stessa, non per la sola somiglianza |
+| Mai una tabella o un diagramma che riassume il codice | Niente copie che invecchiano; una sintesi utile si tiene, con la sua fonte |
+| Mai repository, cache, adapter fuori dal modello scelto | Si valutano bisogno, costo e contesto; la semplicità resta il punto di partenza |
+| Audit sempre facoltativo, rate limit sempre permissivo con il guasto | Si decide in base al rischio del servizio; la scelta dello starter resta nelle sue convenzioni |
+| Correzioni nate da un bug di un browser | Con il contesto e le condizioni in cui valgono |
+
+Del motion resta nella skill la parte tecnica: reduced motion, pulizia degli effetti, interruzioni gestite, focus e input corretti, contenuti accessibili, prestazioni misurate.
+
+**Criteri in più per la chiusura**
+- Uno script piccolo riceve regole di correttezza e verifica, senza controller, CMS, design system o milestone.
+- Un gestionale tiene filtri e bozze e usa interazioni sobrie, senza animazioni obbligatorie.
+- Un sito con un design approvato lo segue, e segnala i problemi di accessibilità senza imporre altri gusti.
+- Un backend può avere un'architettura e un contratto diversi dallo starter, con integrità, permessi e prove.
+- Un progetto con più processi affronta stato condiviso, concorrenza e guasti, senza una risposta unica imposta.
+- Chi riprende il progetto trova avvio, prove, decisioni, configurazione e limiti noti.
+
 ## Cosa c'è già
 
 - `docs/conventions.md` negli starter, portato da `ai:update`: è il posto naturale delle preferenze degli starter.
@@ -41,7 +78,7 @@
 
 ## Step
 
-0. **Niente nomi di clienti in dido-skills** (26/11, Dido: "non devono esserci nomi di clienti"). Oggi c'è `bici.pro` in `evals/REPORT.md` e nelle prove di dido-board (`board.test.mjs`, `fake-infinity.mjs`, `fixture.sh`, due `case.yaml`), e il nome di persona Lorenzo in `skills/dido-board/SKILL.md` e nelle prove di dido-board. Si sostituiscono con nomi finti e si rilanciano `node --test evals/dido-board/board.test.mjs` e le prove di dido-board. La storia git, che è pubblica, li contiene ancora (26 righe): ripulirla vuol dire riscriverla e forzare il push, che lancia Dido.
+0. **Niente nomi di clienti in dido-skills** (26/11, Dido: "non devono esserci nomi di clienti"; solo dai file di oggi, la storia git resta). Nello stesso passo si toglie `docs/riorganizzazione-skill-linee-guida-software.md`, già riportato in "Dal documento di partenza". Oggi c'è `bici.pro` in `evals/REPORT.md` e nelle prove di dido-board (`board.test.mjs`, `fake-infinity.mjs`, `fixture.sh`, due `case.yaml`), e il nome di persona Lorenzo in `skills/dido-board/SKILL.md` e nelle prove di dido-board. Si sostituiscono con nomi finti e si rilanciano `node --test evals/dido-board/board.test.mjs` e le prove di dido-board. La storia git, che è pubblica, li contiene ancora (26 righe): ripulirla vuol dire riscriverla e forzare il push, che lancia Dido.
 1. **Inventario**: ogni regola di ogni skill `dido-*` (comprese dido-goal e i file di riferimento) con la destinazione: base comune, riferimento di stack, convenzioni dello starter, eliminata. Esce una tabella in questo piano, da guardare insieme prima di scrivere.
 2. **Scenari prima (RED)**: 4 repo di prova non starter (script Python, app React, backend Go o Fastify, gestionale Vue con filtri e bozze) e 2 compiti per ciascuno, lanciati con `claude -p` e le skill di oggi. Si annota dove l'agente applica regole che non c'entrano o dice di doverle ignorare. Senza difetto visto, la regola non si tocca.
 3. **dido-code-style**: base comune neutra; le preferenze escono verso le convenzioni degli starter. Scenari del passo 2 e `evals/dido-code-style`.
