@@ -107,6 +107,8 @@ checkMode()
 
 const variables = request.variables ?? {}
 const findItem = (match) => state.items.find(match) ?? fail(`fake gh: elemento non trovato (${JSON.stringify(variables)})`)
+// Una risposta di GitHub con un errore al posto dei dati.
+const refused = (message) => ({ refused: message })
 const issueById = (id) => findItem((item) => item.kind === 'Issue' && item.contentId === id)
 const userById = (id) => state.users.find((user) => user.id === id) ?? fail(`fake gh: utente sconosciuto ${id}`)
 const milestoneById = (id) => state.milestones.find((milestone) => milestone.id === id) ?? fail(`fake gh: milestone sconosciuta ${id}`)
@@ -248,6 +250,12 @@ const answers = {
   },
   BoardCloseIssue: () => {
     const item = issueById(variables.issue)
+    // La chiusura dell'automazione "Auto-close issue" è ancora in corso: GitHub rifiuta la seconda.
+    if (item.closingByWorkflow) {
+      delete item.closingByWorkflow
+      save()
+      return refused('Could not close the issue.')
+    }
     Object.assign(item, { state: 'CLOSED', stateReason: variables.reason })
     save()
     return { closeIssue: { issue: { id: item.contentId } } }
@@ -283,7 +291,13 @@ const answers = {
       const value = variables[`v${index}`]
       const shown = value.text ?? field.options?.find((option) => option.id === value.singleSelectOptionId)?.name
       if (shown === undefined) fail(`fake gh: valore sconosciuto ${JSON.stringify(value)}`)
-      if (field.name === 'Status') item.status = shown
+      if (field.name === 'Status') {
+        item.status = shown
+        // Con state.autoClose il Project ha "Auto-close issue": in Done GitHub chiude la issue da solo.
+        if (state.autoClose && shown === 'Done' && item.kind === 'Issue' && item.state === 'OPEN') {
+          Object.assign(item, { state: 'CLOSED', stateReason: 'COMPLETED', closingByWorkflow: true })
+        }
+      }
       else item.fields = { ...item.fields, [field.name]: shown }
     }
     save()
@@ -311,6 +325,10 @@ const answers = {
       },
     }
   },
+  BoardIssueState: () => {
+    const item = issueById(variables.issue)
+    return { node: { state: item.state, stateReason: item.stateReason } }
+  },
   BoardArchive: () => {
     const item = findItem((candidate) => candidate.id === variables.item)
     item.archived = true
@@ -320,4 +338,5 @@ const answers = {
 }
 
 if (!answers[operation]) fail(`fake gh: operazione GraphQL sconosciuta ${operation}`)
-process.stdout.write(JSON.stringify({ data: answers[operation]() }))
+const answer = answers[operation]()
+process.stdout.write(JSON.stringify(answer?.refused ? { data: null, errors: [{ message: answer.refused }] } : { data: answer }))

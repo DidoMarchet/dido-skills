@@ -1027,6 +1027,16 @@ test('GitHub: in Done la issue si chiude, tornando indietro si riapre', () => {
   assert.equal(board.card('M1 step 2').state, 'CLOSED')
 })
 
+test('GitHub: con "Auto-close issue" acceso nel Project la issue chiusa da GitHub non ferma la sync', () => {
+  const board = session({ state: { autoClose: true } })
+  syncPlan(board)
+  assert.deepEqual(board.run(['move', 'M1 step 1', 'Done']).lines, ['board: "Design" ora è in Done'])
+  assert.deepEqual([board.card('M1 step 1').state, board.card('M1 step 1').stateReason], ['CLOSED', 'COMPLETED'])
+  const result = board.run(['sync', '-'], { input: JSON.stringify([{ key: 'M1 step 2', status: 'Done' }, { key: 'M1 step 10', status: 'Done' }]) })
+  assert.ok(!result.lines.some((line) => line.includes('non aggiornata')), result.lines.join('\n'))
+  assert.deepEqual([board.card('M1 step 2').state, board.card('M1 step 10').state], ['CLOSED', 'CLOSED'])
+})
+
 test('GitHub: una issue chiusa a mano resta chiusa con una sync senza stato', () => {
   const board = session()
   syncPlan(board)

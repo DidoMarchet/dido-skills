@@ -51,11 +51,17 @@ const parseJson = (output) => {
   }
 }
 
+// La risposta intera di GitHub, con gli errori: graphql si ferma al primo, chi la usa decide.
+const graphqlResponse = (query, variables) => parseJson(runGh(['api', 'graphql', '--input', '-'], JSON.stringify({ query, variables })))
+
 const graphql = (query, variables) => {
-  const response = parseJson(runGh(['api', 'graphql', '--input', '-'], JSON.stringify({ query, variables })))
+  const response = graphqlResponse(query, variables)
   if (response.errors?.length) notUpdated(String(response.errors[0].message).slice(0, 160))
   return response.data
 }
+
+// Un'attesa breve senza async: lo script parla con gh in modo sincrono.
+const wait = (milliseconds) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds)
 
 // Le milestone si creano e si chiudono solo con l'API REST: GraphQL non ha le mutation.
 const rest = (path, method, fields) =>
@@ -192,6 +198,10 @@ const closeIssueMutation = `mutation BoardCloseIssue($issue: ID!, $reason: Issue
 
 const reopenIssueMutation = `mutation BoardReopenIssue($issue: ID!) {
   reopenIssue(input: { issueId: $issue }) { issue { id } }
+}`
+
+const issueStateQuery = `query BoardIssueState($issue: ID!) {
+  node(id: $issue) { ... on Issue { state stateReason } }
 }`
 
 const convertDraftMutation = `mutation BoardConvertDraft($item: ID!, $repository: ID!) {
@@ -388,9 +398,22 @@ export const openGithubBoard = async (config) => {
     return [`ora è la issue #${card.number}`]
   }
 
+  // Con "Auto-close issue" acceso nel Project, GitHub chiude da solo la issue che va in Done e
+  // rifiuta la chiusura che arriva nello stesso momento ("Could not close the issue"): se la
+  // issue risulta chiusa, va bene così.
   const closeIssue = (card, reason) => {
-    graphql(closeIssueMutation, { issue: card.contentId, reason })
-    Object.assign(card, { state: 'CLOSED', stateReason: reason })
+    const response = graphqlResponse(closeIssueMutation, { issue: card.contentId, reason })
+    if (!response.errors?.length) {
+      Object.assign(card, { state: 'CLOSED', stateReason: reason })
+      return
+    }
+    let issue = graphql(issueStateQuery, { issue: card.contentId }).node
+    if (issue?.state !== 'CLOSED') {
+      wait(2000)
+      issue = graphql(issueStateQuery, { issue: card.contentId }).node
+    }
+    if (issue?.state !== 'CLOSED') notUpdated(String(response.errors[0].message).slice(0, 160))
+    Object.assign(card, { state: 'CLOSED', stateReason: issue.stateReason ?? reason })
   }
   const reopenIssue = (card) => {
     graphql(reopenIssueMutation, { issue: card.contentId })
