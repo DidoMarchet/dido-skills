@@ -190,8 +190,10 @@ Le sessioni di prova le lancia lo script di `evals/` in background, senza aprire
 1. 26/11: rinominare `dido-frontend-nuxt` in `dido-frontend`. **Sì.**
 2. 26/11: tipi di progetto: siti e app web con qualunque framework, backend con qualunque stack, script. **Sì.**
 3. 26/11: le preferenze personali (arrow ovunque, come si scrive) escono dalle skill e restano nel CLAUDE.md globale o nelle convenzioni degli starter. **Sì**; Dido preferirebbe "un modo più moderno di scrivere": da chiarire cosa intende, non blocca il piano.
+4. 27/11: Dido vorrebbe le skill per fase (capire, progettare, costruire, provare, gestire in produzione). Proposta: le skill di processo seguono le fasi, quelle di stack (frontend, backend) restano a parte perché servono in più fasi. L'inventario del passo 1 dà a ogni regola anche la sua fase. **Sì**: `dido-goal` diventa `dido-understand` e prende la parte "capire prima di toccare" di dido-code-style; `dido-rilascio` diventa `dido-release`, con il comando `/dido-release`. Nel passo 10 si correggono i vecchi nomi in `AGENTS.md`, nell'agente `revisore` e nelle doc dei siti.
 
 ## Dove siamo
 
 - 26/11/2026: bozza scritta, risposte alle tre domande. Versione ridotta adesso, completa più avanti. "Testi staccati dalle righe" tolta, "multipli di 5" nello starter Nuxt. SEO tecnica completa nella skill frontend. Aggiunto il passo 6b con le fasi che mancano.
 - 26/11/2026: aggiunti 6c (casi dai progetti, con le etichette e la decisione di Dido) e 6d (lavoro online), con l'analisi di fattibilità. 6d si fa più avanti. Prossimo passo: ok di Dido su 6b e 6c, poi inventario.
+- 27/11/2026: ok di Dido su 6b (operatività con rollback e monitoraggio). Domanda 4: skill di processo per fase, `dido-goal` diventa `dido-understand` e `dido-rilascio` diventa `dido-release`. Prossimo passo: ok su 6c, poi inventario.
